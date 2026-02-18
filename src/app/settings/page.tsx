@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Sparkles, Loader2, Save, Check, Key, Shield, LogIn, LogOut, ClipboardPaste, X } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2, Save, Check, Key, Shield, LogIn, LogOut, ClipboardPaste, X, Calendar } from "lucide-react";
 import { Concept } from "@/types";
 import { getAllConcepts, hideConcept } from "@/lib/concepts";
 
@@ -36,6 +36,7 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const [userConcepts, setUserConcepts] = useState<Concept[]>([]);
   const [allConceptsList, setAllConceptsList] = useState<Concept[]>([]);
+  const [conceptDate, setConceptDate] = useState("");
 
   useEffect(() => {
     const storedType = localStorage.getItem("auth-type") as "apikey" | "oauth" | "oauth-browser" | null;
@@ -198,15 +199,17 @@ export default function SettingsPage() {
       x: generated.x,
       y: generated.y,
       z: generated.z,
-      date_learned: new Date().toISOString().split("T")[0],
+      date_learned: conceptDate || new Date().toISOString().split("T")[0],
     };
-    const existing = localStorage.getItem("sunny-concepts");
+    const existing = localStorage.getItem("user-concepts");
     const concepts: Concept[] = existing ? JSON.parse(existing) : [];
     concepts.push(concept);
-    localStorage.setItem("sunny-concepts", JSON.stringify(concepts));
+    localStorage.setItem("user-concepts", JSON.stringify(concepts));
     setSaved(true);
     setConceptName("");
+    setConceptDate("");
     setGenerated(null);
+    setAllConceptsList(getAllConcepts());
   };
 
   if (status === "loading") {
@@ -482,10 +485,10 @@ export default function SettingsPage() {
           )}
         </section>
 
-        {/* Add Learning */}
+        {/* Add Concept */}
         <section className="p-6 rounded-xl" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text)" }}>
-            <Sparkles className="w-5 h-5" /> Add New Learning
+            <Sparkles className="w-5 h-5" /> Add New Concept
           </h2>
 
           {credentialStatus === "none" && (
@@ -515,6 +518,21 @@ export default function SettingsPage() {
             </button>
           </div>
 
+          <label className="text-sm block mb-2" style={{ color: "var(--text-muted)" }}>Date (optional)</label>
+          <div className="flex items-center gap-2 mb-4">
+            <Calendar className="w-4 h-4 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+            <input
+              type="date"
+              value={conceptDate}
+              onChange={(e) => setConceptDate(e.target.value)}
+              className="flex-1 px-3 py-2 rounded-lg text-sm focus:outline-none"
+              style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
+            />
+            <span className="text-xs whitespace-nowrap" style={{ color: "var(--text-muted)" }}>
+              {conceptDate ? "" : "Defaults to today"}
+            </span>
+          </div>
+
           {generated && (
             <div className="p-4 rounded-lg mb-4" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
               <h3 className="text-sm font-semibold mb-2" style={{ color: "var(--accent-mid)" }}>Preview</h3>
@@ -525,14 +543,14 @@ export default function SettingsPage() {
                 className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 cursor-pointer"
                 style={{ background: "var(--accent)", color: "#fff" }}
               >
-                <Save className="w-4 h-4" /> Save Learning
+                <Save className="w-4 h-4" /> Save Concept
               </button>
             </div>
           )}
 
           {saved && (
             <div className="flex items-center gap-2 text-sm p-3 rounded-lg" style={{ background: "rgba(33,131,128,0.1)", color: "var(--accent-mid)" }}>
-              <Check className="w-4 h-4" /> Learning saved! It will appear in the visualization.
+              <Check className="w-4 h-4" /> Concept saved! It will appear in the visualization.
             </div>
           )}
         </section>
