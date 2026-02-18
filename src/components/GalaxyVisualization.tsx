@@ -495,35 +495,33 @@ function DispersionController({ dispersionRef }: { dispersionRef: React.MutableR
   return null;
 }
 
-// Zoom by holding both left+right mouse buttons and dragging up/down
-function BothButtonZoom() {
+// Zoom by holding right mouse button and dragging up/down
+function RightClickZoom() {
   const { camera } = useThree();
-  const state = useRef({ leftDown: false, rightDown: false, lastY: 0, active: false });
+  const state = useRef({ active: false, lastY: 0 });
 
   useEffect(() => {
     const canvas = document.querySelector("#galaxy-container canvas") as HTMLElement | null;
     if (!canvas) return;
 
     const onDown = (e: MouseEvent) => {
-      if (e.button === 0) state.current.leftDown = true;
-      if (e.button === 2) state.current.rightDown = true;
-      if (state.current.leftDown && state.current.rightDown) {
+      if (e.button === 2) {
         state.current.active = true;
         state.current.lastY = e.clientY;
+        e.preventDefault();
       }
     };
 
     const onUp = (e: MouseEvent) => {
-      if (e.button === 0) state.current.leftDown = false;
-      if (e.button === 2) state.current.rightDown = false;
-      state.current.active = false;
+      if (e.button === 2) {
+        state.current.active = false;
+      }
     };
 
     const onMove = (e: MouseEvent) => {
       if (!state.current.active) return;
       const dy = e.clientY - state.current.lastY;
       state.current.lastY = e.clientY;
-      // Drag up = zoom in (move camera closer), drag down = zoom out
       const zoomSpeed = 0.02;
       const direction = new THREE.Vector3();
       camera.getWorldDirection(direction);
@@ -531,7 +529,6 @@ function BothButtonZoom() {
     };
 
     const onContext = (e: MouseEvent) => {
-      // Prevent context menu when right-clicking on canvas
       e.preventDefault();
     };
 
@@ -583,9 +580,9 @@ function Scene({ concepts, dispersionRef }: { concepts: Concept[]; dispersionRef
         enableRotate={true}
         autoRotate={mode === "galaxy"}
         autoRotateSpeed={0.3}
-        mouseButtons={{ LEFT: THREE.MOUSE.ROTATE, MIDDLE: undefined as unknown as THREE.MOUSE, RIGHT: THREE.MOUSE.ROTATE }}
+        mouseButtons={{ LEFT: THREE.MOUSE.ROTATE, MIDDLE: undefined as unknown as THREE.MOUSE, RIGHT: undefined as unknown as THREE.MOUSE }}
       />
-      <BothButtonZoom />
+      <RightClickZoom />
       <Bloom />
       <DispersionController dispersionRef={dispersionRef} />
     </>
