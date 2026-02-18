@@ -3,8 +3,10 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Sparkles, Loader2, Save, Check, Key, Shield, LogIn, LogOut, ClipboardPaste } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2, Save, Check, Key, Shield, LogIn, LogOut, ClipboardPaste, Trash2 } from "lucide-react";
 import { Concept } from "@/types";
+import { getAllConcepts, getUserConcepts, removeUserConcept } from "@/lib/concepts";
+import { mockConcepts } from "@/data/mock";
 
 export default function SettingsPage() {
   const { data: session, status } = useSession();
@@ -33,6 +35,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [generated, setGenerated] = useState<{ short_summary: string; long_summary: string; x: number; y: number; z: number } | null>(null);
   const [saved, setSaved] = useState(false);
+  const [userConcepts, setUserConcepts] = useState<Concept[]>([]);
+  const [allConceptsList, setAllConceptsList] = useState<Concept[]>([]);
 
   useEffect(() => {
     const storedType = localStorage.getItem("auth-type") as "apikey" | "oauth" | "oauth-browser" | null;
@@ -56,6 +60,8 @@ export default function SettingsPage() {
 
     const storedLength = localStorage.getItem("summary-length");
     if (storedLength) setSummaryLength(parseInt(storedLength, 10));
+
+    setAllConceptsList(getAllConcepts());
   }, []);
 
   const saveCredentials = () => {
@@ -435,6 +441,52 @@ export default function SettingsPage() {
           <p className="text-center text-sm mt-2 font-semibold" style={{ color: "var(--accent-mid)" }}>
             {summaryLength} sentence{summaryLength === 1 ? "" : "s"}
           </p>
+        </section>
+
+        {/* Concept List */}
+        <section className="p-6 rounded-xl mb-8" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text)" }}>
+            <Sparkles className="w-5 h-5" /> My Concepts
+          </h2>
+          {allConceptsList.length === 0 ? (
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>No concepts yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {allConceptsList.map((c) => {
+                const isMock = mockConcepts.some((m) => m.id === c.id);
+                return (
+                  <div key={c.id} className="flex items-center justify-between p-3 rounded-lg" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+                    <div className="flex-1 min-w-0 mr-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium truncate" style={{ color: "var(--text)" }}>{c.name}</span>
+                        {isMock && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full shrink-0" style={{ background: "rgba(33,131,128,0.15)", color: "var(--accent-mid)" }}>Default</span>
+                        )}
+                      </div>
+                      <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{c.short_summary}</p>
+                      <p className="text-[10px] mt-1 font-mono" style={{ color: "var(--text-muted)", opacity: 0.6 }}>
+                        {new Date(c.date_learned).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                      </p>
+                    </div>
+                    {!isMock && (
+                      <button
+                        onClick={() => {
+                          if (!confirm(`Delete "${c.name}"?`)) return;
+                          removeUserConcept(c.id);
+                          setAllConceptsList(getAllConcepts());
+                        }}
+                        className="p-2 rounded-lg transition-colors cursor-pointer shrink-0"
+                        style={{ color: "#ff6464" }}
+                        title="Delete concept"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         {/* Add Learning */}
