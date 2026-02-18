@@ -27,7 +27,7 @@ const ARM_Y_MEAN = 100;
 const SPIRAL_FACTOR = 3.0;
 const ARMS = 2;
 const HAZE_RATIO = 0.5;
-const GALAXY_SCALE = 0.03; // scale down to fit scene
+const GALAXY_SCALE = 0.03;
 
 const STAR_COLORS = [0xffcc6f, 0xffd2a1, 0xfff4ea, 0xf8f7ff, 0xcad7ff, 0xaabfff];
 const STAR_PERCENTAGES = [76.45, 12.1, 7.6, 3.0, 0.6, 0.13];
@@ -69,7 +69,6 @@ function generateGalaxy(): StarData[] {
   const stars: StarData[] = [];
   const quarter = Math.floor(NUM_STARS / 4);
 
-  // Core stars
   for (let i = 0; i < quarter; i++) {
     const x = gaussianRandom(0, CORE_X_DIST);
     const y = gaussianRandom(0, CORE_Y_DIST);
@@ -83,7 +82,6 @@ function generateGalaxy(): StarData[] {
     });
   }
 
-  // Outer core
   for (let i = 0; i < quarter; i++) {
     const x = gaussianRandom(0, OUTER_CORE_X_DIST);
     const y = gaussianRandom(0, OUTER_CORE_Y_DIST);
@@ -97,7 +95,6 @@ function generateGalaxy(): StarData[] {
     });
   }
 
-  // Arm stars
   const armStars = NUM_STARS - 2 * quarter;
   const perArm = Math.floor(armStars / ARMS);
   for (let j = 0; j < ARMS; j++) {
@@ -117,7 +114,6 @@ function generateGalaxy(): StarData[] {
     }
   }
 
-  // Haze sprites
   const numHaze = Math.floor(NUM_STARS * HAZE_RATIO);
   for (let i = 0; i < numHaze; i++) {
     const x = gaussianRandom(0, OUTER_CORE_X_DIST * 1.5);
@@ -152,7 +148,6 @@ function createStarTexture(): THREE.Texture {
   return tex;
 }
 
-// Timeline positions
 function getTimelinePositions(concepts: Concept[]): Map<string, THREE.Vector3> {
   const sorted = [...concepts].sort(
     (a, b) => new Date(a.date_learned).getTime() - new Date(b.date_learned).getTime()
@@ -164,7 +159,6 @@ function getTimelinePositions(concepts: Concept[]): Map<string, THREE.Vector3> {
   return map;
 }
 
-// Place concepts along spiral arms
 function placeConceptsInGalaxy(concepts: Concept[]): Map<string, THREE.Vector3> {
   const map = new Map<string, THREE.Vector3>();
   concepts.forEach((c, i) => {
@@ -189,49 +183,66 @@ function Bloom() {
     comp.addPass(new RenderPass(scene, camera));
     const bloom = new UnrealBloomPass(
       new THREE.Vector2(size.width, size.height),
-      1.5, // strength
-      0.4, // radius
-      0.2  // threshold
+      1.5, 0.4, 0.2
     );
     comp.addPass(bloom);
     comp.addPass(new OutputPass());
     composer.current = comp;
-
-    return () => {
-      comp.dispose();
-    };
+    return () => { comp.dispose(); };
   }, [gl, scene, camera, size]);
 
   useEffect(() => {
-    if (composer.current) {
-      composer.current.setSize(size.width, size.height);
-    }
+    if (composer.current) composer.current.setSize(size.width, size.height);
   }, [size]);
 
   useFrame(() => {
-    if (composer.current) {
-      composer.current.render();
-    }
+    if (composer.current) composer.current.render();
   }, 1);
 
   return null;
 }
 
-// Galaxy stars rendered as Points
-function GalaxyStars() {
+// Galaxy stars with dispersion/gathering animation
+function GalaxyStars({ dispersionProgress }: { dispersionProgress: number }) {
   const pointsRef = useRef<THREE.Points>(null!);
   const hazeRef = useRef<THREE.Points>(null!);
 
-  const { stars, hazeStars, starTexture } = useMemo(() => {
+  const { stars, hazeStars, starTexture, disperseDirections, hazeDisperseDirections } = useMemo(() => {
     const allStars = generateGalaxy();
+    const s = allStars.filter((st) => !st.isHaze);
+    const h = allStars.filter((st) => st.isHaze);
+    
+    // Pre-compute random disperse directions for each star
+    const sDirs = s.map(() => {
+      const dir = new THREE.Vector3(
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2
+      ).normalize();
+      const dist = 15 + Math.random() * 25; // fly far out
+      return dir.multiplyScalar(dist);
+    });
+    const hDirs = h.map(() => {
+      const dir = new THREE.Vector3(
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2
+      ).normalize();
+      const dist = 15 + Math.random() * 25;
+      return dir.multiplyScalar(dist);
+    });
+
     return {
-      stars: allStars.filter((s) => !s.isHaze),
-      hazeStars: allStars.filter((s) => s.isHaze),
+      stars: s,
+      hazeStars: h,
       starTexture: createStarTexture(),
+      disperseDirections: sDirs,
+      hazeDisperseDirections: hDirs,
     };
   }, []);
 
-  const { starPositions, starColors, starSizes } = useMemo(() => {
+  // Base positions (galaxy shape)
+  const { baseStarPositions, starColors, starSizes } = useMemo(() => {
     const positions = new Float32Array(stars.length * 3);
     const colors = new Float32Array(stars.length * 3);
     const sizes = new Float32Array(stars.length);
@@ -244,10 +255,10 @@ function GalaxyStars() {
       colors[i * 3 + 2] = s.color.b;
       sizes[i] = s.size;
     });
-    return { starPositions: positions, starColors: colors, starSizes: sizes };
+    return { baseStarPositions: positions, starColors: colors, starSizes: sizes };
   }, [stars]);
 
-  const { hazePositions, hazeColors, hazeSizes } = useMemo(() => {
+  const { baseHazePositions, hazeColors, hazeSizes } = useMemo(() => {
     const positions = new Float32Array(hazeStars.length * 3);
     const colors = new Float32Array(hazeStars.length * 3);
     const sizes = new Float32Array(hazeStars.length);
@@ -260,8 +271,12 @@ function GalaxyStars() {
       colors[i * 3 + 2] = s.color.b;
       sizes[i] = s.size;
     });
-    return { hazePositions: positions, hazeColors: colors, hazeSizes: sizes };
+    return { baseHazePositions: positions, hazeColors: colors, hazeSizes: sizes };
   }, [hazeStars]);
+
+  // Animated positions buffer
+  const animatedStarPositions = useRef(new Float32Array(baseStarPositions.length));
+  const animatedHazePositions = useRef(new Float32Array(baseHazePositions.length));
 
   useFrame((_, delta) => {
     if (pointsRef.current) {
@@ -270,13 +285,54 @@ function GalaxyStars() {
     if (hazeRef.current) {
       hazeRef.current.rotation.y += delta * 0.05;
     }
+
+    // Apply dispersion: lerp from base positions to dispersed positions
+    const p = dispersionProgress; // 0 = galaxy, 1 = fully dispersed
+    
+    // Stars
+    const starPos = animatedStarPositions.current;
+    for (let i = 0; i < stars.length; i++) {
+      const i3 = i * 3;
+      const dir = disperseDirections[i];
+      starPos[i3] = baseStarPositions[i3] + dir.x * p;
+      starPos[i3 + 1] = baseStarPositions[i3 + 1] + dir.y * p;
+      starPos[i3 + 2] = baseStarPositions[i3 + 2] + dir.z * p;
+    }
+    if (pointsRef.current) {
+      const posAttr = pointsRef.current.geometry.getAttribute("position") as THREE.BufferAttribute;
+      posAttr.array.set(starPos);
+      posAttr.needsUpdate = true;
+      (pointsRef.current.material as THREE.PointsMaterial).opacity = 0.9 * (1 - p);
+    }
+
+    // Haze
+    const hazePos = animatedHazePositions.current;
+    for (let i = 0; i < hazeStars.length; i++) {
+      const i3 = i * 3;
+      const dir = hazeDisperseDirections[i];
+      hazePos[i3] = baseHazePositions[i3] + dir.x * p;
+      hazePos[i3 + 1] = baseHazePositions[i3 + 1] + dir.y * p;
+      hazePos[i3 + 2] = baseHazePositions[i3 + 2] + dir.z * p;
+    }
+    if (hazeRef.current) {
+      const posAttr = hazeRef.current.geometry.getAttribute("position") as THREE.BufferAttribute;
+      posAttr.array.set(hazePos);
+      posAttr.needsUpdate = true;
+      (hazeRef.current.material as THREE.PointsMaterial).opacity = 0.08 * (1 - p);
+    }
   });
+
+  // Initialize animated positions
+  useEffect(() => {
+    animatedStarPositions.current.set(baseStarPositions);
+    animatedHazePositions.current.set(baseHazePositions);
+  }, [baseStarPositions, baseHazePositions]);
 
   return (
     <>
       <points ref={pointsRef}>
         <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[starPositions, 3]} />
+          <bufferAttribute attach="attributes-position" args={[new Float32Array(baseStarPositions), 3]} />
           <bufferAttribute attach="attributes-color" args={[starColors, 3]} />
           <bufferAttribute attach="attributes-size" args={[starSizes, 1]} />
         </bufferGeometry>
@@ -293,7 +349,7 @@ function GalaxyStars() {
       </points>
       <points ref={hazeRef}>
         <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[hazePositions, 3]} />
+          <bufferAttribute attach="attributes-position" args={[new Float32Array(baseHazePositions), 3]} />
           <bufferAttribute attach="attributes-color" args={[hazeColors, 3]} />
           <bufferAttribute attach="attributes-size" args={[hazeSizes, 1]} />
         </bufferGeometry>
@@ -325,8 +381,6 @@ function ConceptDots({ concepts, onHover }: ConceptDotsProps) {
 
   const galaxyPositions = useMemo(() => placeConceptsInGalaxy(concepts), [concepts]);
   const timelinePositions = useMemo(() => getTimelinePositions(concepts), [concepts]);
-
-  // Cluster positions: use stored x,y,z
   const clusterPositions = useMemo(() => {
     const map = new Map<string, THREE.Vector3>();
     concepts.forEach((c) => map.set(c.id, new THREE.Vector3(c.x, c.y, c.z)));
@@ -339,7 +393,6 @@ function ConceptDots({ concepts, onHover }: ConceptDotsProps) {
   const targetPositions = useRef<THREE.Vector3[]>(concepts.map(() => new THREE.Vector3()));
   const currentPositions = useRef<THREE.Vector3[]>(concepts.map(() => new THREE.Vector3()));
 
-  // Update targets when mode changes
   useEffect(() => {
     const posMap = mode === "galaxy" ? galaxyPositions : mode === "reduction" ? clusterPositions : timelinePositions;
     concepts.forEach((c, i) => {
@@ -362,27 +415,14 @@ function ConceptDots({ concepts, onHover }: ConceptDotsProps) {
     for (let i = 0; i < concepts.length; i++) {
       currentPositions.current[i].lerpVectors(prevPositions.current[i], targetPositions.current[i], ease);
       dummy.position.copy(currentPositions.current[i]);
-
-      // In galaxy mode, rotate with the galaxy
-      if (mode === "galaxy") {
-        const galaxyRotation = meshRef.current.parent?.parent?.rotation.y || 0;
-        // Concept dots don't need extra rotation since they're children
-      }
-
       dummy.scale.setScalar(0.06);
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
-
       color.set(STAR_COLORS[i % STAR_COLORS.length]);
       meshRef.current.setColorAt(i, color);
     }
     meshRef.current.instanceMatrix.needsUpdate = true;
     if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true;
-
-    // Rotate with galaxy in galaxy mode
-    if (meshRef.current.parent) {
-      // Handled by parent group rotation
-    }
   });
 
   const { camera, raycaster, pointer } = useThree();
@@ -441,41 +481,43 @@ function Tooltip({ concept, position }: { concept: Concept | null; position: THR
   );
 }
 
-function GalaxyGroup({ concepts }: { concepts: Concept[] }) {
-  const groupRef = useRef<THREE.Group>(null!);
-  const { mode } = useScroll();
-
+// Dispersion controller — drives the dispersion progress inside the Canvas
+function DispersionController({ dispersionRef }: { dispersionRef: React.MutableRefObject<{ target: number; current: number }> }) {
   useFrame((_, delta) => {
-    if (groupRef.current && mode === "galaxy") {
-      // Galaxy auto-rotates; concept dots are children so they rotate too
+    const d = dispersionRef.current;
+    const speed = 1.2; // ~1-1.5s transition
+    if (d.current < d.target) {
+      d.current = Math.min(d.current + delta * speed, d.target);
+    } else if (d.current > d.target) {
+      d.current = Math.max(d.current - delta * speed, d.target);
     }
   });
-
-  return (
-    <group ref={groupRef}>
-      <GalaxyStars />
-    </group>
-  );
+  return null;
 }
 
-function Scene({ concepts }: { concepts: Concept[] }) {
+function Scene({ concepts, dispersionRef }: { concepts: Concept[]; dispersionRef: React.MutableRefObject<{ target: number; current: number }> }) {
   const [hovered, setHovered] = useState<Concept | null>(null);
   const [hoveredPos, setHoveredPos] = useState<THREE.Vector3 | null>(null);
   const { mode } = useScroll();
+  const [dispersionProgress, setDispersionProgress] = useState(0);
 
   const handleHover = useCallback((concept: Concept | null, pos: THREE.Vector3 | null) => {
     setHovered(concept);
     setHoveredPos(pos);
   }, []);
 
-  // Fade galaxy stars based on mode
-  const galaxyOpacity = mode === "galaxy" ? 1 : 0;
+  // Read dispersion progress each frame
+  useFrame(() => {
+    setDispersionProgress(dispersionRef.current.current);
+  });
 
   return (
     <>
       <ambientLight intensity={0.2} />
-      <group visible={mode === "galaxy"}>
-        <GalaxyGroup concepts={concepts} />
+      <group visible={dispersionProgress < 0.99}>
+        <group>
+          <GalaxyStars dispersionProgress={dispersionProgress} />
+        </group>
       </group>
       <ConceptDots concepts={concepts} onHover={handleHover} />
       <Tooltip concept={hovered} position={hoveredPos} />
@@ -487,6 +529,7 @@ function Scene({ concepts }: { concepts: Concept[] }) {
         autoRotateSpeed={0.3}
       />
       <Bloom />
+      <DispersionController dispersionRef={dispersionRef} />
     </>
   );
 }
@@ -496,35 +539,86 @@ interface Props {
 }
 
 export default function GalaxyVisualization({ concepts }: Props) {
-  const { mode, nextMode, prevMode, setMode } = useScroll();
+  const { mode, nextMode, prevMode, setMode, pastVisualization, setPastVisualization } = useScroll();
   const [mounted, setMounted] = useState(false);
   const lastWheelTime = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dispersionRef = useRef({ target: 0, current: 0 });
 
   useEffect(() => setMounted(true), []);
 
-  // Scroll wheel mode switching
+  // Drive dispersion target based on mode
+  useEffect(() => {
+    dispersionRef.current.target = mode === "galaxy" ? 0 : 1;
+  }, [mode]);
+
+  // Global scroll lock: intercept wheel events on the whole page
   useEffect(() => {
     if (!mounted) return;
+
     const handleWheel = (e: WheelEvent) => {
-      // Only intercept when the visualization is in view
-      const now = Date.now();
-      if (now - lastWheelTime.current < 800) return;
-      
-      if (e.deltaY > 0) {
-        nextMode();
-      } else if (e.deltaY < 0) {
-        prevMode();
+      const container = containerRef.current;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+      const viewportH = window.innerHeight;
+
+      // Check if visualization section is in view (at least partially)
+      const vizInView = rect.top < viewportH && rect.bottom > 0;
+
+      // If we're past the visualization and scrolling down, allow normal scroll
+      if (pastVisualization && e.deltaY > 0) {
+        return; // allow normal scroll
       }
-      lastWheelTime.current = now;
-      e.preventDefault();
+
+      // If past visualization and scrolling up, check if we've scrolled back to the viz section
+      if (pastVisualization && e.deltaY < 0) {
+        // If the top of the page content is visible (window.scrollY close to container height)
+        if (window.scrollY <= rect.height + 10) {
+          // Re-enter visualization
+          e.preventDefault();
+          setPastVisualization(false);
+          // We're in timeline mode, go back
+          prevMode();
+          return;
+        }
+        return; // allow normal scroll up through content
+      }
+
+      // If visualization is in view and not past it, lock scroll
+      if (vizInView && !pastVisualization) {
+        e.preventDefault();
+
+        const now = Date.now();
+        if (now - lastWheelTime.current < 800) return;
+        lastWheelTime.current = now;
+
+        if (e.deltaY > 0) {
+          // Scrolling down
+          if (mode === "timeline") {
+            // Already at last mode, scroll past visualization
+            setPastVisualization(true);
+            // Smoothly scroll the page to show content below
+            window.scrollTo({ top: rect.height, behavior: "smooth" });
+          } else {
+            nextMode();
+          }
+        } else if (e.deltaY < 0) {
+          prevMode();
+        }
+      }
     };
 
-    const container = document.getElementById("galaxy-container");
-    if (container) {
-      container.addEventListener("wheel", handleWheel, { passive: false });
-      return () => container.removeEventListener("wheel", handleWheel);
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    return () => window.removeEventListener("wheel", handleWheel);
+  }, [mounted, mode, nextMode, prevMode, pastVisualization, setPastVisualization]);
+
+  // Reset pastVisualization when mode changes back from timeline
+  useEffect(() => {
+    if (mode !== "timeline") {
+      setPastVisualization(false);
     }
-  }, [mounted, nextMode, prevMode]);
+  }, [mode, setPastVisualization]);
 
   if (!mounted) {
     return (
@@ -535,13 +629,13 @@ export default function GalaxyVisualization({ concepts }: Props) {
   }
 
   return (
-    <div id="galaxy-container" className="w-full h-screen relative">
+    <div ref={containerRef} id="galaxy-container" className="w-full h-screen relative">
       <Canvas
         camera={{ position: [0, 3, 8], fov: 60 }}
         style={{ background: "transparent" }}
         gl={{ antialias: true, alpha: true }}
       >
-        <Scene concepts={concepts} />
+        <Scene concepts={concepts} dispersionRef={dispersionRef} />
       </Canvas>
       {/* Mode buttons */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-10">

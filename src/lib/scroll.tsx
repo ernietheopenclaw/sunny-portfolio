@@ -10,8 +10,10 @@ interface ScrollContextType {
   scrollProgress: number;
   mode: Mode;
   setMode: (m: Mode) => void;
-  nextMode: () => void;
-  prevMode: () => void;
+  nextMode: () => boolean; // returns true if mode changed, false if already at end
+  prevMode: () => boolean; // returns true if mode changed, false if already at start
+  pastVisualization: boolean;
+  setPastVisualization: (v: boolean) => void;
 }
 
 const ScrollContext = createContext<ScrollContextType>({
@@ -19,12 +21,15 @@ const ScrollContext = createContext<ScrollContextType>({
   scrollProgress: 0,
   mode: "galaxy",
   setMode: () => {},
-  nextMode: () => {},
-  prevMode: () => {},
+  nextMode: () => false,
+  prevMode: () => false,
+  pastVisualization: false,
+  setPastVisualization: () => {},
 });
 
 export function ScrollProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<Mode>("galaxy");
+  const [pastVisualization, setPastVisualization] = useState(false);
 
   const scrollProgress = mode === "galaxy" ? 0 : mode === "reduction" ? 0.5 : 1;
 
@@ -32,22 +37,34 @@ export function ScrollProvider({ children }: { children: ReactNode }) {
     setModeState(m);
   }, []);
 
-  const nextMode = useCallback(() => {
+  const nextMode = useCallback((): boolean => {
+    let changed = false;
     setModeState((prev) => {
       const idx = MODES.indexOf(prev);
-      return idx < MODES.length - 1 ? MODES[idx + 1] : prev;
+      if (idx < MODES.length - 1) {
+        changed = true;
+        return MODES[idx + 1];
+      }
+      return prev;
     });
+    return changed;
   }, []);
 
-  const prevMode = useCallback(() => {
+  const prevMode = useCallback((): boolean => {
+    let changed = false;
     setModeState((prev) => {
       const idx = MODES.indexOf(prev);
-      return idx > 0 ? MODES[idx - 1] : prev;
+      if (idx > 0) {
+        changed = true;
+        return MODES[idx - 1];
+      }
+      return prev;
     });
+    return changed;
   }, []);
 
   return (
-    <ScrollContext.Provider value={{ scrollY: 0, scrollProgress, mode, setMode, nextMode, prevMode }}>
+    <ScrollContext.Provider value={{ scrollY: 0, scrollProgress, mode, setMode, nextMode, prevMode, pastVisualization, setPastVisualization }}>
       {children}
     </ScrollContext.Provider>
   );
