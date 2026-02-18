@@ -636,10 +636,27 @@ export default function GalaxyVisualization({ concepts }: Props) {
     dispersionRef.current.target = mode === "galaxy" ? 0 : 1;
   }, [mode]);
 
-  // Track whether we're snapping to prevent re-entrant triggers
-  const isSnapping = useRef(false);
+  // Track whether we're in a scroll transition to prevent re-entrant triggers
+  const isTransitioning = useRef(false);
 
-  // IntersectionObserver: when viz re-enters viewport from below, snap to it
+  // Helper: snap to a scroll position and lock during animation
+  const snapTo = useCallback((top: number, onDone?: () => void) => {
+    isTransitioning.current = true;
+    window.scrollTo({ top, behavior: "smooth" });
+    // Listen for scroll end (scrollend event with fallback timeout)
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      isTransitioning.current = false;
+      onDone?.();
+    };
+    window.addEventListener("scrollend", finish, { once: true });
+    // Fallback: release after 800ms in case scrollend doesn't fire (Safari)
+    setTimeout(finish, 800);
+  }, []);
+
+  // Snap-back: when scrolling up and viz becomes partially visible, snap to top
   useEffect(() => {
     if (!mounted) return;
     const container = containerRef.current;
@@ -647,28 +664,58 @@ export default function GalaxyVisualization({ concepts }: Props) {
 
     let lastY = window.scrollY;
     const handleScroll = () => {
+      if (isTransitioning.current) return;
+
       const currentY = window.scrollY;
       const scrollingUp = currentY < lastY;
       lastY = currentY;
 
-      if (!pastVisualization || !scrollingUp || isSnapping.current) return;
+      if (!pastVisualization || !scrollingUp) return;
 
       const rect = container.getBoundingClientRect();
-      // If bottom edge of viz is visible in viewport (viz entering from above as we scroll up)
-      if (rect.bottom > 0 && rect.top < 0) {
-        // Viz is partially visible — snap to it
-        isSnapping.current = true;
+      // If any part of the viz is visible while scrolling up, snap back to it
+      if (rect.bottom > 0 && rect.top < window.innerHeight) {
         setPastVisualization(false);
         setMode("timeline");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        // Release snap lock after scroll settles
-        setTimeout(() => { isSnapping.current = false; }, 600);
+        snapTo(0);
       }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [mounted, pastVisualization, setPastVisualization, setMode]);
+  }, [mounted, pastVisualization, setPastVisualization, setMode, snapTo]);
+
+  // Stuck-in-between fix: if page is idle at a position between galaxy and content, resolve it
+  useEffect(() => {
+    if (!mounted) return;
+    const container = containerRef.current;
+    if (!container) return;
+
+    let idleTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const checkStuck = () => {
+      if (isTransitioning.current) return;
+      const rect = container.getBoundingClientRect();
+      const scrollY = window.scrollY;
+      // "Stuck" = scrolled past top of viz but not fully past it (in the dead zone)
+      if (scrollY > 0 && rect.bottom > 0 && rect.top < 0 && !pastVisualization) {
+        // Snap to content below
+        setPastVisualization(true);
+        snapTo(rect.height + scrollY);
+      }
+    };
+
+    const handleScrollEnd = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(checkStuck, 150);
+    };
+
+    window.addEventListener("scroll", handleScrollEnd, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScrollEnd);
+      if (idleTimer) clearTimeout(idleTimer);
+    };
+  }, [mounted, pastVisualization, setPastVisualization, snapTo]);
 
   // Global scroll lock: intercept wheel events on the whole page
   useEffect(() => {
@@ -677,7 +724,9 @@ export default function GalaxyVisualization({ concepts }: Props) {
     const handleWheel = (e: WheelEvent) => {
       const container = containerRef.current;
       if (!container) return;
-      if (isSnapping.current) { e.preventDefault(); return; }
+
+      // Block all wheel events during transitions
+      if (isTransitioning.current) { e.preventDefault(); return; }
 
       const rect = container.getBoundingClientRect();
       const viewportH = window.innerHeight;
@@ -685,14 +734,10 @@ export default function GalaxyVisualization({ concepts }: Props) {
       // Check if visualization section is in view (at least partially)
       const vizInView = rect.top < viewportH && rect.bottom > 0;
 
-      // If we're past the visualization and scrolling down, allow normal scroll
-      if (pastVisualization && e.deltaY > 0) {
-        return; // allow normal scroll
-      }
-
-      // If past visualization and scrolling up, let the scroll handler above deal with snapping
-      if (pastVisualization && e.deltaY < 0) {
-        return; // allow normal scroll up — IntersectionObserver will catch re-entry
+      // If we're past the visualization, allow normal scroll in both directions
+      // (snap-back is handled by the scroll listener above)
+      if (pastVisualization) {
+        return;
       }
 
       // If visualization is in view and not past it, lock scroll
@@ -708,15 +753,13 @@ export default function GalaxyVisualization({ concepts }: Props) {
           if (mode === "timeline") {
             // Already at last mode, scroll past visualization
             setPastVisualization(true);
-            // Smoothly scroll the page to show content below
-            window.scrollTo({ top: rect.height, behavior: "smooth" });
+            snapTo(rect.height + window.scrollY);
           } else {
             nextMode();
           }
         } else if (e.deltaY < 0) {
           // Scrolling up — if at galaxy (first mode), allow normal page scroll
           if (mode === "galaxy") {
-            // Don't prevent default — let page scroll up normally
             return;
           }
           prevMode();
@@ -726,7 +769,7 @@ export default function GalaxyVisualization({ concepts }: Props) {
 
     window.addEventListener("wheel", handleWheel, { passive: false });
     return () => window.removeEventListener("wheel", handleWheel);
-  }, [mounted, mode, nextMode, prevMode, pastVisualization, setPastVisualization]);
+  }, [mounted, mode, nextMode, prevMode, pastVisualization, setPastVisualization, snapTo]);
 
   // Reset pastVisualization when mode changes back from timeline
   useEffect(() => {
