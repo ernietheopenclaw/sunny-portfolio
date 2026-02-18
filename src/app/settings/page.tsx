@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Sparkles, Loader2, Save, Check, Key, Shield, LogIn, LogOut, ClipboardPaste, X, Calendar } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2, Save, Check, Key, Shield, LogIn, LogOut, ClipboardPaste, X } from "lucide-react";
 import { Concept } from "@/types";
 import { getAllConcepts, hideConcept } from "@/lib/concepts";
 
@@ -483,19 +483,13 @@ export default function SettingsPage() {
           </div>
 
           <label className="text-sm block mb-2" style={{ color: "var(--text-muted)" }}>Date (optional)</label>
-          <div className="flex items-center gap-2 mb-4">
-            <Calendar className="w-4 h-4 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
-            <input
-              type="date"
-              value={conceptDate}
-              onChange={(e) => setConceptDate(e.target.value)}
-              className="flex-1 px-3 py-2 rounded-lg text-sm focus:outline-none"
-              style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
-            />
-            <span className="text-xs whitespace-nowrap" style={{ color: "var(--text-muted)" }}>
-              {conceptDate ? "" : "Defaults to today"}
-            </span>
-          </div>
+          <input
+            type="date"
+            value={conceptDate}
+            onChange={(e) => setConceptDate(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg text-sm mb-4 focus:outline-none"
+            style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
+          />
 
           {generated && (
             <div className="p-4 rounded-lg mb-4" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>

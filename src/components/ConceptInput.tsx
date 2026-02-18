@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Sparkles, Loader2, Calendar } from "lucide-react";
+import { Plus, Sparkles, Loader2 } from "lucide-react";
 import { addUserConcept } from "@/lib/concepts";
 import { getEmbedding } from "@/lib/embedding-model";
 
@@ -152,19 +152,14 @@ export default function ConceptInput({ onConceptAdded }: { onConceptAdded?: () =
               className="w-full px-3 py-2 rounded-lg text-sm mb-2 focus:outline-none"
               style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
             />
-            <div className="flex items-center gap-2 mb-2">
-              <Calendar className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-1.5 rounded-lg text-xs focus:outline-none"
-                style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
-              />
-              <span className="text-xs whitespace-nowrap" style={{ color: "var(--text-muted)" }}>
-                {date ? "" : "Today"}
-              </span>
-            </div>
+            <label className="text-xs mb-1 block" style={{ color: "var(--text-muted)" }}>Date (Optional)</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm mb-2 focus:outline-none"
+              style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
+            />
             {error && (
               <p className="text-xs mb-2" style={{ color: "var(--error)" }}>{error}</p>
             )}
