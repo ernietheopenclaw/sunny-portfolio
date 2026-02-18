@@ -125,59 +125,78 @@ export const mockConcepts: Concept[] = [
 
 export const mockProjects: Project[] = [
   {
-    title: "Webpage Summarizer ChatGPT Plugin",
+    title: "Enterprise RAG LLM System",
+    description: "Engineered an enterprise-scale RAG system at Amazon serving 15,000 tables across 200 schemas with automated DDL generation, git-style versioning, and Slack notifications using AWS S3, Bedrock, and Redshift.",
+    tech: ["Python", "AWS Bedrock", "Redshift", "S3", "RAG", "Slack API"],
+  },
+  {
+    title: "DDPM for Histopathologic Images",
+    description: "Built denoising diffusion probabilistic models for histopathologic cancer detection on the Patch Camelyon dataset with comprehensive ablation studies.",
+    tech: ["PyTorch", "Diffusion Models", "Computer Vision", "Deep Learning"],
+  },
+  {
+    title: "ChatGPT Web Summarizer Plugin",
     description: "A ChatGPT companion plugin that parses URL content (HTML/PDF) for conversational agents, enabling real-time webpage summarization and information extraction.",
     tech: ["Python", "ChatGPT Plugins", "HTML Parsing", "PDF Extraction"],
     github: "https://github.com/sunnydigital/web-sum",
   },
   {
-    title: "AR-Net & NeuralProphet Analysis",
-    description: "Stock price forecasting using NeuralProphet time-series decomposition with AR-Net and additive events. Final project for DS-GA 3001 Probabilistic Time Series Analysis.",
-    tech: ["Python", "NeuralProphet", "Time Series", "PyTorch"],
-  },
-  {
-    title: "ESG Classification vs Regression",
-    description: "Fine-tuned language models on Reddit ESG data with SHAP feature attribution for interpretable ESG scoring. Final project for DS-GA 1011 NLP.",
-    tech: ["Python", "NLP", "SHAP", "Transformers", "Scikit-learn"],
-    github: "https://github.com/sunnydigital/nlp-f22",
-  },
-  {
-    title: "Persona Emulation & Dialogue Generation",
-    description: "Fine-tuning GPT-3 on movie, book, and game dialogue data to generate character-specific responses. Final project for DS-UA 203 ML for NLP.",
-    tech: ["Python", "GPT-3", "Fine-tuning", "NLP"],
-  },
-  {
-    title: "NYU DSC x Peak AI Datathon Winner",
-    description: "Built a winning recommender system using k-NN with GloVe-50d embeddings for the NYU Data Science Club x Peak.AI datathon competition.",
+    title: "NYU DSC x Peak AI Datathon — Winner",
+    description: "Built a winning recommender system using k-NN with GloVe-50d embeddings, competing against 50+ teams in the NYU Data Science Club x Peak.AI datathon.",
     tech: ["Python", "k-NN", "GloVe", "Recommender Systems"],
     github: "https://github.com/sunnydigital/datathon-f22",
   },
   {
+    title: "NeuralProphet Stock Forecasting",
+    description: "Stock price forecasting using NeuralProphet time-series decomposition with AR-Net and additive events for IT sector stocks.",
+    tech: ["Python", "NeuralProphet", "Time Series", "PyTorch"],
+  },
+  {
+    title: "ESG NLP Classification",
+    description: "Fine-tuned language models on Reddit ESG data with SHAP feature attribution for interpretable ESG scoring and analysis.",
+    tech: ["Python", "NLP", "SHAP", "Transformers", "Scikit-Learn"],
+    github: "https://github.com/sunnydigital/nlp-f22",
+  },
+  {
+    title: "Persona Emulation & Dialogue",
+    description: "Fine-tuning GPT-3 on movie, book, and game dialogue (LotR, Harry Potter, FF XIV) to generate character-specific responses.",
+    tech: ["Python", "GPT-3", "Fine-tuning", "NLP"],
+  },
+  {
     title: "Cover Letter Generator",
-    description: "A Python CLI tool that generates tailored cover letters, streamlining the job application process.",
-    tech: ["Python", "CLI", "NLP"],
+    description: "A Python CLI tool that generates tailored cover letters using AI, streamlining the job application process.",
+    tech: ["Python", "CLI", "NLP", "OpenAI"],
     github: "https://github.com/sunnydigital/cover-gen",
   },
 ];
 
 export const mockSkills: Skill[] = [
+  // Languages
   { name: "Python", level: 95, category: "Languages" },
-  { name: "R", level: 78, category: "Languages" },
-  { name: "SQL", level: 82, category: "Languages" },
-  { name: "JavaScript / TypeScript", level: 80, category: "Languages" },
-  { name: "Machine Learning", level: 92, category: "AI / ML" },
-  { name: "NLP / Transformers", level: 90, category: "AI / ML" },
-  { name: "Deep Learning", level: 88, category: "AI / ML" },
-  { name: "Dimensionality Reduction", level: 90, category: "AI / ML" },
-  { name: "PyTorch", level: 85, category: "Frameworks & Libraries" },
-  { name: "TensorFlow", level: 78, category: "Frameworks & Libraries" },
-  { name: "Scikit-learn", level: 90, category: "Frameworks & Libraries" },
-  { name: "Pandas / NumPy", level: 92, category: "Frameworks & Libraries" },
-  { name: "React / Next.js", level: 78, category: "Frameworks & Libraries" },
-  { name: "Data Science", level: 92, category: "Domains" },
-  { name: "Genomic Data Analysis", level: 75, category: "Domains" },
-  { name: "Time Series Analysis", level: 80, category: "Domains" },
-  { name: "Git", level: 85, category: "Tools & Platforms" },
-  { name: "AWS", level: 78, category: "Tools & Platforms" },
-  { name: "Docker", level: 70, category: "Tools & Platforms" },
+  { name: "R", level: 80, category: "Languages" },
+  { name: "Java", level: 70, category: "Languages" },
+  { name: "SQL", level: 85, category: "Languages" },
+  { name: "JavaScript", level: 78, category: "Languages" },
+  { name: "HTML / CSS", level: 75, category: "Languages" },
+  // AI / ML Frameworks
+  { name: "PyTorch", level: 90, category: "AI / ML Frameworks" },
+  { name: "Keras", level: 85, category: "AI / ML Frameworks" },
+  { name: "Scikit-Learn", level: 92, category: "AI / ML Frameworks" },
+  { name: "XGBoost", level: 85, category: "AI / ML Frameworks" },
+  { name: "Hugging Face Transformers", level: 88, category: "AI / ML Frameworks" },
+  { name: "spaCy", level: 80, category: "AI / ML Frameworks" },
+  { name: "OpenCV", level: 78, category: "AI / ML Frameworks" },
+  // Data & Compute
+  { name: "NumPy / Pandas / SciPy", level: 95, category: "Data & Compute" },
+  { name: "W&B / MLflow", level: 80, category: "Data & Compute" },
+  { name: "Airflow", level: 75, category: "Data & Compute" },
+  { name: "Raytune", level: 70, category: "Data & Compute" },
+  // Cloud & Infrastructure
+  { name: "AWS (S3, Bedrock, Redshift)", level: 82, category: "Cloud & Infrastructure" },
+  // Specializations
+  { name: "NLP", level: 92, category: "Specializations" },
+  { name: "Computer Vision", level: 85, category: "Specializations" },
+  { name: "Deep Learning", level: 90, category: "Specializations" },
+  { name: "Time Series Analysis", level: 82, category: "Specializations" },
+  { name: "Bioinformatics", level: 78, category: "Specializations" },
 ];
