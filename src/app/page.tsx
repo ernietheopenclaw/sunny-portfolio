@@ -49,7 +49,7 @@ export default function Home() {
         <About />
         <Projects projects={mockProjects} />
         <Papers />
-        <Skills skills={mockSkills} />
+        <Skills skills={mockSkills} projects={mockProjects} />
         <Resume />
         <Links />
         <Contact />
