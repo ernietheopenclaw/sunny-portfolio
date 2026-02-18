@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: "user",
+          timestamp: Date.now(),
           content: `Generate a JSON object for the concept "${name}" with these fields:
 - "short_summary": A concise 1-sentence summary (under 120 chars)
 - "long_summary": A detailed 3-4 sentence explanation
