@@ -235,7 +235,7 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen px-4 py-20" style={{ background: "var(--bg)" }}>
-      <div className="max-w-xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <button
           onClick={() => router.push("/")}
           className="flex items-center gap-2 mb-8 text-sm transition-colors cursor-pointer"
@@ -248,8 +248,12 @@ export default function SettingsPage() {
 
         <h1 className="text-3xl font-bold mb-8" style={{ color: "var(--text)" }}>Settings</h1>
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column: Auth, Summary Length, Add Concept */}
+          <div className="space-y-8">
+
         {/* API Configuration */}
-        <section className="p-6 rounded-xl mb-8" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+        <section className="p-6 rounded-xl" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text)" }}>
             <Key className="w-5 h-5" /> Authentication
           </h2>
@@ -416,7 +420,7 @@ export default function SettingsPage() {
         </section>
 
         {/* Summary Length */}
-        <section className="p-6 rounded-xl mb-8" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+        <section className="p-6 rounded-xl" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text)" }}>
             <Sparkles className="w-5 h-5" /> Summary Length
           </h2>
@@ -443,46 +447,6 @@ export default function SettingsPage() {
           <p className="text-center text-sm mt-2 font-semibold" style={{ color: "var(--accent-mid)" }}>
             {summaryLength} sentence{summaryLength === 1 ? "" : "s"}
           </p>
-        </section>
-
-        {/* Concept List */}
-        <section className="p-6 rounded-xl mb-8" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text)" }}>
-            <Sparkles className="w-5 h-5" /> My Concepts
-          </h2>
-          {allConceptsList.length === 0 ? (
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>No concepts yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {allConceptsList.map((c) => (
-                  <div key={c.id} className="flex items-center justify-between p-3 rounded-lg" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
-                    <div className="flex-1 min-w-0 mr-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-medium truncate" style={{ color: "var(--text)" }}>{c.name}</span>
-                      </div>
-                      <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{c.short_summary}</p>
-                      <p className="text-[10px] mt-1 font-mono" style={{ color: "var(--text-muted)", opacity: 0.6 }}>
-                        {new Date(c.date_learned).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        if (!confirm(`Delete "${c.name}"?`)) return;
-                        hideConcept(c.id);
-                        setAllConceptsList(getAllConcepts());
-                      }}
-                      className="p-2 rounded-lg transition-opacity cursor-pointer shrink-0"
-                      style={{ color: "#e74c3c", opacity: 0.4 }}
-                      onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
-                      onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.4")}
-                      title="Delete concept"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-              ))}
-            </div>
-          )}
         </section>
 
         {/* Add Concept */}
@@ -554,6 +518,56 @@ export default function SettingsPage() {
             </div>
           )}
         </section>
+
+          </div>
+          {/* End left column */}
+
+          {/* Right Column: My Concepts */}
+          <div>
+            <section className="p-6 rounded-xl sticky top-20" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text)" }}>
+                <Sparkles className="w-5 h-5" /> My Concepts
+              </h2>
+              {allConceptsList.length === 0 ? (
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>No concepts yet.</p>
+              ) : (
+                <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
+                  {allConceptsList.map((c) => (
+                    <div key={c.id} className="flex items-center justify-between p-3 rounded-lg" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+                      <div className="flex-1 min-w-0 mr-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium truncate" style={{ color: "var(--text)" }}>{c.name}</span>
+                        </div>
+                        <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{c.short_summary}</p>
+                        <p className="text-[10px] mt-1 font-mono" style={{ color: "var(--text-muted)", opacity: 0.6 }}>
+                          {new Date(c.date_learned).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (!confirm(`Delete "${c.name}"?`)) return;
+                          hideConcept(c.id);
+                          setAllConceptsList(getAllConcepts());
+                        }}
+                        className="p-2 rounded-lg transition-opacity cursor-pointer shrink-0"
+                        style={{ color: "#e74c3c", opacity: 0.4 }}
+                        onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                        onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.4")}
+                        title="Delete concept"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+          {/* End right column */}
+
+        </div>
+        {/* End grid */}
+
       </div>
     </div>
   );
