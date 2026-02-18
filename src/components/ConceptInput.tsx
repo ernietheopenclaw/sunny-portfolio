@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Sparkles, Loader2 } from "lucide-react";
 
 export default function ConceptInput() {
+  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [concept, setConcept] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isLoggedIn] = useState(false);
+  const isLoggedIn = !!session;
 
   if (!isLoggedIn) {
     return (
