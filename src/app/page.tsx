@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { mockProjects, mockSkills } from "@/data/mock";
+import { mockConcepts, mockProjects, mockSkills } from "@/data/mock";
 import { getAllConcepts } from "@/lib/concepts";
 import Navbar from "@/components/Navbar";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -22,7 +22,12 @@ const GalaxyVisualization = dynamic(
 );
 
 export default function Home() {
-  const [concepts, setConcepts] = useState(() => getAllConcepts());
+  const [concepts, setConcepts] = useState(mockConcepts);
+
+  // Load user-added concepts from localStorage after mount (avoids hydration mismatch)
+  useEffect(() => {
+    setConcepts(getAllConcepts());
+  }, []);
 
   const handleConceptAdded = useCallback(() => {
     setConcepts(getAllConcepts());
