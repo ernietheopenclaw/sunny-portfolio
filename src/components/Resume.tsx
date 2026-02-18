@@ -1,42 +1,43 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Download, Briefcase, GraduationCap } from "lucide-react";
+import { Download, Briefcase, GraduationCap, Award, Heart } from "lucide-react";
 
 const experience = [
   {
-    title: "Senior Frontend Engineer",
-    company: "TechCorp AI",
-    period: "2023 – Present",
-    description: "Building interactive AI-powered visualization tools and leading the frontend architecture for ML experiment dashboards.",
+    title: "Data Scientist",
+    company: "Amazon",
+    period: "Present",
+    description: "Working on machine learning and data science initiatives at scale.",
   },
   {
-    title: "Full-Stack Developer",
-    company: "DataViz Labs",
-    period: "2021 – 2023",
-    description: "Developed real-time data visualization platforms using Three.js and D3. Built APIs for processing and serving embedding data.",
-  },
-  {
-    title: "Research Assistant",
-    company: "University AI Lab",
-    period: "2019 – 2021",
-    description: "Researched dimensionality reduction techniques for high-dimensional data visualization. Published 2 papers on interactive ML interfaces.",
+    title: "Human Microbiome Research Intern",
+    company: "NYU Langone Health",
+    period: "2022",
+    description: "Pipelined and analyzed genomic data for immunology research. Applied dimensionality reduction and unsupervised methods to infer pseudotime trajectories of cell-fate, contributing to a Nature Immunology publication.",
   },
 ];
 
 const education = [
   {
-    degree: "M.S. Computer Science",
-    school: "State University",
-    period: "2019 – 2021",
-    focus: "Focus: Human-Computer Interaction & Machine Learning",
+    degree: "B.S. Data Science",
+    school: "New York University",
+    period: "2019 – 2023",
+    focus: "Focus: Machine Learning, NLP, Probabilistic Time Series Analysis",
   },
-  {
-    degree: "B.S. Computer Science",
-    school: "State University",
-    period: "2015 – 2019",
-    focus: "Minor: Mathematics",
-  },
+];
+
+const honors = [
+  { title: "Winner, Recommendation System Challenge", org: "NYU DSC x Peak.AI", date: "Nov 2022" },
+  { title: "Dean's List", org: "NYU", date: "2019, 2022" },
+  { title: "Golden Thread Award — Best Valuation", org: "iXperience", date: "Jul 2019" },
+  { title: "President's Volunteer Service Award", org: "250+ volunteer hours", date: "" },
+];
+
+const volunteering = [
+  { role: "Research Contributor", org: "EleutherAI", description: "Contributing to open-source AI research." },
+  { role: "Volunteer", org: "Rogue Aerospace", description: "" },
+  { role: "Volunteer", org: "Children's Ark Ministry", description: "" },
 ];
 
 export default function Resume() {
@@ -61,6 +62,7 @@ export default function Resume() {
           </a>
         </div>
 
+        {/* Experience */}
         <div className="mb-12">
           <div className="flex items-center gap-2 mb-6">
             <Briefcase className="w-5 h-5" style={{ color: "var(--accent-mid)" }} />
@@ -86,7 +88,8 @@ export default function Resume() {
           </div>
         </div>
 
-        <div>
+        {/* Education */}
+        <div className="mb-12">
           <div className="flex items-center gap-2 mb-6">
             <GraduationCap className="w-5 h-5" style={{ color: "var(--accent-mid)" }} />
             <h3 className="text-lg font-semibold" style={{ color: "var(--text)" }}>Education</h3>
@@ -106,6 +109,53 @@ export default function Resume() {
                 <p className="text-sm" style={{ color: "var(--accent-mid)" }}>{edu.school}</p>
                 <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>{edu.period}</p>
                 <p className="text-sm" style={{ color: "var(--text-muted)" }}>{edu.focus}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Honors & Awards */}
+        <div className="mb-12">
+          <div className="flex items-center gap-2 mb-6">
+            <Award className="w-5 h-5" style={{ color: "var(--accent-mid)" }} />
+            <h3 className="text-lg font-semibold" style={{ color: "var(--text)" }}>Honors & Awards</h3>
+          </div>
+          <div className="space-y-3 pl-6">
+            {honors.map((h, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.05 }}
+                viewport={{ once: true }}
+                className="flex items-baseline gap-2"
+              >
+                <span className="text-sm font-medium" style={{ color: "var(--text)" }}>{h.title}</span>
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}>— {h.org}{h.date ? `, ${h.date}` : ""}</span>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Volunteering */}
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <Heart className="w-5 h-5" style={{ color: "var(--accent-mid)" }} />
+            <h3 className="text-lg font-semibold" style={{ color: "var(--text)" }}>Volunteering</h3>
+          </div>
+          <div className="space-y-3 pl-6">
+            {volunteering.map((v, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.05 }}
+                viewport={{ once: true }}
+                className="flex items-baseline gap-2"
+              >
+                <span className="text-sm font-medium" style={{ color: "var(--text)" }}>{v.role}</span>
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}>— {v.org}</span>
+                {v.description && <span className="text-xs" style={{ color: "var(--text-muted)" }}>· {v.description}</span>}
               </motion.div>
             ))}
           </div>

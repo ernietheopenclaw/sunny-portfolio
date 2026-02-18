@@ -11,6 +11,7 @@ import { useScroll } from "@/lib/scroll";
 const links = [
   { label: "About", href: "#about" },
   { label: "Projects", href: "#projects" },
+  { label: "Papers", href: "#papers" },
   { label: "Skills", href: "#skills" },
   { label: "Resume", href: "#resume" },
   { label: "Contact", href: "#contact" },

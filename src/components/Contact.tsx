@@ -6,14 +6,14 @@ import { Send } from "lucide-react";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [sent, setSent] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Contact form:", form);
-    setSent(true);
-    setTimeout(() => setSent(false), 3000);
-    setForm({ name: "", email: "", message: "" });
+    const subject = encodeURIComponent(`Portfolio Contact from ${form.name}`);
+    const body = encodeURIComponent(
+      `Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`
+    );
+    window.location.href = `mailto:sunnys2327@gmail.com?subject=${subject}&body=${body}`;
   };
 
   return (
@@ -73,7 +73,7 @@ export default function Contact() {
             style={{ background: "var(--accent)", color: "#ffffff" }}
           >
             <Send className="w-4 h-4" />
-            {sent ? "Sent!" : "Send Message"}
+            Send Message
           </button>
         </form>
       </motion.div>

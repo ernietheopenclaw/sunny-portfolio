@@ -10,6 +10,7 @@ import Projects from "@/components/Projects";
 import Skills from "@/components/Skills";
 import Resume from "@/components/Resume";
 import Links from "@/components/Links";
+import Papers from "@/components/Papers";
 import Contact from "@/components/Contact";
 import ConceptInput from "@/components/ConceptInput";
 import Footer from "@/components/Footer";
@@ -34,6 +35,7 @@ export default function Home() {
       <div className="relative z-10" style={{ background: "var(--bg)" }}>
         <About />
         <Projects projects={mockProjects} />
+        <Papers />
         <Skills skills={mockSkills} />
         <Resume />
         <Links />

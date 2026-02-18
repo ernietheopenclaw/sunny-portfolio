@@ -20,13 +20,13 @@ export default function About() {
           </div>
           <div className="space-y-4">
             <p className="text-lg leading-relaxed" style={{ color: "var(--text)" }}>
-              Hi, I&apos;m <span className="font-semibold" style={{ color: "var(--accent-mid)" }}>Sunny</span> — a developer, researcher, and creative technologist passionate about the intersection of AI, visualization, and human learning.
+              Hi, I&apos;m <span className="font-semibold" style={{ color: "var(--accent-mid)" }}>Sunny Son</span> — a data scientist at <span className="font-semibold" style={{ color: "var(--accent-mid)" }}>Amazon</span> and NYU graduate with a passion for machine learning, NLP, and making sense of high-dimensional data.
             </p>
             <p className="leading-relaxed" style={{ color: "var(--text-muted)" }}>
-              I build tools that make complex ideas tangible. From interactive 3D visualizations of neural network architectures to AI-powered learning roadmaps, I love turning abstract concepts into experiences you can see, touch, and explore.
+              My work spans dimensionality reduction, time-series forecasting, and fine-tuning language models. I&apos;ve contributed genomic data analysis to a <span className="font-semibold">Nature Immunology</span> publication and built tools ranging from ChatGPT plugins to recommendation engines. I&apos;m also curious about quantum mechanics and the strange loops in Gödel, Escher, Bach.
             </p>
             <p className="leading-relaxed" style={{ color: "var(--text-muted)" }}>
-              When I&apos;m not coding, you&apos;ll find me reading research papers, experimenting with generative art, or building something weird and wonderful with the latest APIs.
+              Outside of work, I volunteer with <span className="font-semibold">EleutherAI</span> as a research contributor and have served with organizations like Rogue Aerospace and Children&apos;s Ark Ministry. Currently reading Zero to One and Six Not-So-Easy Pieces.
             </p>
           </div>
         </div>

@@ -1,14 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Github, Linkedin, Twitter, Mail, Globe } from "lucide-react";
+import { Github, Linkedin, Mail, BookOpen } from "lucide-react";
 
 const socialLinks = [
-  { label: "GitHub", href: "https://github.com/sunny", icon: Github },
-  { label: "LinkedIn", href: "https://linkedin.com/in/sunny", icon: Linkedin },
-  { label: "Twitter / X", href: "https://x.com/sunny", icon: Twitter },
-  { label: "Email", href: "mailto:sunny@example.com", icon: Mail },
-  { label: "Website", href: "https://sunny.dev", icon: Globe },
+  { label: "GitHub", href: "https://github.com/sunnydigital", icon: Github },
+  { label: "LinkedIn", href: "https://linkedin.com/in/sunny-son", icon: Linkedin },
+  { label: "Google Scholar", href: "https://scholar.google.com/citations?user=sunny-son", icon: BookOpen },
+  { label: "Email", href: "mailto:sunnys2327@gmail.com", icon: Mail },
 ];
 
 export default function Links() {
