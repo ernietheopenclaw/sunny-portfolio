@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme";
 import { ScrollProvider } from "@/lib/scroll";
+import SessionWrapper from "@/components/SessionWrapper";
 
 export const metadata: Metadata = {
   title: "Sunny — Developer & Creative Technologist",
@@ -16,11 +17,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark scroll-smooth">
       <body className="antialiased" style={{ background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-body)" }}>
-        <ThemeProvider>
-          <ScrollProvider>
-            {children}
-          </ScrollProvider>
-        </ThemeProvider>
+        <SessionWrapper>
+          <ThemeProvider>
+            <ScrollProvider>
+              {children}
+            </ScrollProvider>
+          </ThemeProvider>
+        </SessionWrapper>
       </body>
     </html>
   );

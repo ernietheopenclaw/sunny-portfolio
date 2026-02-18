@@ -10,6 +10,7 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { Concept } from "@/types";
 import { useScroll } from "@/lib/scroll";
+import { useRouter } from "next/navigation";
 
 extend({ EffectComposer, RenderPass, UnrealBloomPass, OutputPass });
 
@@ -372,9 +373,10 @@ function GalaxyStars({ dispersionProgress }: { dispersionProgress: number }) {
 interface ConceptDotsProps {
   concepts: Concept[];
   onHover: (concept: Concept | null, pos: THREE.Vector3 | null) => void;
+  onClick: (concept: Concept) => void;
 }
 
-function ConceptDots({ concepts, onHover }: ConceptDotsProps) {
+function ConceptDots({ concepts, onHover, onClick }: ConceptDotsProps) {
   const { mode } = useScroll();
   const meshRef = useRef<THREE.InstancedMesh>(null!);
   const transitionRef = useRef({ progress: 0, currentMode: "galaxy" as string });
@@ -427,26 +429,43 @@ function ConceptDots({ concepts, onHover }: ConceptDotsProps) {
 
   const { camera, raycaster, pointer } = useThree();
 
-  const handlePointerMove = useCallback(() => {
-    if (!meshRef.current) return;
+  const findNearest = useCallback((): { concept: Concept; pos: THREE.Vector3 } | null => {
+    if (!meshRef.current) return null;
     raycaster.setFromCamera(pointer, camera);
-    const intersects = raycaster.intersectObject(meshRef.current);
-    if (intersects.length > 0 && intersects[0].instanceId !== undefined) {
-      const idx = intersects[0].instanceId;
-      if (idx < concepts.length) {
-        const pos = new THREE.Vector3();
-        const mat = new THREE.Matrix4();
-        meshRef.current.getMatrixAt(idx, mat);
-        pos.setFromMatrixPosition(mat);
-        onHover(concepts[idx], pos);
-        return;
+    const ray = raycaster.ray;
+    const PROXIMITY = 0.25;
+    let closest: { concept: Concept; pos: THREE.Vector3; dist: number } | null = null;
+    const mat = new THREE.Matrix4();
+    const pos = new THREE.Vector3();
+    for (let i = 0; i < concepts.length; i++) {
+      meshRef.current.getMatrixAt(i, mat);
+      pos.setFromMatrixPosition(mat);
+      const dist = ray.distanceToPoint(pos);
+      if (dist < PROXIMITY && (!closest || dist < closest.dist)) {
+        closest = { concept: concepts[i], pos: pos.clone(), dist };
       }
     }
-    onHover(null, null);
-  }, [concepts, camera, raycaster, pointer, onHover]);
+    return closest;
+  }, [concepts, camera, raycaster, pointer]);
+
+  const handlePointerMove = useCallback(() => {
+    const result = findNearest();
+    if (result) {
+      onHover(result.concept, result.pos);
+    } else {
+      onHover(null, null);
+    }
+  }, [findNearest, onHover]);
+
+  const handleClick = useCallback(() => {
+    const result = findNearest();
+    if (result) {
+      onClick(result.concept);
+    }
+  }, [findNearest, onClick]);
 
   return (
-    <group onPointerMove={handlePointerMove}>
+    <group onPointerMove={handlePointerMove} onClick={handleClick}>
       <instancedMesh ref={meshRef} args={[undefined, undefined, concepts.length]}>
         <sphereGeometry args={[1, 12, 12]} />
         <meshBasicMaterial toneMapped={false} transparent opacity={0.9} />
@@ -548,7 +567,7 @@ function RightClickZoom() {
   return null;
 }
 
-function Scene({ concepts, dispersionRef }: { concepts: Concept[]; dispersionRef: React.MutableRefObject<{ target: number; current: number }> }) {
+function Scene({ concepts, dispersionRef, onConceptClick }: { concepts: Concept[]; dispersionRef: React.MutableRefObject<{ target: number; current: number }>; onConceptClick: (concept: Concept) => void }) {
   const [hovered, setHovered] = useState<Concept | null>(null);
   const [hoveredPos, setHoveredPos] = useState<THREE.Vector3 | null>(null);
   const { mode } = useScroll();
@@ -572,7 +591,7 @@ function Scene({ concepts, dispersionRef }: { concepts: Concept[]; dispersionRef
           <GalaxyStars dispersionProgress={dispersionProgress} />
         </group>
       </group>
-      <ConceptDots concepts={concepts} onHover={handleHover} />
+      <ConceptDots concepts={concepts} onHover={handleHover} onClick={onConceptClick} />
       <Tooltip concept={hovered} position={hoveredPos} />
       <OrbitControls
         enableZoom={false}
@@ -599,6 +618,11 @@ export default function GalaxyVisualization({ concepts }: Props) {
   const lastWheelTime = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const dispersionRef = useRef({ target: 0, current: 0 });
+  const router = useRouter();
+
+  const handleConceptClick = useCallback((concept: Concept) => {
+    router.push(`/concept/${concept.id}`);
+  }, [router]);
 
   useEffect(() => setMounted(true), []);
 
@@ -721,7 +745,7 @@ export default function GalaxyVisualization({ concepts }: Props) {
         style={{ background: "transparent" }}
         gl={{ antialias: true, alpha: true }}
       >
-        <Scene concepts={concepts} dispersionRef={dispersionRef} />
+        <Scene concepts={concepts} dispersionRef={dispersionRef} onConceptClick={handleConceptClick} />
       </Canvas>
       {/* Mode buttons */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-10">
