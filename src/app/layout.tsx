@@ -8,10 +8,7 @@ export const metadata: Metadata = {
   title: "Sunny — Developer & Creative Technologist",
   description: "Interactive portfolio showcasing concepts, projects, and skills through immersive 3D visualization.",
   icons: {
-    icon: [
-      { url: "/favicon.gif", type: "image/gif" },
-      { url: "/favicon.webp", type: "image/webp" },
-    ],
+    icon: { url: "/favicon.svg", type: "image/svg+xml" },
   },
 };
 
