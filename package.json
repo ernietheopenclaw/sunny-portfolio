@@ -27,7 +27,6 @@
     "umap-js": "^1.4.0"
   },
   "devDependencies": {
-    "@huggingface/transformers": "^3.8.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

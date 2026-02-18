@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
 - "x": A float between -3 and 3 (semantic x-coordinate for visualization)
 - "y": A float between -3 and 3 (semantic y-coordinate)
 - "z": A float between -2 and 2 (semantic z-coordinate)
+- "embedding": An array of exactly 32 floats between -1 and 1, representing a semantic fingerprint of this concept. Each dimension should encode a different semantic axis (e.g., theoretical vs applied, math-heavy vs intuitive, ML vs web-dev vs systems, foundational vs advanced). Similar concepts (e.g., "Bayes Rule" and "Neural Networks") MUST have similar embedding vectors (high cosine similarity). Dissimilar concepts (e.g., "Bayes Rule" and "CSS Grid") should have very different vectors.
 
 Position similar concepts near each other in the coordinate space (e.g., ML concepts near each other, web dev concepts near each other).
 
@@ -84,30 +85,9 @@ Respond with ONLY the JSON object, no markdown.`,
       date_learned: new Date().toISOString().split("T")[0],
     };
 
-    // Generate embedding via OpenAI if key is available
-    const openaiKey = process.env.OPENAI_API_KEY;
-    if (openaiKey) {
-      try {
-        const embText = parsed.short_summary + " " + parsed.long_summary;
-        const embResponse = await fetch("https://api.openai.com/v1/embeddings", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${openaiKey}`,
-          },
-          body: JSON.stringify({
-            model: "text-embedding-3-small",
-            input: embText,
-          }),
-        });
-        if (embResponse.ok) {
-          const embData = await embResponse.json();
-          result.embedding = embData.data[0].embedding;
-        }
-      } catch (e) {
-        console.error("Embedding generation failed:", e);
-        // Non-fatal: concept still works without embedding
-      }
+    // Include LLM-generated semantic embedding if present
+    if (parsed.embedding && Array.isArray(parsed.embedding)) {
+      result.embedding = parsed.embedding;
     }
 
     // If credentials were refreshed, include them so the client can update storage
