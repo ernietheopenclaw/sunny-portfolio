@@ -48,15 +48,29 @@ export default function ConceptInput({ onConceptAdded }: { onConceptAdded?: () =
         summaryLength,
       };
 
-      if (authType === "oauth") {
+      if (authType === "oauth-browser") {
         const credsRaw = localStorage.getItem("anthropic-oauth-credentials");
-        if (credsRaw) {
-          body.oauthCredentials = JSON.parse(credsRaw);
-        } else {
-          const oauthToken = localStorage.getItem("anthropic-oauth-token") || "";
-          body.oauthToken = oauthToken;
+        if (!credsRaw) {
+          setError("Please sign in with Anthropic in Settings first.");
+          setLoading(false);
+          return;
         }
+        body.oauthCredentials = JSON.parse(credsRaw);
+        body.authType = "oauth";
+      } else if (authType === "oauth") {
+        const oauthToken = localStorage.getItem("anthropic-oauth-token") || "";
+        if (!oauthToken) {
+          setError("Please configure your Claude OAuth token in Settings first.");
+          setLoading(false);
+          return;
+        }
+        body.oauthToken = oauthToken;
       } else {
+        if (!apiKey) {
+          setError("Please configure your Anthropic API key in Settings first.");
+          setLoading(false);
+          return;
+        }
         body.apiKey = apiKey;
       }
 
