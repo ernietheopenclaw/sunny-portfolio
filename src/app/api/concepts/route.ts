@@ -57,8 +57,6 @@ export async function POST(req: NextRequest) {
 - "x": A float between -3 and 3 (semantic x-coordinate for visualization)
 - "y": A float between -3 and 3 (semantic y-coordinate)
 - "z": A float between -2 and 2 (semantic z-coordinate)
-- "embedding": An array of exactly 32 floats between -1 and 1, representing a semantic fingerprint of this concept. Each dimension should encode a different semantic axis (e.g., theoretical vs applied, math-heavy vs intuitive, ML vs web-dev vs systems, foundational vs advanced). Similar concepts (e.g., "Bayes Rule" and "Neural Networks") MUST have similar embedding vectors (high cosine similarity). Dissimilar concepts (e.g., "Bayes Rule" and "CSS Grid") should have very different vectors.
-
 Position similar concepts near each other in the coordinate space (e.g., ML concepts near each other, web dev concepts near each other).
 
 Respond with ONLY the JSON object, no markdown.`,
@@ -84,11 +82,6 @@ Respond with ONLY the JSON object, no markdown.`,
       z: parsed.z,
       date_learned: new Date().toISOString().split("T")[0],
     };
-
-    // Include LLM-generated semantic embedding if present
-    if (parsed.embedding && Array.isArray(parsed.embedding)) {
-      result.embedding = parsed.embedding;
-    }
 
     // If credentials were refreshed, include them so the client can update storage
     if (refreshedCredentials) {

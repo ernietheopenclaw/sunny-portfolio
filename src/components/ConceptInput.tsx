@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Sparkles, Loader2, Calendar } from "lucide-react";
 import { addUserConcept } from "@/lib/concepts";
+import { getEmbedding } from "@/lib/embedding-model";
 
 export default function ConceptInput({ onConceptAdded }: { onConceptAdded?: () => void }) {
   const { data: session } = useSession();
@@ -92,6 +93,15 @@ export default function ConceptInput({ onConceptAdded }: { onConceptAdded?: () =
         localStorage.setItem("anthropic-oauth-credentials", JSON.stringify(data.refreshedCredentials));
       }
 
+      // Generate real embedding client-side
+      let embedding: number[] | undefined;
+      try {
+        const embText = `${data.name}. ${data.short_summary} ${data.long_summary}`;
+        embedding = await getEmbedding(embText);
+      } catch (e) {
+        console.warn("Embedding generation failed, concept will use fallback position:", e);
+      }
+
       // Build concept object and store
       const newConcept = {
         id: `user-${Date.now()}`,
@@ -102,7 +112,7 @@ export default function ConceptInput({ onConceptAdded }: { onConceptAdded?: () =
         y: data.y,
         z: data.z,
         date_learned: date || new Date().toISOString().split("T")[0],
-        ...(data.embedding ? { embedding: data.embedding } : {}),
+        ...(embedding ? { embedding } : data.embedding ? { embedding: data.embedding } : {}),
       };
 
       addUserConcept(newConcept);
