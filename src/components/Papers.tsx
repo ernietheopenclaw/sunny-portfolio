@@ -22,14 +22,6 @@ const publications = [
     contribution:
       "Pipelined and analyzed genomic data, performing dimensionality reduction and subsetting to organize cell populations. Applied various semi-supervised and unsupervised methods to determine the optimal format for inferring the pseudotime trajectory of cell-fate in relation to gene expression.",
   },
-  {
-    title: "Author Correction: T cell egress via lymphatic vessels is tuned by antigen encounter and limits tumor control",
-    journal: "Nature Immunology",
-    date: "2023",
-    url: "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=tGaMcikAAAAJ&citation_for_view=tGaMcikAAAAJ:2osOgNQ5qMEC",
-    authors: "MM Steele, A Jaiswal, I Delclaux, ID Dryg, D Murugan, J Femel, S Son, et al.",
-    contribution: "Erratum/correction for the original Nature Immunology publication.",
-  },
 ];
 
 export default function Papers() {
