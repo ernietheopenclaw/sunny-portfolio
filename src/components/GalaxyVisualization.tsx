@@ -800,7 +800,7 @@ export default function GalaxyVisualization({ concepts }: Props) {
     <div ref={containerRef} id="galaxy-container" className="w-full h-screen relative">
       {/* Dedication quote */}
       <div className="absolute top-20 left-6 z-10 pointer-events-none" style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontStyle: "italic", opacity: 0.6, maxWidth: "280px", lineHeight: 1.5 }}>
-        Dedicated to the bright lights that have guided me through wayward roads and rough seas
+        Dedicated to the bright lights that have guided me through wayward roads and tumultuous seas
       </div>
       <Canvas
         camera={{ position: [0, 3, 8], fov: 60 }}
