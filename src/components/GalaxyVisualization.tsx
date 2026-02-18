@@ -433,7 +433,7 @@ function ConceptDots({ concepts, onHover, onClick }: ConceptDotsProps) {
     if (!meshRef.current) return null;
     raycaster.setFromCamera(pointer, camera);
     const ray = raycaster.ray;
-    const PROXIMITY = 0.25;
+    const PROXIMITY = 0.5;
     let closest: { concept: Concept; pos: THREE.Vector3; dist: number } | null = null;
     const mat = new THREE.Matrix4();
     const pos = new THREE.Vector3();
@@ -466,6 +466,11 @@ function ConceptDots({ concepts, onHover, onClick }: ConceptDotsProps) {
 
   return (
     <group onPointerMove={handlePointerMove} onClick={handleClick}>
+      {/* Invisible large plane to capture pointer events across the whole scene */}
+      <mesh visible={false}>
+        <planeGeometry args={[100, 100]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
       <instancedMesh ref={meshRef} args={[undefined, undefined, concepts.length]}>
         <sphereGeometry args={[1, 12, 12]} />
         <meshBasicMaterial toneMapped={false} transparent opacity={0.9} />
