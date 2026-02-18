@@ -160,10 +160,10 @@ function getTimelinePositions(concepts: Concept[]): Map<string, THREE.Vector3> {
   const map = new Map<string, THREE.Vector3>();
   sorted.forEach((c, i) => {
     const x = startX + i * spacing;
-    // x·sin(x) curve for a flowing wave that grows in amplitude
-    const amplitude = 0.15;
-    const freq = 0.35;
-    const y = amplitude * x * Math.sin(freq * x);
+    // Pure sin(x) wave
+    const amplitude = 1.2;
+    const freq = 0.5;
+    const y = amplitude * Math.sin(freq * x);
     map.set(c.id, new THREE.Vector3(x, y, 0));
   });
   return map;
