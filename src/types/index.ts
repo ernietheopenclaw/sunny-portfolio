@@ -9,6 +9,7 @@ export interface Concept {
   date_learned: string;
   user_id?: string;
   isFiller?: boolean;
+  embedding?: number[];
 }
 
 export interface Project {

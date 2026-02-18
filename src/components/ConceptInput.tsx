@@ -102,6 +102,7 @@ export default function ConceptInput({ onConceptAdded }: { onConceptAdded?: () =
         y: data.y,
         z: data.z,
         date_learned: date || new Date().toISOString().split("T")[0],
+        ...(data.embedding ? { embedding: data.embedding } : {}),
       };
 
       addUserConcept(newConcept);

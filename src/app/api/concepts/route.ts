@@ -84,6 +84,32 @@ Respond with ONLY the JSON object, no markdown.`,
       date_learned: new Date().toISOString().split("T")[0],
     };
 
+    // Generate embedding via OpenAI if key is available
+    const openaiKey = process.env.OPENAI_API_KEY;
+    if (openaiKey) {
+      try {
+        const embText = parsed.short_summary + " " + parsed.long_summary;
+        const embResponse = await fetch("https://api.openai.com/v1/embeddings", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${openaiKey}`,
+          },
+          body: JSON.stringify({
+            model: "text-embedding-3-small",
+            input: embText,
+          }),
+        });
+        if (embResponse.ok) {
+          const embData = await embResponse.json();
+          result.embedding = embData.data[0].embedding;
+        }
+      } catch (e) {
+        console.error("Embedding generation failed:", e);
+        // Non-fatal: concept still works without embedding
+      }
+    }
+
     // If credentials were refreshed, include them so the client can update storage
     if (refreshedCredentials) {
       result.refreshedCredentials = refreshedCredentials;

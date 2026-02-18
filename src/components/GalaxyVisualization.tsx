@@ -11,6 +11,7 @@ import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { Concept } from "@/types";
 import { useScroll } from "@/lib/scroll";
 import { useRouter } from "next/navigation";
+import { computeClusterPositions } from "@/lib/embeddings";
 
 extend({ EffectComposer, RenderPass, UnrealBloomPass, OutputPass });
 
@@ -383,11 +384,7 @@ function ConceptDots({ concepts, onHover, onClick }: ConceptDotsProps) {
 
   const galaxyPositions = useMemo(() => placeConceptsInGalaxy(concepts), [concepts]);
   const timelinePositions = useMemo(() => getTimelinePositions(concepts), [concepts]);
-  const clusterPositions = useMemo(() => {
-    const map = new Map<string, THREE.Vector3>();
-    concepts.forEach((c) => map.set(c.id, new THREE.Vector3(c.x, c.y, c.z)));
-    return map;
-  }, [concepts]);
+  const clusterPositions = useMemo(() => computeClusterPositions(concepts), [concepts]);
 
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const color = useMemo(() => new THREE.Color(), []);
