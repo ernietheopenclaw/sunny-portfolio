@@ -6,6 +6,7 @@ import { useTheme } from "@/lib/theme";
 import { useSession, signIn, signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useScroll } from "@/lib/scroll";
 
 const links = [
   { label: "About", href: "#about" },
@@ -19,6 +20,12 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { theme, toggle } = useTheme();
   const { data: session } = useSession();
+  const { setMode, setPastVisualization } = useScroll();
+
+  const handleNavClick = () => {
+    setMode("timeline");
+    setPastVisualization(true);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 backdrop-blur-md" style={{ background: "color-mix(in srgb, var(--bg) 80%, transparent)", borderBottom: "1px solid var(--border)" }}>
@@ -31,6 +38,7 @@ export default function Navbar() {
             <a
               key={l.href}
               href={l.href}
+              onClick={handleNavClick}
               className="text-sm transition-colors"
               style={{ color: "var(--text-muted)" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent-mid)")}
@@ -96,7 +104,7 @@ export default function Navbar() {
             <a
               key={l.href}
               href={l.href}
-              onClick={() => setOpen(false)}
+              onClick={() => { setOpen(false); handleNavClick(); }}
               className="text-sm transition-colors"
               style={{ color: "var(--text-muted)" }}
             >
