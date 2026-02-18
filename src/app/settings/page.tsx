@@ -3,20 +3,27 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Sparkles, Loader2, Save, Check, Key, Shield } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2, Save, Check, Key, Shield, LogIn, LogOut, ClipboardPaste } from "lucide-react";
 import { Concept } from "@/types";
 
 export default function SettingsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Auth type toggle
-  const [authType, setAuthType] = useState<"apikey" | "oauth">("apikey");
+  // Auth type toggle: "apikey" | "oauth" | "oauth-browser"
+  const [authType, setAuthType] = useState<"apikey" | "oauth" | "oauth-browser">("apikey");
 
   // API config
   const [apiKey, setApiKey] = useState("");
   const [oauthToken, setOauthToken] = useState("");
   const [credentialStatus, setCredentialStatus] = useState<"none" | "configured">("none");
+
+  // OAuth browser flow state
+  const [oauthSessionId, setOauthSessionId] = useState<string | null>(null);
+  const [oauthCode, setOauthCode] = useState("");
+  const [oauthLoading, setOauthLoading] = useState(false);
+  const [oauthConnected, setOauthConnected] = useState(false);
+  const [oauthError, setOauthError] = useState<string | null>(null);
 
   // Summary length
   const [summaryLength, setSummaryLength] = useState(4);
@@ -28,16 +35,22 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const storedType = localStorage.getItem("auth-type") as "apikey" | "oauth" | null;
+    const storedType = localStorage.getItem("auth-type") as "apikey" | "oauth" | "oauth-browser" | null;
     if (storedType) setAuthType(storedType);
 
     const storedKey = localStorage.getItem("anthropic-api-key");
     const storedToken = localStorage.getItem("anthropic-oauth-token");
+    const storedOAuthCreds = localStorage.getItem("anthropic-oauth-credentials");
 
     if (storedKey) setApiKey(storedKey);
     if (storedToken) setOauthToken(storedToken);
+    if (storedOAuthCreds) setOauthConnected(true);
 
-    if ((storedType === "oauth" && storedToken) || (storedType !== "oauth" && storedKey)) {
+    if (
+      (storedType === "oauth" && storedToken) ||
+      (storedType === "oauth-browser" && storedOAuthCreds) ||
+      (storedType !== "oauth" && storedType !== "oauth-browser" && storedKey)
+    ) {
       setCredentialStatus("configured");
     }
 
@@ -50,25 +63,95 @@ export default function SettingsPage() {
     if (authType === "apikey") {
       localStorage.setItem("anthropic-api-key", apiKey);
       setCredentialStatus(apiKey ? "configured" : "none");
-    } else {
+    } else if (authType === "oauth") {
       localStorage.setItem("anthropic-oauth-token", oauthToken);
       setCredentialStatus(oauthToken ? "configured" : "none");
     }
   };
 
+  // Start OAuth browser flow
+  const startOAuthFlow = async () => {
+    setOauthLoading(true);
+    setOauthError(null);
+    setOauthCode("");
+    try {
+      const res = await fetch("/api/oauth/anthropic/authorize");
+      if (!res.ok) throw new Error("Failed to start OAuth flow");
+      const { sessionId, authUrl } = await res.json();
+      setOauthSessionId(sessionId);
+      window.open(authUrl, "_blank");
+    } catch (err) {
+      setOauthError(err instanceof Error ? err.message : "Failed to start login");
+    } finally {
+      setOauthLoading(false);
+    }
+  };
+
+  // Complete OAuth flow with pasted code
+  const completeOAuthFlow = async () => {
+    if (!oauthCode.trim() || !oauthSessionId) return;
+    setOauthLoading(true);
+    setOauthError(null);
+    try {
+      const res = await fetch("/api/oauth/anthropic/exchange", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: oauthCode.trim(), sessionId: oauthSessionId }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Token exchange failed");
+      }
+      const credentials = await res.json();
+      localStorage.setItem("auth-type", "oauth-browser");
+      localStorage.setItem("anthropic-oauth-credentials", JSON.stringify(credentials));
+      setAuthType("oauth-browser");
+      setOauthConnected(true);
+      setCredentialStatus("configured");
+      setOauthSessionId(null);
+      setOauthCode("");
+    } catch (err) {
+      setOauthError(err instanceof Error ? err.message : "Exchange failed");
+    } finally {
+      setOauthLoading(false);
+    }
+  };
+
+  // Disconnect OAuth
+  const disconnectOAuth = () => {
+    localStorage.removeItem("anthropic-oauth-credentials");
+    setOauthConnected(false);
+    setCredentialStatus("none");
+  };
+
   const handleGenerate = async () => {
     if (!conceptName.trim()) return;
-    const key = localStorage.getItem("anthropic-api-key");
-    const token = localStorage.getItem("anthropic-oauth-token");
     const storedType = localStorage.getItem("auth-type") || "apikey";
 
-    if (storedType === "oauth" && !token) {
-      alert("Please configure your Claude OAuth token first.");
-      return;
-    }
-    if (storedType === "apikey" && !key) {
-      alert("Please configure your Anthropic API key first.");
-      return;
+    let body: Record<string, unknown> = { name: conceptName, authType: storedType, summaryLength };
+
+    if (storedType === "oauth-browser") {
+      const creds = localStorage.getItem("anthropic-oauth-credentials");
+      if (!creds) {
+        alert("Please sign in with Anthropic first.");
+        return;
+      }
+      body.oauthCredentials = JSON.parse(creds);
+      body.authType = "oauth";
+    } else if (storedType === "oauth") {
+      const token = localStorage.getItem("anthropic-oauth-token");
+      if (!token) {
+        alert("Please configure your Claude OAuth token first.");
+        return;
+      }
+      body.oauthToken = token;
+    } else {
+      const key = localStorage.getItem("anthropic-api-key");
+      if (!key) {
+        alert("Please configure your Anthropic API key first.");
+        return;
+      }
+      body.apiKey = key;
     }
 
     setLoading(true);
@@ -78,13 +161,7 @@ export default function SettingsPage() {
       const res = await fetch("/api/concepts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: conceptName,
-          authType: storedType,
-          apiKey: storedType === "apikey" ? key : undefined,
-          oauthToken: storedType === "oauth" ? token : undefined,
-          summaryLength,
-        }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -92,6 +169,12 @@ export default function SettingsPage() {
         return;
       }
       const data = await res.json();
+
+      // Update credentials if they were refreshed
+      if (data.refreshedCredentials) {
+        localStorage.setItem("anthropic-oauth-credentials", JSON.stringify(data.refreshedCredentials));
+      }
+
       setGenerated(data);
     } catch {
       alert("Failed to generate concept.");
@@ -172,31 +255,41 @@ export default function SettingsPage() {
             </span>
           </div>
 
-          {/* Auth type toggle */}
+          {/* Auth type toggle — 3 options */}
           <div className="flex rounded-lg overflow-hidden mb-4" style={{ border: "1px solid var(--border)" }}>
             <button
               onClick={() => setAuthType("apikey")}
-              className="flex-1 px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              className="flex-1 px-3 py-2 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               style={{
                 background: authType === "apikey" ? "var(--accent)" : "var(--bg)",
                 color: authType === "apikey" ? "#fff" : "var(--text-muted)",
               }}
             >
-              <Key className="w-3.5 h-3.5" /> API Key
+              <Key className="w-3 h-3" /> API Key
+            </button>
+            <button
+              onClick={() => setAuthType("oauth-browser")}
+              className="flex-1 px-3 py-2 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              style={{
+                background: authType === "oauth-browser" ? "var(--accent)" : "var(--bg)",
+                color: authType === "oauth-browser" ? "#fff" : "var(--text-muted)",
+              }}
+            >
+              <LogIn className="w-3 h-3" /> Claude Login
             </button>
             <button
               onClick={() => setAuthType("oauth")}
-              className="flex-1 px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              className="flex-1 px-3 py-2 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               style={{
                 background: authType === "oauth" ? "var(--accent)" : "var(--bg)",
                 color: authType === "oauth" ? "#fff" : "var(--text-muted)",
               }}
             >
-              <Shield className="w-3.5 h-3.5" /> Claude OAuth
+              <Shield className="w-3 h-3" /> Token Paste
             </button>
           </div>
 
-          {authType === "apikey" ? (
+          {authType === "apikey" && (
             <>
               <label className="text-sm block mb-2" style={{ color: "var(--text-muted)" }}>Anthropic API Key</label>
               <div className="flex gap-2">
@@ -217,11 +310,81 @@ export default function SettingsPage() {
                 </button>
               </div>
             </>
-          ) : (
+          )}
+
+          {authType === "oauth-browser" && (
+            <div className="space-y-3">
+              {oauthConnected ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm p-3 rounded-lg" style={{ background: "rgba(33,131,128,0.1)", color: "var(--accent-mid)" }}>
+                    <Check className="w-4 h-4" /> Connected to Anthropic (Claude Pro/Max)
+                  </div>
+                  <button
+                    onClick={disconnectOAuth}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors"
+                    style={{ background: "rgba(255,100,100,0.1)", color: "#ff6464", border: "1px solid rgba(255,100,100,0.2)" }}
+                  >
+                    <LogOut className="w-4 h-4" /> Disconnect
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    Sign in with your Anthropic account (Claude Pro/Max). No API key needed — uses your subscription directly.
+                  </p>
+
+                  {!oauthSessionId ? (
+                    <button
+                      onClick={startOAuthFlow}
+                      disabled={oauthLoading}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer disabled:opacity-50"
+                      style={{ background: "var(--accent)", color: "#fff" }}
+                    >
+                      {oauthLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
+                      Sign in with Anthropic
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                        A new tab opened for authorization. After authorizing, copy the code and paste it below:
+                      </p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={oauthCode}
+                          onChange={(e) => setOauthCode(e.target.value)}
+                          placeholder="Paste authorization code here..."
+                          className="flex-1 px-3 py-2 rounded-lg text-sm focus:outline-none font-mono"
+                          style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
+                        />
+                        <button
+                          onClick={completeOAuthFlow}
+                          disabled={oauthLoading || !oauthCode.trim()}
+                          className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                          style={{ background: "var(--accent)", color: "#fff" }}
+                        >
+                          {oauthLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ClipboardPaste className="w-4 h-4" />}
+                          Submit
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {oauthError && (
+                    <p className="text-xs p-2 rounded-lg" style={{ background: "rgba(255,100,100,0.1)", color: "#ff6464" }}>
+                      {oauthError}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {authType === "oauth" && (
             <>
               <label className="text-sm block mb-2" style={{ color: "var(--text-muted)" }}>Claude OAuth Token</label>
               <p className="text-xs mb-3" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
-                Generate a token by running <code className="px-1 py-0.5 rounded text-xs" style={{ background: "var(--bg)", fontFamily: "var(--font-mono)" }}>npx @mariozechner/pi-ai login anthropic</code> in your terminal. Uses your Claude Pro/Max subscription — no API credits needed.
+                Generate a token by running <code className="px-1 py-0.5 rounded text-xs" style={{ background: "var(--bg)", fontFamily: "var(--font-mono)" }}>npx @mariozechner/pi-ai login anthropic</code> in your terminal.
               </p>
               <div className="flex gap-2">
                 <input

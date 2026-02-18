@@ -1,15 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getModel, complete } from "@mariozechner/pi-ai";
+import { refreshAnthropicToken } from "@mariozechner/pi-ai";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, apiKey, oauthToken, authType, summaryLength = 4 } = await req.json();
+    const { name, apiKey, oauthToken, oauthCredentials, authType, summaryLength = 4 } = await req.json();
 
     if (!name) {
       return NextResponse.json({ error: "Concept name is required" }, { status: 400 });
     }
 
-    const credential = authType === "oauth" ? oauthToken : (apiKey || process.env.ANTHROPIC_API_KEY);
+    let credential: string;
+    let refreshedCredentials: { access_token: string; refresh_token: string; expires_at: number } | null = null;
+
+    if (authType === "oauth" && oauthCredentials) {
+      // Full OAuth with auto-refresh
+      const { access_token, refresh_token, expires_at } = oauthCredentials;
+
+      if (Date.now() >= expires_at && refresh_token) {
+        // Token expired — refresh it
+        try {
+          const newCreds = await refreshAnthropicToken(refresh_token);
+          credential = newCreds.access;
+          refreshedCredentials = {
+            access_token: newCreds.access,
+            refresh_token: newCreds.refresh,
+            expires_at: newCreds.expires,
+          };
+        } catch {
+          return NextResponse.json({ error: "OAuth token expired and refresh failed. Please log in again." }, { status: 401 });
+        }
+      } else {
+        credential = access_token;
+      }
+    } else if (authType === "oauth" && oauthToken) {
+      // Legacy: plain OAuth token paste
+      credential = oauthToken;
+    } else {
+      credential = apiKey || process.env.ANTHROPIC_API_KEY || "";
+    }
+
     if (!credential) {
       return NextResponse.json({ error: "API key or OAuth token required" }, { status: 401 });
     }
@@ -44,7 +74,7 @@ Respond with ONLY the JSON object, no markdown.`,
 
     const parsed = JSON.parse(text.text);
 
-    return NextResponse.json({
+    const result: Record<string, unknown> = {
       name,
       short_summary: parsed.short_summary,
       long_summary: parsed.long_summary,
@@ -52,7 +82,14 @@ Respond with ONLY the JSON object, no markdown.`,
       y: parsed.y,
       z: parsed.z,
       date_learned: new Date().toISOString().split("T")[0],
-    });
+    };
+
+    // If credentials were refreshed, include them so the client can update storage
+    if (refreshedCredentials) {
+      result.refreshedCredentials = refreshedCredentials;
+    }
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Concept generation error:", error);
     return NextResponse.json({ error: "Failed to generate concept" }, { status: 500 });
