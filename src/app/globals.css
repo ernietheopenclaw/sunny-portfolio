@@ -1,13 +1,30 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  --background: #030712;
-  --foreground: #f9fafb;
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.15);
+  --text: #e5e5e5;
+  --text-muted: rgba(255,255,255,0.45);
+  --accent: #218380;
+  --accent-mid: #5aaca7;
+  --accent-light: #d4f0ee;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
-.light {
-  --background: #f9fafb;
-  --foreground: #030712;
+[data-theme="light"] {
+  --bg: #faf8f5;
+  --surface: #f0ede8;
+  --border: #e8e4df;
+  --border-strong: #d4cfc9;
+  --text: #2d2926;
+  --text-muted: #8a8580;
+  --accent: #218380;
+  --accent-mid: #5aaca7;
+  --accent-light: #d4f0ee;
 }
 
 html {
@@ -15,8 +32,13 @@ html {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+code, pre, .font-mono {
+  font-family: var(--font-mono);
 }
 
 /* Custom scrollbar */
@@ -24,43 +46,12 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #111;
+  background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: var(--border-strong);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* Light mode overrides */
-html:not(.dark) {
-  --background: #f9fafb;
-  --foreground: #111827;
-}
-html:not(.dark) body {
-  background: #f9fafb;
-  color: #111827;
-}
-html:not(.dark) .bg-gray-950 {
-  background-color: #f9fafb;
-}
-html:not(.dark) .bg-gray-900\/50 {
-  background-color: rgba(243, 244, 246, 0.5);
-}
-html:not(.dark) .border-gray-800 {
-  border-color: #e5e7eb;
-}
-html:not(.dark) .text-white {
-  color: #111827;
-}
-html:not(.dark) .text-gray-300 {
-  color: #4b5563;
-}
-html:not(.dark) .text-gray-400 {
-  color: #6b7280;
-}
-html:not(.dark) .text-gray-500 {
-  color: #9ca3af;
+  background: var(--text-muted);
 }

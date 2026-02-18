@@ -12,7 +12,8 @@ export default function Projects({ projects }: { projects: Project[] }) {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
         viewport={{ once: true }}
-        className="text-3xl font-bold mb-12 bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent"
+        className="text-3xl font-bold mb-12"
+        style={{ color: "var(--accent)" }}
       >
         Projects
       </motion.h2>
@@ -24,18 +25,20 @@ export default function Projects({ projects }: { projects: Project[] }) {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: i * 0.1 }}
             viewport={{ once: true }}
-            className="group relative rounded-xl border border-gray-800 bg-gray-900/50 p-6 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/5"
+            className="group relative rounded-xl p-6 transition-all duration-300"
+            style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
           >
-            {/* Glow effect */}
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative">
-              <h3 className="text-lg font-semibold text-white mb-2">{project.title}</h3>
-              <p className="text-sm text-gray-400 mb-4 leading-relaxed">{project.description}</p>
+              <h3 className="text-lg font-semibold mb-2" style={{ color: "var(--text)" }}>{project.title}</h3>
+              <p className="text-sm mb-4 leading-relaxed" style={{ color: "var(--text-muted)" }}>{project.description}</p>
               <div className="flex flex-wrap gap-2 mb-4">
                 {project.tech.map((t) => (
                   <span
                     key={t}
-                    className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
+                    className="text-[10px] px-2 py-0.5 rounded-full"
+                    style={{ background: "rgba(33,131,128,0.1)", color: "var(--accent-mid)", border: "1px solid rgba(33,131,128,0.2)" }}
                   >
                     {t}
                   </span>
@@ -43,22 +46,12 @@ export default function Projects({ projects }: { projects: Project[] }) {
               </div>
               <div className="flex gap-3">
                 {project.link && (
-                  <a
-                    href={project.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-cyan-400 transition-colors"
-                  >
+                  <a href={project.link} target="_blank" rel="noopener noreferrer" style={{ color: "var(--text-muted)" }}>
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 )}
                 {project.github && (
-                  <a
-                    href={project.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-cyan-400 transition-colors"
-                  >
+                  <a href={project.github} target="_blank" rel="noopener noreferrer" style={{ color: "var(--text-muted)" }}>
                     <Github className="w-4 h-4" />
                   </a>
                 )}

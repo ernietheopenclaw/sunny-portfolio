@@ -27,7 +27,6 @@ export default function ParticleBackground() {
     resize();
     window.addEventListener("resize", resize);
 
-    // Create particles
     for (let i = 0; i < 60; i++) {
       particles.push({
         x: Math.random() * canvas.width,
@@ -52,11 +51,10 @@ export default function ParticleBackground() {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(100, 200, 255, ${p.alpha})`;
+        ctx.fillStyle = `rgba(33, 131, 128, ${p.alpha})`;
         ctx.fill();
       }
 
-      // Draw connections
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
@@ -66,7 +64,7 @@ export default function ParticleBackground() {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(100, 200, 255, ${0.05 * (1 - dist / 150)})`;
+            ctx.strokeStyle = `rgba(33, 131, 128, ${0.05 * (1 - dist / 150)})`;
             ctx.stroke();
           }
         }

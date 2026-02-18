@@ -1,43 +1,53 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+
+type Mode = "galaxy" | "reduction" | "timeline";
+const MODES: Mode[] = ["galaxy", "reduction", "timeline"];
 
 interface ScrollContextType {
   scrollY: number;
-  scrollProgress: number; // 0-1 over first 3 viewport heights
-  mode: "galaxy" | "reduction" | "timeline";
+  scrollProgress: number;
+  mode: Mode;
+  setMode: (m: Mode) => void;
+  nextMode: () => void;
+  prevMode: () => void;
 }
 
 const ScrollContext = createContext<ScrollContextType>({
   scrollY: 0,
   scrollProgress: 0,
   mode: "galaxy",
+  setMode: () => {},
+  nextMode: () => {},
+  prevMode: () => {},
 });
 
 export function ScrollProvider({ children }: { children: ReactNode }) {
-  const [scrollY, setScrollY] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [mode, setMode] = useState<"galaxy" | "reduction" | "timeline">("galaxy");
+  const [mode, setModeState] = useState<Mode>("galaxy");
 
-  useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY;
-      const vh = window.innerHeight;
-      const progress = Math.min(y / (vh * 3), 1);
-      setScrollY(y);
-      setScrollProgress(progress);
+  const scrollProgress = mode === "galaxy" ? 0 : mode === "reduction" ? 0.5 : 1;
 
-      if (progress < 0.33) setMode("galaxy");
-      else if (progress < 0.66) setMode("reduction");
-      else setMode("timeline");
-    };
+  const setMode = useCallback((m: Mode) => {
+    setModeState(m);
+  }, []);
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+  const nextMode = useCallback(() => {
+    setModeState((prev) => {
+      const idx = MODES.indexOf(prev);
+      return idx < MODES.length - 1 ? MODES[idx + 1] : prev;
+    });
+  }, []);
+
+  const prevMode = useCallback(() => {
+    setModeState((prev) => {
+      const idx = MODES.indexOf(prev);
+      return idx > 0 ? MODES[idx - 1] : prev;
+    });
   }, []);
 
   return (
-    <ScrollContext.Provider value={{ scrollY, scrollProgress, mode }}>
+    <ScrollContext.Provider value={{ scrollY: 0, scrollProgress, mode, setMode, nextMode, prevMode }}>
       {children}
     </ScrollContext.Provider>
   );

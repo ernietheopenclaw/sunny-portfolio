@@ -27,14 +27,14 @@ export default function Home() {
       <Navbar />
       <ThemeToggle />
 
-      {/* Scroll-driven visualization — 4 viewport heights of scroll space */}
-      <div className="relative" style={{ height: "400vh" }}>
+      {/* Galaxy visualization — single viewport, scroll wheel switches modes */}
+      <div className="relative">
         <GalaxyVisualization concepts={mockConcepts} />
         <ScrollIndicator />
       </div>
 
       {/* Portfolio sections */}
-      <div className="relative z-10 bg-gray-950">
+      <div className="relative z-10" style={{ background: "var(--bg)" }}>
         <About />
         <Projects projects={mockProjects} />
         <Skills skills={mockSkills} />

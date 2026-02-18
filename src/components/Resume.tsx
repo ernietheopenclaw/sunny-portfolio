@@ -49,24 +49,24 @@ export default function Resume() {
         viewport={{ once: true }}
       >
         <div className="flex items-center justify-between mb-12">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold" style={{ color: "var(--accent)" }}>
             Resume
           </h2>
           <a
             href="/resume.pdf"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 transition-colors text-sm"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors"
+            style={{ background: "rgba(33,131,128,0.1)", color: "var(--accent-mid)", border: "1px solid rgba(33,131,128,0.3)" }}
           >
             <Download className="w-4 h-4" /> Download PDF
           </a>
         </div>
 
-        {/* Experience */}
         <div className="mb-12">
           <div className="flex items-center gap-2 mb-6">
-            <Briefcase className="w-5 h-5 text-cyan-400" />
-            <h3 className="text-lg font-semibold text-white">Experience</h3>
+            <Briefcase className="w-5 h-5" style={{ color: "var(--accent-mid)" }} />
+            <h3 className="text-lg font-semibold" style={{ color: "var(--text)" }}>Experience</h3>
           </div>
-          <div className="space-y-6 border-l-2 border-gray-800 pl-6">
+          <div className="space-y-6 pl-6" style={{ borderLeft: "2px solid var(--border-strong)" }}>
             {experience.map((exp, i) => (
               <motion.div
                 key={i}
@@ -76,23 +76,22 @@ export default function Resume() {
                 viewport={{ once: true }}
                 className="relative"
               >
-                <div className="absolute -left-[31px] top-1 w-3 h-3 rounded-full bg-cyan-500 border-2 border-gray-950" />
-                <h4 className="font-semibold text-white">{exp.title}</h4>
-                <p className="text-sm text-cyan-400">{exp.company}</p>
-                <p className="text-xs text-gray-500 mb-2">{exp.period}</p>
-                <p className="text-sm text-gray-400">{exp.description}</p>
+                <div className="absolute -left-[31px] top-1 w-3 h-3 rounded-full" style={{ background: "var(--accent)", border: "2px solid var(--bg)" }} />
+                <h4 className="font-semibold" style={{ color: "var(--text)" }}>{exp.title}</h4>
+                <p className="text-sm" style={{ color: "var(--accent-mid)" }}>{exp.company}</p>
+                <p className="text-xs mb-2" style={{ color: "var(--text-muted)" }}>{exp.period}</p>
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>{exp.description}</p>
               </motion.div>
             ))}
           </div>
         </div>
 
-        {/* Education */}
         <div>
           <div className="flex items-center gap-2 mb-6">
-            <GraduationCap className="w-5 h-5 text-purple-400" />
-            <h3 className="text-lg font-semibold text-white">Education</h3>
+            <GraduationCap className="w-5 h-5" style={{ color: "var(--accent-mid)" }} />
+            <h3 className="text-lg font-semibold" style={{ color: "var(--text)" }}>Education</h3>
           </div>
-          <div className="space-y-6 border-l-2 border-gray-800 pl-6">
+          <div className="space-y-6 pl-6" style={{ borderLeft: "2px solid var(--border-strong)" }}>
             {education.map((edu, i) => (
               <motion.div
                 key={i}
@@ -102,11 +101,11 @@ export default function Resume() {
                 viewport={{ once: true }}
                 className="relative"
               >
-                <div className="absolute -left-[31px] top-1 w-3 h-3 rounded-full bg-purple-500 border-2 border-gray-950" />
-                <h4 className="font-semibold text-white">{edu.degree}</h4>
-                <p className="text-sm text-purple-400">{edu.school}</p>
-                <p className="text-xs text-gray-500 mb-1">{edu.period}</p>
-                <p className="text-sm text-gray-400">{edu.focus}</p>
+                <div className="absolute -left-[31px] top-1 w-3 h-3 rounded-full" style={{ background: "var(--accent-mid)", border: "2px solid var(--bg)" }} />
+                <h4 className="font-semibold" style={{ color: "var(--text)" }}>{edu.degree}</h4>
+                <p className="text-sm" style={{ color: "var(--accent-mid)" }}>{edu.school}</p>
+                <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>{edu.period}</p>
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>{edu.focus}</p>
               </motion.div>
             ))}
           </div>

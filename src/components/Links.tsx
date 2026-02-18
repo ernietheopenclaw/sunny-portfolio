@@ -29,7 +29,10 @@ export default function Links() {
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gray-900/50 border border-gray-800 hover:border-cyan-500/50 hover:bg-gray-900/80 transition-all text-gray-300 hover:text-cyan-400"
+              className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all"
+              style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent-mid)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-muted)"; }}
             >
               <Icon className="w-5 h-5" />
               <span className="text-sm font-medium">{link.label}</span>

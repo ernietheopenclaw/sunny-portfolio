@@ -13,14 +13,15 @@ export default function Skills({ skills }: { skills: Skill[] }) {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
         viewport={{ once: true }}
-        className="text-3xl font-bold mb-12 bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent"
+        className="text-3xl font-bold mb-12"
+        style={{ color: "var(--accent)" }}
       >
         Skills
       </motion.h2>
       <div className="space-y-10">
         {categories.map((cat) => (
           <div key={cat}>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--text-muted)" }}>
               {cat}
             </h3>
             <div className="space-y-3">
@@ -35,16 +36,17 @@ export default function Skills({ skills }: { skills: Skill[] }) {
                     viewport={{ once: true }}
                   >
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-300">{skill.name}</span>
-                      <span className="text-gray-500">{skill.level}%</span>
+                      <span style={{ color: "var(--text)" }}>{skill.name}</span>
+                      <span style={{ color: "var(--text-muted)" }}>{skill.level}%</span>
                     </div>
-                    <div className="h-2 rounded-full bg-gray-800 overflow-hidden">
+                    <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
                       <motion.div
                         initial={{ width: 0 }}
                         whileInView={{ width: `${skill.level}%` }}
                         transition={{ duration: 0.8, delay: i * 0.05 }}
                         viewport={{ once: true }}
-                        className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-purple-500"
+                        className="h-full rounded-full"
+                        style={{ background: "var(--accent)" }}
                       />
                     </div>
                   </motion.div>
