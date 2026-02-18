@@ -552,6 +552,40 @@ export default function GalaxyVisualization({ concepts }: Props) {
     dispersionRef.current.target = mode === "galaxy" ? 0 : 1;
   }, [mode]);
 
+  // Track whether we're snapping to prevent re-entrant triggers
+  const isSnapping = useRef(false);
+
+  // IntersectionObserver: when viz re-enters viewport from below, snap to it
+  useEffect(() => {
+    if (!mounted) return;
+    const container = containerRef.current;
+    if (!container) return;
+
+    let lastY = window.scrollY;
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      const scrollingUp = currentY < lastY;
+      lastY = currentY;
+
+      if (!pastVisualization || !scrollingUp || isSnapping.current) return;
+
+      const rect = container.getBoundingClientRect();
+      // If bottom edge of viz is visible in viewport (viz entering from above as we scroll up)
+      if (rect.bottom > 0 && rect.top < 0) {
+        // Viz is partially visible — snap to it
+        isSnapping.current = true;
+        setPastVisualization(false);
+        setMode("timeline");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        // Release snap lock after scroll settles
+        setTimeout(() => { isSnapping.current = false; }, 600);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [mounted, pastVisualization, setPastVisualization, setMode]);
+
   // Global scroll lock: intercept wheel events on the whole page
   useEffect(() => {
     if (!mounted) return;
@@ -559,6 +593,7 @@ export default function GalaxyVisualization({ concepts }: Props) {
     const handleWheel = (e: WheelEvent) => {
       const container = containerRef.current;
       if (!container) return;
+      if (isSnapping.current) { e.preventDefault(); return; }
 
       const rect = container.getBoundingClientRect();
       const viewportH = window.innerHeight;
@@ -571,18 +606,9 @@ export default function GalaxyVisualization({ concepts }: Props) {
         return; // allow normal scroll
       }
 
-      // If past visualization and scrolling up, check if we've scrolled back to the viz section
+      // If past visualization and scrolling up, let the scroll handler above deal with snapping
       if (pastVisualization && e.deltaY < 0) {
-        // If the top of the page content is visible (window.scrollY close to container height)
-        if (window.scrollY <= rect.height + 10) {
-          // Re-enter visualization
-          e.preventDefault();
-          setPastVisualization(false);
-          // We're in timeline mode, go back
-          prevMode();
-          return;
-        }
-        return; // allow normal scroll up through content
+        return; // allow normal scroll up — IntersectionObserver will catch re-entry
       }
 
       // If visualization is in view and not past it, lock scroll
@@ -604,6 +630,11 @@ export default function GalaxyVisualization({ concepts }: Props) {
             nextMode();
           }
         } else if (e.deltaY < 0) {
+          // Scrolling up — if at galaxy (first mode), allow normal page scroll
+          if (mode === "galaxy") {
+            // Don't prevent default — let page scroll up normally
+            return;
+          }
           prevMode();
         }
       }
