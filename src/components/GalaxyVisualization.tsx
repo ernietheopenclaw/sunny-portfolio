@@ -391,11 +391,23 @@ function ConceptDots({ concepts, onHover, onClick }: ConceptDotsProps) {
 
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const color = useMemo(() => new THREE.Color(), []);
-  const prevPositions = useRef<THREE.Vector3[]>(concepts.map(() => new THREE.Vector3()));
-  const targetPositions = useRef<THREE.Vector3[]>(concepts.map(() => new THREE.Vector3()));
-  const currentPositions = useRef<THREE.Vector3[]>(concepts.map(() => new THREE.Vector3()));
+  const prevPositions = useRef<THREE.Vector3[]>([]);
+  const targetPositions = useRef<THREE.Vector3[]>([]);
+  const currentPositions = useRef<THREE.Vector3[]>([]);
+
+  // Ensure position arrays stay in sync with concepts length
+  useEffect(() => {
+    const len = concepts.length;
+    while (prevPositions.current.length < len) prevPositions.current.push(new THREE.Vector3());
+    while (targetPositions.current.length < len) targetPositions.current.push(new THREE.Vector3());
+    while (currentPositions.current.length < len) currentPositions.current.push(new THREE.Vector3());
+    prevPositions.current.length = len;
+    targetPositions.current.length = len;
+    currentPositions.current.length = len;
+  }, [concepts]);
 
   useEffect(() => {
+    if (prevPositions.current.length === 0) return;
     const posMap = mode === "galaxy" ? galaxyPositions : mode === "reduction" ? clusterPositions : timelinePositions;
     concepts.forEach((c, i) => {
       prevPositions.current[i].copy(currentPositions.current[i]);
@@ -414,7 +426,8 @@ function ConceptDots({ concepts, onHover, onClick }: ConceptDotsProps) {
       ? 4 * t.progress * t.progress * t.progress
       : 1 - Math.pow(-2 * t.progress + 2, 3) / 2;
 
-    for (let i = 0; i < concepts.length; i++) {
+    const len = Math.min(concepts.length, currentPositions.current.length);
+    for (let i = 0; i < len; i++) {
       currentPositions.current[i].lerpVectors(prevPositions.current[i], targetPositions.current[i], ease);
       dummy.position.copy(currentPositions.current[i]);
       dummy.scale.setScalar(0.06);
