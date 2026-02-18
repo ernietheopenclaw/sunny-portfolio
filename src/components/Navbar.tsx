@@ -31,7 +31,8 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 backdrop-blur-md" style={{ background: "color-mix(in srgb, var(--bg) 80%, transparent)", borderBottom: "1px solid var(--border)" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14">
-        <a href="/" className="font-bold text-lg" style={{ color: "var(--accent)" }}>
+        <a href="/" className="font-bold text-lg flex items-center gap-2" style={{ color: "var(--accent)" }}>
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f31e/512.gif" alt="🌞" width="28" height="28" />
           Sunny
         </a>
         <div className="hidden md:flex items-center gap-6">
