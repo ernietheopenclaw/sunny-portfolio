@@ -3,13 +3,16 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Sparkles, Loader2 } from "lucide-react";
+import { Plus, Sparkles, Loader2, Calendar } from "lucide-react";
+import { addUserConcept } from "@/lib/concepts";
 
-export default function ConceptInput() {
+export default function ConceptInput({ onConceptAdded }: { onConceptAdded?: () => void }) {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [concept, setConcept] = useState("");
+  const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const isLoggedIn = !!session;
 
   if (!isLoggedIn) {
@@ -31,11 +34,72 @@ export default function ConceptInput() {
     e.preventDefault();
     if (!concept.trim()) return;
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError("");
+
+    try {
+      // Get auth credentials from localStorage
+      const authType = localStorage.getItem("auth-type") || "apikey";
+      const apiKey = localStorage.getItem("anthropic-api-key") || "";
+      const summaryLength = parseInt(localStorage.getItem("summary-length") || "4", 10);
+
+      let body: Record<string, unknown> = {
+        name: concept.trim(),
+        authType,
+        summaryLength,
+      };
+
+      if (authType === "oauth") {
+        const credsRaw = localStorage.getItem("anthropic-oauth-credentials");
+        if (credsRaw) {
+          body.oauthCredentials = JSON.parse(credsRaw);
+        } else {
+          const oauthToken = localStorage.getItem("anthropic-oauth-token") || "";
+          body.oauthToken = oauthToken;
+        }
+      } else {
+        body.apiKey = apiKey;
+      }
+
+      const res = await fetch("/api/concepts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to generate concept");
+      }
+
+      const data = await res.json();
+
+      // If server refreshed OAuth credentials, update localStorage
+      if (data.refreshedCredentials) {
+        localStorage.setItem("anthropic-oauth-credentials", JSON.stringify(data.refreshedCredentials));
+      }
+
+      // Build concept object and store
+      const newConcept = {
+        id: `user-${Date.now()}`,
+        name: data.name,
+        short_summary: data.short_summary,
+        long_summary: data.long_summary,
+        x: data.x,
+        y: data.y,
+        z: data.z,
+        date_learned: date || new Date().toISOString().split("T")[0],
+      };
+
+      addUserConcept(newConcept);
       setConcept("");
+      setDate("");
       setIsOpen(false);
-    }, 1500);
+      onConceptAdded?.();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -63,14 +127,32 @@ export default function ConceptInput() {
               className="w-full px-3 py-2 rounded-lg text-sm mb-2 focus:outline-none"
               style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
             />
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full px-3 py-1.5 rounded-lg text-xs focus:outline-none"
+                style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
+              />
+              <span className="text-xs whitespace-nowrap" style={{ color: "var(--text-muted)" }}>
+                {date ? "" : "Today"}
+              </span>
+            </div>
+            {error && (
+              <p className="text-xs mb-2" style={{ color: "var(--error)" }}>{error}</p>
+            )}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !concept.trim()}
               className="w-full py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50"
               style={{ background: "var(--accent)", color: "#ffffff" }}
             >
               {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Generating...
+                </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" /> Generate & Add

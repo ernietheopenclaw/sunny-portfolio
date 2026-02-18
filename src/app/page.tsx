@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { mockConcepts, mockProjects, mockSkills } from "@/data/mock";
+import { mockProjects, mockSkills } from "@/data/mock";
+import { getAllConcepts } from "@/lib/concepts";
 import Navbar from "@/components/Navbar";
 import ThemeToggle from "@/components/ThemeToggle";
 import ScrollIndicator from "@/components/ScrollIndicator";
@@ -20,6 +22,12 @@ const GalaxyVisualization = dynamic(
 );
 
 export default function Home() {
+  const [concepts, setConcepts] = useState(() => getAllConcepts());
+
+  const handleConceptAdded = useCallback(() => {
+    setConcepts(getAllConcepts());
+  }, []);
+
   return (
     <main className="relative">
       <Navbar />
@@ -27,7 +35,7 @@ export default function Home() {
 
       {/* Galaxy visualization — single viewport, scroll wheel switches modes */}
       <div className="relative">
-        <GalaxyVisualization concepts={mockConcepts} />
+        <GalaxyVisualization concepts={concepts} />
         <ScrollIndicator />
       </div>
 
@@ -43,7 +51,7 @@ export default function Home() {
         <Footer />
       </div>
 
-      <ConceptInput />
+      <ConceptInput onConceptAdded={handleConceptAdded} />
     </main>
   );
 }
