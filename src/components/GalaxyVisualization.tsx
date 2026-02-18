@@ -12,6 +12,7 @@ import { Concept } from "@/types";
 import { useScroll } from "@/lib/scroll";
 import { useRouter } from "next/navigation";
 import { computeClusterPositions } from "@/lib/embeddings";
+import { renderLatex } from "@/lib/latex";
 
 extend({ EffectComposer, RenderPass, UnrealBloomPass, OutputPass });
 
@@ -512,7 +513,7 @@ function Tooltip({ concept, position }: { concept: Concept | null; position: THR
         boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
       }}>
         <p style={{ fontWeight: 600, color: "var(--accent-mid)", fontSize: "13px" }}>{concept.name}</p>
-        <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>{concept.short_summary}</p>
+        <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }} dangerouslySetInnerHTML={{ __html: renderLatex(concept.short_summary) }} />
         {concept.date_learned && (
           <p style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "4px", opacity: 0.7 }}>
             Added: {new Date(concept.date_learned).toLocaleDateString()}

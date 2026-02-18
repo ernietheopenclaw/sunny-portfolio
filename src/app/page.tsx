@@ -13,6 +13,7 @@ import Skills from "@/components/Skills";
 import Resume from "@/components/Resume";
 import Links from "@/components/Links";
 import Papers from "@/components/Papers";
+import Posts from "@/components/Posts";
 import Contact from "@/components/Contact";
 import ConceptInput from "@/components/ConceptInput";
 import Footer from "@/components/Footer";
@@ -49,6 +50,7 @@ export default function Home() {
         <About />
         <Projects projects={mockProjects} />
         <Papers />
+        <Posts />
         <Skills skills={mockSkills} projects={mockProjects} />
         <Resume />
         <Links />

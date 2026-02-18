@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Edit3, Save, X, Trash2 } from "lucide-react";
 import { getAllConcepts, hideConcept } from "@/lib/concepts";
 import { Concept } from "@/types";
+import LatexText from "@/components/LatexText";
 
 export default function ConceptDetail() {
   const params = useParams();
@@ -63,9 +64,9 @@ export default function ConceptDetail() {
           {concept.name}
         </h1>
 
-        <p className="text-sm mb-8" style={{ color: "var(--accent-mid)" }}>
+        <LatexText as="p" className="text-sm mb-8" style={{ color: "var(--accent-mid)" }}>
           {concept.short_summary}
-        </p>
+        </LatexText>
 
         <div className="p-6 rounded-xl" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
           <div className="flex items-center justify-between mb-4">
@@ -123,9 +124,9 @@ export default function ConceptDetail() {
               style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
             />
           ) : (
-            <p className="text-sm leading-relaxed" style={{ color: "var(--text)", lineHeight: 1.8 }}>
+            <LatexText as="div" className="text-sm leading-relaxed" style={{ color: "var(--text)", lineHeight: 1.8 }}>
               {concept.long_summary}
-            </p>
+            </LatexText>
           )}
         </div>
       </div>

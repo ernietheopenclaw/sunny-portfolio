@@ -21,6 +21,15 @@ export interface Project {
   image?: string;
 }
 
+export interface Post {
+  id: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  date: string;
+  tags: string[];
+}
+
 export interface Skill {
   name: string;
   level: number; // 0-100

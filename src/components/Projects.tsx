@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ExternalLink, Github } from "lucide-react";
 import { Project } from "@/types";
+import LatexText from "@/components/LatexText";
 
 export default function Projects({ projects }: { projects: Project[] }) {
   return (
@@ -32,7 +33,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
           >
             <div className="relative">
               <h3 className="text-lg font-semibold mb-2" style={{ color: "var(--text)" }}>{project.title}</h3>
-              <p className="text-sm mb-4 leading-relaxed" style={{ color: "var(--text-muted)" }}>{project.description}</p>
+              <LatexText as="p" className="text-sm mb-4 leading-relaxed" style={{ color: "var(--text-muted)" }}>{project.description}</LatexText>
               <div className="flex flex-wrap gap-2 mb-4">
                 {project.tech.map((t) => (
                   <span

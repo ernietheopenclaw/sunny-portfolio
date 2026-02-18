@@ -1,4 +1,4 @@
-import { Concept, Project, Skill } from "@/types";
+import { Concept, Project, Skill, Post } from "@/types";
 
 export const mockConcepts: Concept[] = [
   {
@@ -199,4 +199,171 @@ export const mockSkills: Skill[] = [
   { name: "Deep Learning", level: 90, category: "Specializations" },
   { name: "Time Series Analysis", level: 82, category: "Specializations" },
   { name: "Bioinformatics", level: 78, category: "Specializations" },
+];
+
+export const mockPosts: Post[] = [
+  {
+    id: "rag-at-scale",
+    title: "Building RAG Systems at Scale: Lessons from Amazon",
+    excerpt: "What I learned engineering an enterprise RAG pipeline serving 15,000 tables — from chunking strategies to hallucination guardrails.",
+    content: `# Building RAG Systems at Scale: Lessons from Amazon
+
+Retrieval-Augmented Generation sounds simple in theory: fetch relevant context, feed it to an LLM, get a grounded answer. In practice, scaling this to **15,000 tables across 200 schemas** at Amazon taught me that the devil is in the details.
+
+## The Chunking Problem
+
+The first challenge was figuring out *what* to retrieve. Database schemas aren't documents — they're structured metadata with implicit relationships. We ended up building a custom DDL generator that produced natural-language-friendly descriptions of each table, including column semantics, join paths, and usage patterns.
+
+## Embedding Strategy
+
+We experimented with several embedding models before settling on a hybrid approach: dense embeddings for semantic similarity combined with sparse BM25 for exact keyword matching. This was crucial for handling technical terms and table names that semantic models often mangle.
+
+## Hallucination Guardrails
+
+The biggest risk in enterprise RAG is confident wrong answers. We implemented a multi-layer verification system:
+
+- **Schema validation**: Generated SQL is checked against actual DDL
+- **Result sanity checks**: Row counts and value distributions are verified
+- **Confidence scoring**: Low-confidence answers are flagged for human review
+
+## Key Takeaways
+
+1. **Chunking strategy matters more than model choice** — garbage in, garbage out
+2. **Hybrid retrieval beats pure semantic search** for technical domains
+3. **Version your knowledge base** — we used git-style versioning for DDL changes
+4. **Monitor everything** — Slack alerts on retrieval failures saved us countless times`,
+    date: "2025-01-15",
+    tags: ["RAG", "LLM", "AWS", "Enterprise ML"],
+  },
+  {
+    id: "diffusion-histopath",
+    title: "Diffusion Models for Medical Imaging: A Practical Guide",
+    excerpt: "How we applied DDPMs to histopathologic cancer detection — architecture choices, training tricks, and what the ablation studies revealed.",
+    content: `# Diffusion Models for Medical Imaging: A Practical Guide
+
+Denoising Diffusion Probabilistic Models (DDPMs) have taken the generative AI world by storm, but their application to **medical imaging** presents unique challenges and opportunities.
+
+## Why Diffusion for Histopathology?
+
+The Patch Camelyon (PCam) dataset contains 327,680 histopathologic patches — a massive dataset by medical imaging standards, but tiny compared to what models like Stable Diffusion train on. We wanted to explore whether diffusion models could augment limited medical training data.
+
+## Architecture Decisions
+
+We started with a standard U-Net backbone but found that **attention at multiple resolutions** was critical for capturing both cellular-level and tissue-level patterns. Our final architecture used:
+
+- Residual blocks with group normalization
+- Self-attention at 16x16 and 8x8 resolutions
+- Sinusoidal time embeddings
+- Linear noise schedule (β₁ = 1e-4, βT = 0.02)
+
+## Training Insights
+
+Medical images have different statistical properties than natural images. Key findings:
+
+1. **Longer training schedules** — convergence took 2-3x longer than natural image datasets
+2. **Lower learning rates** — 1e-5 worked better than the typical 2e-4
+3. **Color augmentation hurts** — unlike natural images, stain colors carry diagnostic meaning
+
+## Ablation Results
+
+Our ablation studies revealed that the noise schedule had the largest impact on sample quality, followed by the number of attention layers. Surprisingly, increasing model depth beyond 4 blocks showed diminishing returns.
+
+## The Bigger Picture
+
+Diffusion models aren't just for generation — the learned representations transfer beautifully to classification tasks. Our diffusion-pretrained features improved cancer detection accuracy by 3.2% over training from scratch.`,
+    date: "2024-11-20",
+    tags: ["Diffusion Models", "Medical Imaging", "PyTorch", "Deep Learning"],
+  },
+  {
+    id: "embeddings-demystified",
+    title: "Embedding Spaces Demystified: From Word2Vec to CLIP",
+    excerpt: "A visual tour through embedding spaces — what they are, why they work, and how to build intuition for high-dimensional geometry.",
+    content: `# Embedding Spaces Demystified: From Word2Vec to CLIP
+
+If there's one concept that underpins modern ML, it's **embeddings**. But what does it actually mean to represent a word, image, or concept as a point in high-dimensional space?
+
+## The Core Idea
+
+An embedding is a learned mapping from discrete objects to continuous vectors. The magic: **semantic relationships become geometric relationships**. Similar things end up close together.
+
+## Word2Vec: Where It Started
+
+Word2Vec (2013) showed that training a simple neural network to predict neighboring words produces vectors where:
+
+\`king - man + woman ≈ queen\`
+
+This wasn't engineered — it *emerged* from the training objective. The geometry of language was hiding in co-occurrence statistics all along.
+
+## From Words to Everything
+
+The embedding paradigm has since expanded to:
+
+- **Sentences** (Sentence-BERT): Encode entire sentences for semantic search
+- **Images** (ResNet features, DINO): Visual similarity in vector space
+- **Multimodal** (CLIP): Images and text in a *shared* space
+- **Code** (CodeBERT): Programming language semantics
+
+## Building Intuition
+
+High-dimensional spaces are weird. Some counterintuitive properties:
+
+1. **Most volume is near the surface** — in high dimensions, almost everything is "far from the center"
+2. **Random vectors are nearly orthogonal** — in 768 dimensions, any two random vectors will have cosine similarity near 0
+3. **Curse of dimensionality** — distances become less meaningful as dimensions increase, which is why approximate methods (HNSW, IVF) work so well
+
+## Practical Tips
+
+When working with embeddings:
+
+- **Always normalize** before computing cosine similarity
+- **Dimensionality reduction** (PCA to ~256) often improves downstream performance
+- **Domain-specific fine-tuning** beats larger generic models
+- **Monitor embedding drift** in production systems`,
+    date: "2024-09-10",
+    tags: ["Embeddings", "NLP", "Machine Learning", "Tutorial"],
+  },
+  {
+    id: "galaxy-portfolio",
+    title: "Building a 3D Galaxy Portfolio with Three.js and Next.js",
+    excerpt: "The story behind this portfolio site — how I turned a knowledge graph into an interactive 3D galaxy visualization.",
+    content: `# Building a 3D Galaxy Portfolio with Three.js and Next.js
+
+When I set out to build my portfolio, I wanted something that reflected how I think about knowledge — as an interconnected, ever-expanding universe of ideas.
+
+## The Concept
+
+Each concept I've learned becomes a star in a 3D galaxy. Related concepts cluster together, forming constellations of knowledge. Visitors can fly through this space, clicking on stars to explore what I've learned.
+
+## Technical Stack
+
+- **Next.js 14** with App Router for the framework
+- **Three.js** via React Three Fiber for 3D rendering
+- **Framer Motion** for section animations
+- **NextAuth** for authentication
+- **Vercel** for deployment
+
+## The Galaxy Visualization
+
+The hardest part was making the galaxy feel *alive*. Key techniques:
+
+1. **Instanced rendering** — Drawing 1000+ stars with a single draw call
+2. **Custom shaders** — GLSL for the glow effect and color gradients
+3. **Smooth camera transitions** — Interpolating between overview and focus modes
+4. **Scroll-driven modes** — The visualization changes based on scroll position
+
+## Performance Optimization
+
+3D on the web is expensive. Optimizations that mattered:
+
+- **Level of detail** — Distant stars render as simple points
+- **Frustum culling** — Only render what's in view
+- **Adaptive quality** — Detect GPU capability and adjust particle count
+- **Lazy loading** — The galaxy component loads via dynamic import
+
+## Lessons Learned
+
+Building this taught me that the intersection of **data visualization, 3D graphics, and web development** is incredibly rewarding. Every concept I add to my knowledge base literally makes the galaxy bigger.`,
+    date: "2024-08-05",
+    tags: ["Three.js", "Next.js", "WebGL", "Portfolio"],
+  },
 ];

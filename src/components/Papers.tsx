@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ExternalLink, BookOpen } from "lucide-react";
+import LatexText from "@/components/LatexText";
 
 const publications = [
   {
@@ -72,9 +73,9 @@ export default function Papers() {
                       {pub.authors}
                     </p>
                   )}
-                  <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                  <LatexText as="p" className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
                     {pub.contribution}
-                  </p>
+                  </LatexText>
                 </div>
               </div>
             </motion.div>
