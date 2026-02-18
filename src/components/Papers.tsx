@@ -5,12 +5,30 @@ import { ExternalLink, BookOpen } from "lucide-react";
 
 const publications = [
   {
+    title: "Cardiac lipid droplets differ under pathological and physiological conditions",
+    journal: "Journal of Lipid Research",
+    date: "2025",
+    url: "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=tGaMcikAAAAJ&citation_for_view=tGaMcikAAAAJ:d1gkVwhDpl0C",
+    authors: "NH Son, S Son, M Verano, ZX Liu, W Younis, M Komack, KV Ruggles, et al.",
+    contribution:
+      "Contributed to data analysis and computational methods for characterizing lipid droplet composition differences between pathological and physiological cardiac conditions.",
+  },
+  {
     title: "T cell egress via lymphatic vessels is tuned by antigen encounter and limits tumor control",
     journal: "Nature Immunology",
-    date: "February 27, 2023",
+    date: "2023",
     url: "https://www.nature.com/articles/s41590-023-01443-y",
+    authors: "MM Steele, A Jaiswal, I Delclaux, ID Dryg, D Murugan, J Femel, S Son, et al.",
     contribution:
       "Pipelined and analyzed genomic data, performing dimensionality reduction and subsetting to organize cell populations. Applied various semi-supervised and unsupervised methods to determine the optimal format for inferring the pseudotime trajectory of cell-fate in relation to gene expression.",
+  },
+  {
+    title: "Author Correction: T cell egress via lymphatic vessels is tuned by antigen encounter and limits tumor control",
+    journal: "Nature Immunology",
+    date: "2023",
+    url: "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=tGaMcikAAAAJ&citation_for_view=tGaMcikAAAAJ:2osOgNQ5qMEC",
+    authors: "MM Steele, A Jaiswal, I Delclaux, ID Dryg, D Murugan, J Femel, S Son, et al.",
+    contribution: "Erratum/correction for the original Nature Immunology publication.",
   },
 ];
 
@@ -57,6 +75,11 @@ export default function Papers() {
                   <p className="text-sm font-medium" style={{ color: "var(--accent-mid)" }}>
                     {pub.journal} · {pub.date}
                   </p>
+                  {pub.authors && (
+                    <p className="text-xs" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
+                      {pub.authors}
+                    </p>
+                  )}
                   <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
                     {pub.contribution}
                   </p>
@@ -67,7 +90,7 @@ export default function Papers() {
         </div>
         <div className="mt-8 text-center">
           <a
-            href="https://scholar.google.com/citations?user=sunny-son"
+            href="https://scholar.google.com/citations?user=tGaMcikAAAAJ"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-sm transition-colors"
