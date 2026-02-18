@@ -7,7 +7,7 @@ interface LatexTextProps {
   children: string;
   className?: string;
   style?: React.CSSProperties;
-  as?: keyof React.JSX.IntrinsicElements;
+  as?: "span" | "p" | "div" | "h1" | "h2" | "h3" | "h4";
 }
 
 /**
@@ -17,7 +17,7 @@ interface LatexTextProps {
 export default function LatexText({ children, className, style, as: Tag = "span" }: LatexTextProps) {
   const html = useMemo(() => renderLatex(children), [children]);
 
-  // If no LaTeX was found, render plain text (no dangerouslySetInnerHTML)
+  // If no LaTeX was found, render plain text
   if (html === children) {
     return <Tag className={className} style={style}>{children}</Tag>;
   }
