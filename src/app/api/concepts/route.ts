@@ -3,7 +3,7 @@ import { getModel, complete } from "@mariozechner/pi-ai";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, apiKey, oauthToken, authType } = await req.json();
+    const { name, apiKey, oauthToken, authType, summaryLength = 4 } = await req.json();
 
     if (!name) {
       return NextResponse.json({ error: "Concept name is required" }, { status: 400 });
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
           timestamp: Date.now(),
           content: `Generate a JSON object for the concept "${name}" with these fields:
 - "short_summary": A concise 1-sentence summary (under 120 chars)
-- "long_summary": A detailed 3-4 sentence explanation
+- "long_summary": A detailed explanation that is exactly ${summaryLength} sentence${summaryLength === 1 ? "" : "s"} long
 - "x": A float between -3 and 3 (semantic x-coordinate for visualization)
 - "y": A float between -3 and 3 (semantic y-coordinate)
 - "z": A float between -2 and 2 (semantic z-coordinate)

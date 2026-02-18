@@ -18,6 +18,9 @@ export default function SettingsPage() {
   const [oauthToken, setOauthToken] = useState("");
   const [credentialStatus, setCredentialStatus] = useState<"none" | "configured">("none");
 
+  // Summary length
+  const [summaryLength, setSummaryLength] = useState(4);
+
   // Concept generation
   const [conceptName, setConceptName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,6 +40,9 @@ export default function SettingsPage() {
     if ((storedType === "oauth" && storedToken) || (storedType !== "oauth" && storedKey)) {
       setCredentialStatus("configured");
     }
+
+    const storedLength = localStorage.getItem("summary-length");
+    if (storedLength) setSummaryLength(parseInt(storedLength, 10));
   }, []);
 
   const saveCredentials = () => {
@@ -77,6 +83,7 @@ export default function SettingsPage() {
           authType: storedType,
           apiKey: storedType === "apikey" ? key : undefined,
           oauthToken: storedType === "oauth" ? token : undefined,
+          summaryLength,
         }),
       });
       if (!res.ok) {
@@ -235,6 +242,36 @@ export default function SettingsPage() {
               </div>
             </>
           )}
+        </section>
+
+        {/* Summary Length */}
+        <section className="p-6 rounded-xl mb-8" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text)" }}>
+            <Sparkles className="w-5 h-5" /> Summary Length
+          </h2>
+          <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>
+            Number of sentences for the detailed summary (default: 4)
+          </p>
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-mono w-6 text-center" style={{ color: "var(--text-muted)" }}>1</span>
+            <input
+              type="range"
+              min={1}
+              max={10}
+              value={summaryLength}
+              onChange={(e) => {
+                const val = parseInt(e.target.value, 10);
+                setSummaryLength(val);
+                localStorage.setItem("summary-length", val.toString());
+              }}
+              className="flex-1 accent-[#218380]"
+              style={{ accentColor: "var(--accent)" }}
+            />
+            <span className="text-sm font-mono w-6 text-center" style={{ color: "var(--text-muted)" }}>10</span>
+          </div>
+          <p className="text-center text-sm mt-2 font-semibold" style={{ color: "var(--accent-mid)" }}>
+            {summaryLength} sentence{summaryLength === 1 ? "" : "s"}
+          </p>
         </section>
 
         {/* Add Learning */}
