@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Edit3, Save, X } from "lucide-react";
-import { mockConcepts } from "@/data/mock";
+import { getAllConcepts } from "@/lib/concepts";
 import { Concept } from "@/types";
 
 export default function ConceptDetail() {
@@ -17,15 +17,7 @@ export default function ConceptDetail() {
 
   useEffect(() => {
     const id = params.id as string;
-    // Check localStorage for saved concepts first
-    const saved = localStorage.getItem("sunny-concepts");
-    let allConcepts = [...mockConcepts];
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved) as Concept[];
-        allConcepts = [...allConcepts, ...parsed];
-      } catch { /* ignore */ }
-    }
+    const allConcepts = getAllConcepts();
     const found = allConcepts.find((c) => c.id === id);
     if (found) {
       // Check for custom long_summary in localStorage
