@@ -4,8 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Edit3, Save, X, Trash2 } from "lucide-react";
-import { getAllConcepts, removeUserConcept } from "@/lib/concepts";
-import { mockConcepts } from "@/data/mock";
+import { getAllConcepts, hideConcept } from "@/lib/concepts";
 import { Concept } from "@/types";
 
 export default function ConceptDetail() {
@@ -82,19 +81,17 @@ export default function ConceptDetail() {
                 >
                   <Edit3 className="w-3 h-3" /> Edit
                 </button>
-                {!mockConcepts.some((m) => m.id === concept.id) && (
-                  <button
-                    onClick={() => {
-                      if (!confirm(`Delete "${concept.name}"? This cannot be undone.`)) return;
-                      removeUserConcept(concept.id);
-                      router.push("/");
-                    }}
-                    className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg transition-colors cursor-pointer"
-                    style={{ color: "#ff6464", border: "1px solid rgba(255,100,100,0.3)" }}
-                  >
-                    <Trash2 className="w-3 h-3" /> Delete
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    if (!confirm(`Delete "${concept.name}"? This cannot be undone.`)) return;
+                    hideConcept(concept.id);
+                    router.push("/");
+                  }}
+                  className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg transition-colors cursor-pointer"
+                  style={{ color: "#ff6464", border: "1px solid rgba(255,100,100,0.3)" }}
+                >
+                  <Trash2 className="w-3 h-3" /> Delete
+                </button>
               </div>
             )}
             {editing && (

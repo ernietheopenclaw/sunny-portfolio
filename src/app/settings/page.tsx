@@ -3,10 +3,9 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Sparkles, Loader2, Save, Check, Key, Shield, LogIn, LogOut, ClipboardPaste, Trash2 } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2, Save, Check, Key, Shield, LogIn, LogOut, ClipboardPaste, X } from "lucide-react";
 import { Concept } from "@/types";
-import { getAllConcepts, getUserConcepts, removeUserConcept } from "@/lib/concepts";
-import { mockConcepts } from "@/data/mock";
+import { getAllConcepts, hideConcept } from "@/lib/concepts";
 
 export default function SettingsPage() {
   const { data: session, status } = useSession();
@@ -452,39 +451,33 @@ export default function SettingsPage() {
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>No concepts yet.</p>
           ) : (
             <div className="space-y-3">
-              {allConceptsList.map((c) => {
-                const isMock = mockConcepts.some((m) => m.id === c.id);
-                return (
+              {allConceptsList.map((c) => (
                   <div key={c.id} className="flex items-center justify-between p-3 rounded-lg" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
                     <div className="flex-1 min-w-0 mr-3">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-medium truncate" style={{ color: "var(--text)" }}>{c.name}</span>
-                        {isMock && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full shrink-0" style={{ background: "rgba(33,131,128,0.15)", color: "var(--accent-mid)" }}>Default</span>
-                        )}
                       </div>
                       <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{c.short_summary}</p>
                       <p className="text-[10px] mt-1 font-mono" style={{ color: "var(--text-muted)", opacity: 0.6 }}>
                         {new Date(c.date_learned).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
                       </p>
                     </div>
-                    {!isMock && (
-                      <button
-                        onClick={() => {
-                          if (!confirm(`Delete "${c.name}"?`)) return;
-                          removeUserConcept(c.id);
-                          setAllConceptsList(getAllConcepts());
-                        }}
-                        className="p-2 rounded-lg transition-colors cursor-pointer shrink-0"
-                        style={{ color: "#ff6464" }}
-                        title="Delete concept"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => {
+                        if (!confirm(`Delete "${c.name}"?`)) return;
+                        hideConcept(c.id);
+                        setAllConceptsList(getAllConcepts());
+                      }}
+                      className="p-2 rounded-lg transition-opacity cursor-pointer shrink-0"
+                      style={{ color: "#e74c3c", opacity: 0.4 }}
+                      onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                      onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.4")}
+                      title="Delete concept"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
-                );
-              })}
+              ))}
             </div>
           )}
         </section>
