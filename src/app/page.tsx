@@ -13,8 +13,6 @@ import Links from "@/components/Links";
 import Contact from "@/components/Contact";
 import ConceptInput from "@/components/ConceptInput";
 import Footer from "@/components/Footer";
-import ParticleBackground from "@/components/ParticleBackground";
-
 const GalaxyVisualization = dynamic(
   () => import("@/components/GalaxyVisualization"),
   { ssr: false }
@@ -23,7 +21,6 @@ const GalaxyVisualization = dynamic(
 export default function Home() {
   return (
     <main className="relative">
-      <ParticleBackground />
       <Navbar />
       <ThemeToggle />
 
