@@ -201,6 +201,27 @@ Galaxy view shows italic quote top-left:
 
 ---
 
+## Semantic Clustering (Embeddings + UMAP)
+
+The "Clusters" view now uses real semantic embeddings instead of LLM-guessed x/y/z coordinates.
+
+### Architecture
+1. **Mock concept embeddings** — Pre-computed 384-dim vectors using `all-MiniLM-L6-v2` (Hugging Face Transformers), stored in `src/data/embeddings.json`
+2. **User concept embeddings** — Generated server-side via OpenAI `text-embedding-3-small` in `/api/concepts` route (requires `OPENAI_API_KEY` env var on Vercel). Stored in localStorage with the concept.
+3. **UMAP projection** — Client-side 3D dimensionality reduction using `umap-js` (`src/lib/embeddings.ts`). Params: nComponents=3, nNeighbors=min(5, n-1), minDist=0.3, spread=1.5. Output scaled to [-3, 3].
+4. **Fallback** — Concepts without embeddings fall back to their x/y/z coordinates.
+
+### Regenerating mock embeddings
+```bash
+node scripts/generate-embeddings.mjs
+```
+Requires `@huggingface/transformers` (devDependency). Downloads model on first run (~30MB, cached).
+
+### Environment variables
+- `OPENAI_API_KEY` — Optional. Enables embedding generation for user-added concepts. Without it, new concepts use LLM-guessed coordinates as fallback.
+
+---
+
 ## Pending / TODO
 - [ ] Skills section redesign (replace loading bars with tiered grid or project-linked approach)
 - [ ] Quote/epigraph section between galaxy and About
