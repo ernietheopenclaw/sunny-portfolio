@@ -531,12 +531,11 @@ function DispersionController({ dispersionRef }: { dispersionRef: React.MutableR
 
 // Zoom by holding right mouse button and dragging up/down
 function RightClickZoom() {
-  const { camera } = useThree();
+  const { camera, gl } = useThree();
   const state = useRef({ active: false, lastY: 0 });
 
   useEffect(() => {
-    const canvas = document.querySelector("#galaxy-container canvas") as HTMLElement | null;
-    if (!canvas) return;
+    const canvas = gl.domElement;
 
     const onDown = (e: MouseEvent) => {
       if (e.button === 2) {
@@ -556,13 +555,13 @@ function RightClickZoom() {
       if (!state.current.active) return;
       const dy = e.clientY - state.current.lastY;
       state.current.lastY = e.clientY;
-      const zoomSpeed = 0.02;
+      const zoomSpeed = 0.03;
       const direction = new THREE.Vector3();
       camera.getWorldDirection(direction);
       camera.position.addScaledVector(direction, -dy * zoomSpeed);
     };
 
-    const onContext = (e: MouseEvent) => {
+    const onContext = (e: Event) => {
       e.preventDefault();
     };
 
@@ -577,7 +576,7 @@ function RightClickZoom() {
       window.removeEventListener("mousemove", onMove);
       canvas.removeEventListener("contextmenu", onContext);
     };
-  }, [camera]);
+  }, [camera, gl]);
 
   return null;
 }
