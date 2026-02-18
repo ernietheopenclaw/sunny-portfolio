@@ -64,7 +64,7 @@ export default function ConceptDetail() {
         </button>
 
         <div className="mb-2 text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-          Learned {new Date(concept.date_learned).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+          Added {new Date(concept.date_learned).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
         </div>
 
         <h1 className="text-4xl font-bold mb-2" style={{ color: "var(--text)" }}>

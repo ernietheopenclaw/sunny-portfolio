@@ -497,7 +497,7 @@ function Tooltip({ concept, position }: { concept: Concept | null; position: THR
         <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>{concept.short_summary}</p>
         {concept.date_learned && (
           <p style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "4px", opacity: 0.7 }}>
-            Learned: {new Date(concept.date_learned).toLocaleDateString()}
+            Added: {new Date(concept.date_learned).toLocaleDateString()}
           </p>
         )}
       </div>
