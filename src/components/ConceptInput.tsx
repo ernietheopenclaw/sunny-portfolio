@@ -17,18 +17,7 @@ export default function ConceptInput({ onConceptAdded }: { onConceptAdded?: () =
   const isLoggedIn = !!session;
 
   if (!isLoggedIn) {
-    return (
-      <div className="fixed bottom-6 right-6 z-30">
-        <button
-          onClick={() => alert("Please log in to add concepts")}
-          className="p-3 rounded-full backdrop-blur-sm transition-all"
-          style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
-          title="Log in to add concepts"
-        >
-          <Plus className="w-5 h-5" />
-        </button>
-      </div>
-    );
+    return null;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
