@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer className="py-8 px-4 text-center space-y-3" style={{ borderTop: "1px solid var(--border)" }}>
       <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-        © {new Date().getFullYear()} Sunny Son. Built with Next.js, Three.js, and ☕
+        <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>&lt;/&gt;</span> with ❤️, Three.js, and ☕️ by Sunny Son
       </p>
       <div className="flex justify-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
