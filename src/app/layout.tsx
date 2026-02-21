@@ -6,7 +6,7 @@ import { ScrollProvider } from "@/lib/scroll";
 import SessionWrapper from "@/components/SessionWrapper";
 
 export const metadata: Metadata = {
-  title: "Sunny — Developer & Creative Technologist",
+  title: "Sunny — AI/ML Engineer",
   description: "Interactive portfolio showcasing concepts, projects, and skills through immersive 3D visualization.",
   icons: {
     icon: { url: "/favicon.svg", type: "image/svg+xml" },
