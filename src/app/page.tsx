@@ -24,6 +24,7 @@ const GalaxyVisualization = dynamic(
 
 export default function Home() {
   const [concepts, setConcepts] = useState(mockConcepts);
+  const [galaxyReady, setGalaxyReady] = useState(false);
 
   // Load user-added concepts from localStorage after mount (avoids hydration mismatch)
   useEffect(() => {
@@ -41,24 +42,26 @@ export default function Home() {
 
       {/* Galaxy visualization — single viewport, scroll wheel switches modes */}
       <div className="relative">
-        <GalaxyVisualization concepts={concepts} />
+        <GalaxyVisualization concepts={concepts} onReady={() => setGalaxyReady(true)} />
         <ScrollIndicator />
       </div>
 
-      {/* Portfolio sections */}
-      <div className="relative z-10" style={{ background: "var(--bg)" }}>
-        <About />
-        <Projects projects={mockProjects} />
-        <Papers />
-        <Posts />
-        <Skills skills={mockSkills} projects={mockProjects} />
-        <Resume />
-        <Links />
-        <Contact />
-        <Footer />
-      </div>
+      {/* Portfolio sections — only render after galaxy is ready */}
+      {galaxyReady && (
+        <div className="relative z-10" style={{ background: "var(--bg)" }}>
+          <About />
+          <Projects projects={mockProjects} />
+          <Papers />
+          <Posts />
+          <Skills skills={mockSkills} projects={mockProjects} />
+          <Resume />
+          <Links />
+          <Contact />
+          <Footer />
+        </div>
+      )}
 
-      <ConceptInput onConceptAdded={handleConceptAdded} />
+      {galaxyReady && <ConceptInput onConceptAdded={handleConceptAdded} />}
     </main>
   );
 }

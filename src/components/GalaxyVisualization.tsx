@@ -633,9 +633,10 @@ function Scene({ concepts, dispersionRef, onConceptClick }: { concepts: Concept[
 
 interface Props {
   concepts: Concept[];
+  onReady?: () => void;
 }
 
-export default function GalaxyVisualization({ concepts }: Props) {
+export default function GalaxyVisualization({ concepts, onReady }: Props) {
   const { mode, nextMode, prevMode, setMode, pastVisualization, setPastVisualization } = useScroll();
   const [mounted, setMounted] = useState(false);
   const lastWheelTime = useRef(0);
@@ -814,6 +815,7 @@ export default function GalaxyVisualization({ concepts }: Props) {
         camera={{ position: [0, 3, 8], fov: 60 }}
         style={{ background: "transparent" }}
         gl={{ antialias: true, alpha: true }}
+        onCreated={() => { if (onReady) onReady(); }}
       >
         <Scene concepts={concepts} dispersionRef={dispersionRef} onConceptClick={handleConceptClick} />
       </Canvas>
