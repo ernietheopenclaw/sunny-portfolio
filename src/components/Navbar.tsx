@@ -32,7 +32,7 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 backdrop-blur-md" style={{ background: "color-mix(in srgb, var(--bg) 80%, transparent)", borderBottom: "1px solid var(--border)" }}>
       <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14">
-        <a href="/" className="font-bold text-lg flex items-center gap-2 mr-auto" style={{ color: "var(--accent)", fontFamily: "-apple-system, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif", letterSpacing: "-0.01em" }}>
+        <a href="/" className="text-sm flex items-center gap-2 mr-auto transition-colors" style={{ color: "var(--text-muted)" }} onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent-mid)")} onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}>
           <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f31e/512.gif" alt="🌞" width="28" height="28" />
           Sunny Son
         </a>
