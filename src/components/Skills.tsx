@@ -5,17 +5,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ExternalLink, Github, X } from "lucide-react";
 import { Skill, Project } from "@/types";
 
-// Map skill names to project tech tags (handles partial matches)
+// Map skill names to project tech tags (exact case-insensitive matching)
+function exactMatch(a: string, b: string): boolean {
+  return a.toLowerCase().trim() === b.toLowerCase().trim();
+}
+
 function getProjectsForSkill(skillName: string, projects: Project[]): Project[] {
-  const lower = skillName.toLowerCase();
+  // Split compound skills like "NumPy / Pandas / SciPy" or "W&B / MLflow"
+  const skillParts = skillName.split(/\s*\/\s*/).map((s) => s.trim());
   return projects.filter((p) =>
-    p.tech.some((t) => {
-      const tl = t.toLowerCase();
-      return tl.includes(lower) || lower.includes(tl) ||
-        // Handle compound skills like "NumPy / Pandas / SciPy"
-        lower.split(/\s*\/\s*/).some((part) => tl.includes(part.trim())) ||
-        tl.split(/\s*\/\s*/).some((part) => lower.includes(part.trim()));
-    })
+    p.tech.some((t) => skillParts.some((part) => exactMatch(t, part)))
   );
 }
 
@@ -151,19 +150,15 @@ export default function Skills({ skills, projects }: { skills: Skill[]; projects
                             key={t}
                             className="text-[9px] px-1.5 py-0.5 rounded-full"
                             style={{
-                              background:
-                                t.toLowerCase().includes(selectedSkill.toLowerCase()) ||
-                                selectedSkill.toLowerCase().includes(t.toLowerCase()) ||
-                                selectedSkill.toLowerCase().split(/\s*\/\s*/).some((p) => t.toLowerCase().includes(p.trim()))
-                                  ? "rgba(2,132,199,0.2)"
-                                  : "rgba(255,255,255,0.05)",
-                              color:
-                                t.toLowerCase().includes(selectedSkill.toLowerCase()) ||
-                                selectedSkill.toLowerCase().includes(t.toLowerCase()) ||
-                                selectedSkill.toLowerCase().split(/\s*\/\s*/).some((p) => t.toLowerCase().includes(p.trim()))
-                                  ? "var(--accent-mid)"
-                                  : "var(--text-muted)",
-                              border: "1px solid rgba(2,132,199,0.15)",
+                              ...(() => {
+                                const parts = selectedSkill.split(/\s*\/\s*/).map((s) => s.trim());
+                                const isMatch = parts.some((p) => exactMatch(t, p));
+                                return {
+                                  background: isMatch ? "rgba(2,132,199,0.2)" : "rgba(255,255,255,0.05)",
+                                  color: isMatch ? "var(--accent-mid)" : "var(--text-muted)",
+                                  border: "1px solid rgba(2,132,199,0.15)",
+                                };
+                              })(),
                             }}
                           >
                             {t}
