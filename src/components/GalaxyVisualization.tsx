@@ -508,7 +508,7 @@ function Tooltip({ concept, position }: { concept: Concept | null; position: THR
         color: "var(--text)",
         padding: "8px 16px",
         borderRadius: "8px",
-        maxWidth: "240px",
+        maxWidth: "360px",
         backdropFilter: "blur(8px)",
         boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
       }}>
