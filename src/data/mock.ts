@@ -514,7 +514,8 @@ export const mockSkills: Skill[] = [
   { name: "SQL", level: 85, category: "Programming Languages", tags: ["Supabase", "Redshift", "S3"] },
   { name: "JavaScript", level: 78, category: "Programming Languages" },
   { name: "TypeScript", level: 78, category: "Programming Languages" },
-  { name: "HTML / CSS", level: 75, category: "Programming Languages", tags: ["Tailwind CSS", "Next.js", "React", "WebGL"] },
+  { name: "HTML", level: 75, category: "Programming Languages", tags: ["HTML Parsing"] },
+  { name: "CSS", level: 75, category: "Programming Languages", tags: ["Tailwind CSS"] },
   { name: "Bash", level: 70, category: "Programming Languages" },
   // AI / ML Frameworks
   { name: "PyTorch", level: 90, category: "AI / ML Frameworks", tags: ["NeuralProphet"] },
@@ -535,7 +536,9 @@ export const mockSkills: Skill[] = [
   { name: "Apache Airflow", level: 75, category: "Data & Compute" },
   { name: "Raytune", level: 70, category: "Data & Compute" },
   // Cloud & Infrastructure
-  { name: "AWS (S3, Bedrock, Redshift)", level: 82, category: "Cloud & Infrastructure", tags: ["AWS Bedrock", "Redshift", "S3", "AWS"] },
+  { name: "AWS S3", level: 82, category: "Cloud & Infrastructure", tags: ["S3"] },
+  { name: "AWS Bedrock", level: 80, category: "Cloud & Infrastructure", tags: ["Bedrock"] },
+  { name: "AWS Redshift", level: 78, category: "Cloud & Infrastructure", tags: ["Redshift"] },
   { name: "HPC (SLURM)", level: 78, category: "Cloud & Infrastructure", tags: ["HPC", "SLURM"] },
   { name: "Vercel", level: 80, category: "Cloud & Infrastructure" },
   { name: "Supabase", level: 78, category: "Cloud & Infrastructure" },
