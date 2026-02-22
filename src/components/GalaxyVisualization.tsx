@@ -514,18 +514,7 @@ function ConceptDots({ concepts, onHover, onClick }: ConceptDotsProps) {
   );
 }
 
-function Tooltip({ concept, position, session }: { concept: Concept | null; position: THREE.Vector3 | null; session: boolean }) {
-  const [editingTooltip, setEditingTooltip] = useState(false);
-  const [editSummary, setEditSummary] = useState("");
-
-  useEffect(() => {
-    if (concept) {
-      const saved = typeof window !== "undefined" ? localStorage.getItem(`concept-short-summary-${concept.id}`) : null;
-      setEditSummary(saved ?? concept.short_summary);
-      setEditingTooltip(false);
-    }
-  }, [concept]);
-
+function Tooltip({ concept, position }: { concept: Concept | null; position: THREE.Vector3 | null; session?: boolean }) {
   if (!concept || !position) return null;
 
   const displaySummary = typeof window !== "undefined"
@@ -533,51 +522,20 @@ function Tooltip({ concept, position, session }: { concept: Concept | null; posi
     : concept.short_summary;
 
   return (
-    <Html position={position} center style={{ pointerEvents: editingTooltip ? "auto" : "none" }}>
+    <Html position={position} center style={{ pointerEvents: "none" }}>
       <div style={{
         background: "var(--surface)",
         border: "1px solid var(--border-strong)",
         color: "var(--text)",
         padding: "8px 16px",
         borderRadius: "8px",
-        maxWidth: "480px",
+        width: "480px",
         backdropFilter: "blur(8px)",
         boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-        pointerEvents: editingTooltip ? "auto" : "none",
+        pointerEvents: "none",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <p style={{ fontWeight: 600, color: "var(--accent-mid)", fontSize: "13px", flex: 1 }}>{concept.name}</p>
-          {session && !editingTooltip && (
-            <button
-              onClick={(e) => { e.stopPropagation(); setEditingTooltip(true); }}
-              style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", fontSize: "12px", padding: "2px", pointerEvents: "auto" }}
-              title="Edit summary"
-            >✏️</button>
-          )}
-        </div>
-        {editingTooltip ? (
-          <div style={{ marginTop: "4px" }}>
-            <textarea
-              value={editSummary}
-              onChange={(e) => setEditSummary(e.target.value)}
-              rows={3}
-              style={{ width: "100%", fontSize: "11px", background: "var(--bg)", color: "var(--text)", border: "1px solid var(--border)", borderRadius: "4px", padding: "4px", resize: "vertical" }}
-              onClick={(e) => e.stopPropagation()}
-            />
-            <div style={{ display: "flex", gap: "4px", marginTop: "4px" }}>
-              <button
-                onClick={(e) => { e.stopPropagation(); localStorage.setItem(`concept-short-summary-${concept.id}`, editSummary); setEditingTooltip(false); }}
-                style={{ fontSize: "10px", padding: "2px 8px", background: "var(--accent)", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}
-              >Save</button>
-              <button
-                onClick={(e) => { e.stopPropagation(); setEditingTooltip(false); }}
-                style={{ fontSize: "10px", padding: "2px 8px", background: "var(--border)", color: "var(--text)", border: "none", borderRadius: "4px", cursor: "pointer" }}
-              >Cancel</button>
-            </div>
-          </div>
-        ) : (
-          <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }} dangerouslySetInnerHTML={{ __html: renderLatex(displaySummary) }} />
-        )}
+        <p style={{ fontWeight: 600, color: "var(--accent-mid)", fontSize: "13px" }}>{concept.name}</p>
+        <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }} dangerouslySetInnerHTML={{ __html: renderLatex(displaySummary) }} />
         {concept.date_learned && (
           <p style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "4px", opacity: 0.7 }}>
             Added: {new Date(concept.date_learned).toLocaleDateString()}
@@ -679,7 +637,7 @@ function Scene({ concepts, dispersionRef, onConceptClick, hasSession }: { concep
         </group>
       </group>
       <ConceptDots concepts={concepts} onHover={handleHover} onClick={onConceptClick} />
-      <Tooltip concept={hovered} position={hoveredPos} session={hasSession} />
+      <Tooltip concept={hovered} position={hoveredPos} />
       <OrbitControls
         enableZoom={false}
         enablePan={false}
