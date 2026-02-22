@@ -3,9 +3,11 @@
 import { motion } from "framer-motion";
 import { ExternalLink, Github } from "lucide-react";
 import { Project } from "@/types";
+import { useRouter } from "next/navigation";
 import LatexText from "@/components/LatexText";
 
 export default function Projects({ projects }: { projects: Project[] }) {
+  const router = useRouter();
   return (
     <section id="projects" className="py-24 px-4 max-w-6xl mx-auto">
       <motion.h2
@@ -26,10 +28,11 @@ export default function Projects({ projects }: { projects: Project[] }) {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: i * 0.1 }}
             viewport={{ once: true }}
-            className="group relative rounded-xl p-6 transition-all duration-300"
+            className="group relative rounded-xl p-6 transition-all duration-300 cursor-pointer"
             style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
             onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
             onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+            onClick={() => project.id && router.push(`/project/${project.id}`)}
           >
             <div className="relative">
               <h3 className="text-lg font-semibold mb-2" style={{ color: "var(--text)" }}>{project.title}</h3>
@@ -47,12 +50,12 @@ export default function Projects({ projects }: { projects: Project[] }) {
               </div>
               <div className="flex gap-3">
                 {project.link && (
-                  <a href={project.link} target="_blank" rel="noopener noreferrer" style={{ color: "var(--text-muted)" }}>
+                  <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: "var(--text-muted)" }}>
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 )}
                 {project.github && (
-                  <a href={project.github} target="_blank" rel="noopener noreferrer" style={{ color: "var(--text-muted)" }}>
+                  <a href={project.github} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: "var(--text-muted)" }}>
                     <Github className="w-4 h-4" />
                   </a>
                 )}

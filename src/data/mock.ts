@@ -125,76 +125,384 @@ export const mockConcepts: Concept[] = [
 
 export const mockProjects: Project[] = [
   {
+    id: "agentic-bi",
     title: "Agentic BI Decision Engine",
     description: "Designing an agentic BI decision engine at Globalink AI combining ML models, LLMs, and Knowledge Graphs to generate actionable e-commerce merchant recommendations across growth, margin optimization, and inventory risk.",
     tech: ["Python", "LLM", "Knowledge Graphs", "Machine Learning", "Deep Learning", "NLP"],
+    content: `## Overview
+
+Building an agentic business intelligence system at Globalink AI that reasons across competing merchant objectives — growth vs. margin optimization vs. inventory risk — to produce actionable recommendations for e-commerce merchants.
+
+## Architecture
+
+The system combines three core components:
+
+- **ML Models** — Predictive models for demand forecasting, price elasticity, and inventory depletion
+- **Knowledge Graphs** — Constraint modeling that encodes business rules, product relationships, and market dynamics
+- **LLM Reasoning** — Large language model layer that synthesizes model outputs with KG constraints to generate explainable decisions
+
+## Key Challenges
+
+1. **Multi-objective optimization** — Balancing growth, margin, and risk requires Pareto-optimal reasoning rather than single-metric optimization
+2. **Explainability** — Every recommendation must trace back to specific data points and constraints
+3. **Cold-start merchants** — Few-shot learning and Bayesian updating for reliable decisions from limited operational data
+
+## Evaluation Framework
+
+Measuring decision quality through:
+- Merchant outcome metrics (revenue lift, margin improvement)
+- A/B-tested recommendation lift against baseline strategies
+- Consistency audits ensuring recommendations don't contradict across related SKUs`,
   },
   {
+    id: "sublora-bounds",
     title: "Extending Non-Vacuous Generalization Bounds for LLMs",
     description: "Extended SubLoRA framework for PAC-Bayes generalization bounds on GPT-2 with adaptive per-layer subspace allocation. Resolved 857x performance bottleneck on A100 GPUs via tensor caching.",
     tech: ["Python", "PyTorch", "Deep Learning", "HPC", "Machine Learning"],
+    content: `## Overview
+
+Extended the SubLoRA framework to achieve non-vacuous PAC-Bayes generalization bounds on GPT-2, developing adaptive per-layer subspace allocation that better captures the varying complexity across transformer layers.
+
+## The Performance Bottleneck
+
+The original implementation had a critical bottleneck: projection matrices were being recomputed on every forward pass across all projection classes. This resulted in training times of ~7 days per experiment on A100 GPUs.
+
+**Solution:** Implemented tensor caching across projection classes, reducing per-experiment added training time from ~7 days to ~12 minutes — an **857x speedup**.
+
+## Adaptive Per-Layer Allocation
+
+Standard SubLoRA uses uniform subspace dimensions across all layers. Our key insight: different layers in a transformer capture different levels of abstraction and should have proportionally different subspace sizes.
+
+We developed an allocation strategy that:
+- Assigns larger subspaces to attention layers (which capture complex token relationships)
+- Uses smaller subspaces for feed-forward layers (which perform simpler transformations)
+- Dynamically adjusts based on per-layer gradient statistics during early training
+
+## Results
+
+Achieved competitive non-vacuous generalization bounds on OpenWebText, demonstrating that large language models can provably generalize rather than merely memorize their training data.
+
+## Infrastructure
+
+All experiments ran on NYU HPC (SLURM) with A100 GPUs, using a custom training/evaluation pipeline with automated hyperparameter sweeps.`,
   },
   {
+    id: "curiosity",
     title: "Curiosity – AI Chat Platform",
     description: "Full-stack AI chat app with conversation branching, dialogue tree visualization, multi-provider LLM support (OpenAI, Anthropic, Gemini, Ollama), OAuth, and vector-embedding memory for RAG context.",
     tech: ["TypeScript", "JavaScript", "Next.js", "React", "Supabase", "RAG", "NLP", "Tailwind CSS"],
     link: "https://curiositylm.app",
     github: "https://github.com/sunnydigital/curiosity",
+    content: `## Overview
+
+Curiosity is a full-stack AI chat application that reimagines how we interact with language models. Instead of linear conversations, users can branch, explore, and navigate nonlinear dialogue paths.
+
+## Key Features
+
+### Conversation Branching
+Users can highlight any passage in a conversation to spawn a contextual branch — exploring tangential topics without losing their place in the main thread. Each branch inherits context from its parent.
+
+### Dialogue Tree Visualization
+An interactive tree visualization lets users see the full structure of their conversation, navigate between branches, and understand the relationships between different discussion threads.
+
+### Multi-Provider LLM Support
+- **OpenAI** (GPT-4, GPT-3.5)
+- **Anthropic** (Claude)
+- **Google** (Gemini)
+- **Local** (Ollama for privacy-first usage)
+
+### Vector-Embedding Memory
+A persistent RAG system using vector embeddings that gives the AI long-term memory across conversations, enabling it to reference past discussions and maintain context over time.
+
+## Tech Stack
+
+- **Frontend:** Next.js, React, Tailwind CSS
+- **Backend:** Supabase (PostgreSQL + Auth + Realtime)
+- **Deployment:** Vercel
+- **Auth:** OAuth integration with multiple providers`,
   },
   {
+    id: "enterprise-rag",
     title: "Enterprise RAG LLM System",
     description: "Engineered an enterprise-scale RAG system at Amazon serving 15,000 tables across 200 schemas with automated DDL generation, git-style versioning, and Slack notifications using AWS S3, Bedrock, and Redshift.",
     tech: ["Python", "AWS Bedrock", "Redshift", "S3", "RAG", "SQL", "Slack API"],
+    content: `## Overview
+
+Built an enterprise-scale Retrieval-Augmented Generation system at Amazon that serves 15,000 tables across 200 schemas, dramatically reducing the time engineers spend discovering and understanding data assets.
+
+## The Problem
+
+Data engineers spent hours manually searching through thousands of database tables to find relevant data for their queries. Schema documentation was sparse, outdated, or nonexistent.
+
+## Solution
+
+### Automated DDL Generation
+Built a pipeline that automatically generates human-readable descriptions for every table and column, using LLMs to infer semantics from column names, data samples, and usage patterns.
+
+### Intelligent Retrieval
+Combined dense embeddings with sparse BM25 search for hybrid retrieval that handles both semantic queries ("find tables about customer transactions") and exact matches ("CUST_TXN_HIST table").
+
+### Git-Style Versioning
+Implemented md5 hash-based difference tracking for schema changes, enabling:
+- Rollback to any previous schema state
+- Diff views showing what changed between versions
+- Reduced schema conflicts by 60%
+
+### Real-Time Monitoring
+Slack API integration providing automated notifications on daily table schema modifications, cutting manual monitoring overhead by 90%.
+
+## Impact
+
+- **75% reduction** in data discovery time
+- **60% fewer** schema conflicts
+- **90% less** manual monitoring overhead`,
   },
   {
+    id: "ddpm-histopath",
     title: "DDPM for Histopathologic Images",
     description: "Built denoising diffusion probabilistic models for histopathologic cancer detection on the Patch Camelyon dataset with comprehensive ablation studies.",
     tech: ["Python", "PyTorch", "Diffusion Models", "Computer Vision", "Deep Learning"],
+    content: `## Overview
+
+Applied Denoising Diffusion Probabilistic Models (DDPMs) to histopathologic cancer detection using the Patch Camelyon (PCam) dataset containing 327,680 image patches.
+
+## Architecture
+
+- **Backbone:** U-Net with residual blocks and group normalization
+- **Attention:** Self-attention at 16x16 and 8x8 resolutions
+- **Time Embedding:** Sinusoidal positional encoding
+- **Noise Schedule:** Linear (β₁ = 1e-4, βT = 0.02)
+
+## Ablation Studies
+
+Conducted comprehensive ablations revealing:
+1. **Noise schedule** had the largest impact on sample quality
+2. **Attention layers** were second most impactful
+3. **Model depth** beyond 4 blocks showed diminishing returns
+4. **Lower learning rates** (1e-5) outperformed typical 2e-4
+5. **Color augmentation hurt** — stain colors carry diagnostic meaning in medical images
+
+## Key Finding
+
+Diffusion-pretrained features transferred beautifully to classification, improving cancer detection accuracy by 3.2% over training from scratch.`,
   },
   {
+    id: "medical-imaging",
     title: "Medical Imaging Pipeline (NYU Langone)",
     description: "End-to-end ML pipeline for biomedical data with U-Net CNN architectures, transfer learning, and pathway analysis for cardiovascular research. Reduced processing from 8 hours to 45 minutes.",
     tech: ["Python", "PyTorch", "Keras", "Computer Vision", "Deep Learning", "R", "Scikit-Learn", "OpenCV"],
+    content: `## Overview
+
+Developed a comprehensive machine learning pipeline at NYU Langone Health for biomedical data analysis, supporting cardiovascular research through computer vision and bioinformatics approaches.
+
+## Computer Vision Component
+
+Implemented U-Net convolutional neural network architectures with transfer learning for medical image segmentation:
+- Analyzed over 2,000 microscopy samples
+- Achieved 15% improvement in segmentation accuracy
+- Applied data augmentation techniques tailored for medical imaging
+
+## Data Pipeline Optimization
+
+Designed the end-to-end preprocessing pipeline that:
+- Reduced processing time from **8 hours to 45 minutes**
+- Maintained over 90% data quality
+- Used feature engineering and domain-specific augmentation
+
+## Pathway Analysis
+
+Identified key biological pathways involved in:
+- Glucose uptake and transport
+- Lipid uptake and oxidation
+- Targeted therapeutic interventions for cardiovascular conditions
+
+## Bioinformatics
+
+- Composed 2,000+ lines of R code for comprehensive analysis
+- Processed datasets with over 300,000 records
+- Implemented dimensionality reduction (UMAP, t-SNE) for immune cell clustering
+- Applied trajectory inference modeling for CXCL12/CXCR4/ACKR3 receptor interactions and CD8+ T Cell dynamics`,
   },
   {
+    id: "web-summarizer",
     title: "ChatGPT Web Summarizer Plugin",
     description: "A ChatGPT companion plugin that parses URL content (HTML/PDF) for conversational agents, enabling real-time webpage summarization and information extraction.",
     tech: ["Python", "ChatGPT Plugins", "HTML Parsing", "NLP"],
     github: "https://github.com/sunnydigital/web-sum",
+    content: `## Overview
+
+A ChatGPT companion plugin that enables real-time webpage summarization by parsing URL content (HTML and PDF) and feeding it to conversational agents for intelligent information extraction.
+
+## How It Works
+
+1. User provides a URL to the ChatGPT plugin
+2. The plugin fetches and parses the page content (supports both HTML and PDF)
+3. Content is cleaned, structured, and sent to the LLM
+4. ChatGPT can then answer questions about, summarize, or analyze the content
+
+## Technical Details
+
+- **HTML Parsing** — Extracts main content while filtering navigation, ads, and boilerplate
+- **PDF Extraction** — Handles multi-page documents with proper text ordering
+- **Content Chunking** — Intelligently splits large documents to fit within context windows
+- **Plugin API** — Follows the OpenAI ChatGPT Plugin specification for seamless integration`,
   },
   {
+    id: "datathon-winner",
     title: "NYU DSC x Peak AI Datathon — Winner",
     description: "Built a winning recommender system using k-NN with GloVe-50d embeddings, competing against 50+ teams in the NYU Data Science Club x Peak.AI datathon.",
     tech: ["Python", "k-NN", "GloVe", "Recommender Systems", "Scikit-Learn"],
     github: "https://github.com/sunnydigital/datathon-f22",
+    content: `## Overview
+
+Won first place in the NYU Data Science Club x Peak.AI datathon (Fall 2022), competing against 50+ teams to build the best recommender system.
+
+## Approach
+
+Used k-Nearest Neighbors with GloVe-50d word embeddings to build a content-based recommendation engine that could match users with relevant items based on semantic similarity.
+
+## Why GloVe + k-NN?
+
+- **GloVe embeddings** capture semantic relationships between words in a dense 50-dimensional space
+- **k-NN** provides interpretable, tunable recommendations with clear similarity scores
+- The combination offered a strong balance of accuracy and explainability — key for the judging criteria
+
+## Results
+
+The approach outperformed more complex models (neural collaborative filtering, matrix factorization) submitted by other teams, demonstrating that well-chosen simple methods with strong feature engineering can beat complex architectures.`,
   },
   {
+    id: "stock-forecasting",
     title: "NeuralProphet Stock Forecasting",
     description: "Stock price forecasting using NeuralProphet time-series decomposition with AR-Net and additive events for IT sector stocks.",
     tech: ["Python", "NeuralProphet", "Time Series", "PyTorch"],
+    content: `## Overview
+
+Built a stock price forecasting system for IT sector stocks using NeuralProphet, which combines the decomposability of Prophet with the power of neural networks.
+
+## Method
+
+NeuralProphet decomposes time series into:
+- **Trend** — Long-term directional movement
+- **Seasonality** — Recurring patterns (weekly, monthly, quarterly)
+- **AR-Net** — Auto-regressive neural network component for capturing complex temporal dependencies
+- **Additive Events** — Incorporating external events (earnings reports, market events) as features
+
+## Key Insights
+
+- AR-Net significantly improved short-term prediction accuracy over vanilla Prophet
+- Event features for earnings dates and market-moving announcements added meaningful signal
+- Ensemble of per-stock models outperformed a single cross-stock model`,
   },
   {
+    id: "esg-nlp",
     title: "ESG NLP Classification",
     description: "Fine-tuned language models on Reddit ESG data with SHAP feature attribution for interpretable ESG scoring and analysis.",
     tech: ["Python", "NLP", "SHAP", "Hugging Face Transformers", "Scikit-Learn"],
     github: "https://github.com/sunnydigital/nlp-f22",
+    content: `## Overview
+
+Fine-tuned language models to classify Environmental, Social, and Governance (ESG) sentiment from Reddit discussions, with SHAP-based feature attribution for interpretable scoring.
+
+## Data
+
+Collected and processed Reddit posts and comments related to ESG topics, creating a labeled dataset for multi-class classification across E, S, and G categories.
+
+## Model
+
+- **Base Model:** Pre-trained transformer (Hugging Face)
+- **Fine-tuning:** Domain-adapted on ESG Reddit corpus
+- **Interpretability:** SHAP (SHapley Additive exPlanations) values for every prediction
+
+## Why SHAP?
+
+ESG scoring needs to be explainable — investors and analysts need to understand *why* a company scores a certain way. SHAP provides:
+- Per-feature importance for each prediction
+- Visual explanations showing which words/phrases drove the classification
+- Consistency and additivity properties that make explanations trustworthy`,
   },
   {
+    id: "persona-emulation",
     title: "Persona Emulation & Dialogue",
     description: "Fine-tuning GPT-3 on movie, book, and game dialogue (LotR, Harry Potter, FF XIV) to generate character-specific responses.",
     tech: ["Python", "GPT-3", "Fine-tuning", "NLP"],
+    content: `## Overview
+
+Fine-tuned GPT-3 on dialogue from iconic fictional universes to generate character-specific responses that capture the voice, mannerisms, and knowledge of individual characters.
+
+## Characters & Sources
+
+- **Lord of the Rings** — Gandalf, Aragorn, Frodo
+- **Harry Potter** — Dumbledore, Snape, Hermione
+- **Final Fantasy XIV** — Various NPCs and story characters
+
+## Approach
+
+1. **Data Collection** — Extracted dialogue scripts and organized by character
+2. **Prompt Engineering** — Designed templates that set character context and voice
+3. **Fine-tuning** — Trained separate LoRA adapters per character on GPT-3
+4. **Evaluation** — Human evaluation for voice consistency, knowledge accuracy, and engagement
+
+## Fun Results
+
+The models captured subtle character traits — Gandalf's tendency to speak in riddles, Snape's sarcasm, Hermione's precision. The FF XIV characters were particularly interesting as they blend formal fantasy language with game-specific terminology.`,
   },
   {
+    id: "cover-gen",
     title: "Cover Letter Generator",
     description: "A Python CLI tool that generates tailored cover letters using AI, streamlining the job application process.",
     tech: ["Python", "CLI", "NLP", "OpenAI"],
     github: "https://github.com/sunnydigital/cover-gen",
+    content: `## Overview
+
+A command-line tool that generates personalized cover letters by combining your resume with job descriptions, using OpenAI's API to produce tailored, professional letters.
+
+## Usage
+
+\`\`\`bash
+cover-gen --resume resume.pdf --job "https://job-posting-url.com"
+\`\`\`
+
+## Features
+
+- **PDF Resume Parsing** — Automatically extracts your experience and skills
+- **Job Description Analysis** — Identifies key requirements and keywords
+- **Intelligent Matching** — Highlights relevant experience for each specific role
+- **Multiple Tones** — Professional, conversational, or enthusiastic
+- **Batch Mode** — Generate letters for multiple job postings at once
+
+## Why CLI?
+
+A CLI tool fits naturally into a job search workflow — scriptable, fast, and can be combined with other tools. No web UI overhead, just results.`,
   },
   {
+    id: "galaxy-portfolio",
     title: "3D Galaxy Portfolio",
     description: "This portfolio site — interactive 3D galaxy visualization with Three.js, scroll-driven mode transitions, UMAP clustering, and concept management.",
     tech: ["TypeScript", "JavaScript", "Next.js", "React", "Three.js", "Tailwind CSS", "WebGL"],
     link: "https://www.sunnyson.dev",
+    content: `## Overview
+
+This very website — an interactive 3D galaxy visualization where each star represents a concept I've learned, with scroll-driven transitions between three viewing modes.
+
+## Visualization Modes
+
+- **Galaxy** — Procedural spiral galaxy (7000 stars) using the pickles976 algorithm with bloom post-processing
+- **Clusters** — UMAP dimensionality reduction groups concepts by semantic similarity using client-side embeddings
+- **Timeline** — Chronological sin(x) wave arrangement of concepts
+
+## Technical Highlights
+
+- **Procedural Galaxy** — Gaussian random + spiral function, core/outer-core/2-arm structure
+- **Client-Side Embeddings** — Hugging Face Transformers (all-MiniLM-L6-v2, 384-dim) running in the browser
+- **Deterministic UMAP** — Seeded PRNG ensures consistent cluster positions across page loads
+- **Scroll Trap** — Wheel events intercepted to switch visualization modes before allowing page scroll
+- **KaTeX** — LaTeX rendering throughout the site for mathematical content
+- **Google OAuth** — Restricted login for content management
+
+## Stack
+
+Next.js, React Three Fiber, Three.js, Framer Motion, NextAuth, Vercel, Tailwind CSS`,
   },
 ];
 
