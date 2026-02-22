@@ -2,7 +2,8 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ArrowLeft, Edit3, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Edit3, Trash2, Save, X } from "lucide-react";
 import { mockPosts } from "@/data/mock";
 import ImageGallery from "@/components/ImageGallery";
 
@@ -26,15 +27,77 @@ export default function PostDetail() {
   const router = useRouter();
   const { data: session } = useSession();
 
-  const post = mockPosts.find((p) => p.id === params.id);
+  const basePost = mockPosts.find((p) => p.id === params.id);
 
-  if (!post) {
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState("");
+  const [excerpt, setExcerpt] = useState("");
+  const [content, setContent] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState("");
+
+  useEffect(() => {
+    if (!basePost) return;
+    const saved = localStorage.getItem(`post-edit-${basePost.id}`);
+    if (saved) {
+      const data = JSON.parse(saved);
+      setTitle(data.title ?? basePost.title);
+      setExcerpt(data.excerpt ?? basePost.excerpt);
+      setContent(data.content ?? basePost.content);
+      setTags(data.tags ?? basePost.tags);
+    } else {
+      setTitle(basePost.title);
+      setExcerpt(basePost.excerpt);
+      setContent(basePost.content);
+      setTags([...basePost.tags]);
+    }
+  }, [basePost]);
+
+  if (!basePost) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--bg)" }}>
         <p style={{ color: "var(--text-muted)" }}>Post not found.</p>
       </div>
     );
   }
+
+  const handleSave = () => {
+    localStorage.setItem(`post-edit-${basePost.id}`, JSON.stringify({ title, excerpt, content, tags }));
+    setEditing(false);
+  };
+
+  const handleCancel = () => {
+    const saved = localStorage.getItem(`post-edit-${basePost.id}`);
+    if (saved) {
+      const data = JSON.parse(saved);
+      setTitle(data.title ?? basePost.title);
+      setExcerpt(data.excerpt ?? basePost.excerpt);
+      setContent(data.content ?? basePost.content);
+      setTags(data.tags ?? basePost.tags);
+    } else {
+      setTitle(basePost.title);
+      setExcerpt(basePost.excerpt);
+      setContent(basePost.content);
+      setTags([...basePost.tags]);
+    }
+    setEditing(false);
+  };
+
+  const handleDelete = () => {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    const hidden = JSON.parse(localStorage.getItem("hidden-posts") || "[]") as string[];
+    hidden.push(basePost.id);
+    localStorage.setItem("hidden-posts", JSON.stringify(hidden));
+    localStorage.removeItem(`post-edit-${basePost.id}`);
+    router.push("/#posts");
+  };
+
+  const removeTag = (tag: string) => setTags((prev) => prev.filter((t) => t !== tag));
+  const addTag = () => {
+    const t = newTag.trim();
+    if (t && !tags.includes(t)) setTags((prev) => [...prev, t]);
+    setNewTag("");
+  };
 
   return (
     <div className="min-h-screen px-4 py-20" style={{ background: "var(--bg)" }}>
@@ -50,38 +113,81 @@ export default function PostDetail() {
         </button>
 
         <div className="mb-2 text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-          {new Date(post.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+          {new Date(basePost.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
         </div>
 
-        <h1 className="text-4xl font-bold mb-4" style={{ color: "var(--text)" }}>
-          {post.title}
-        </h1>
+        {editing ? (
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="text-4xl font-bold mb-4 w-full bg-transparent focus:outline-none"
+            style={{ color: "var(--text)", borderBottom: "1px solid var(--border)" }}
+          />
+        ) : (
+          <h1 className="text-4xl font-bold mb-4" style={{ color: "var(--text)" }}>
+            {title}
+          </h1>
+        )}
 
-        <div className="flex flex-wrap gap-2 mb-8">
-          {post.tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-xs px-2 py-0.5 rounded-full"
-              style={{
-                background: "rgba(2,132,199,0.1)",
-                color: "var(--accent-mid)",
-                border: "1px solid rgba(2,132,199,0.2)",
-              }}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+        {editing ? (
+          <textarea
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value)}
+            rows={2}
+            className="text-sm mb-4 w-full bg-transparent focus:outline-none resize-y p-2 rounded-lg"
+            style={{ color: "var(--text-muted)", border: "1px solid var(--border)" }}
+            placeholder="Excerpt..."
+          />
+        ) : null}
 
-        {session && (
+        {editing ? (
+          <div className="mb-6">
+            <div className="flex flex-wrap gap-2 mb-2">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-xs px-2 py-0.5 rounded-full flex items-center gap-1"
+                  style={{ background: "rgba(2,132,199,0.1)", color: "var(--accent-mid)", border: "1px solid rgba(2,132,199,0.2)" }}
+                >
+                  {tag}
+                  <button onClick={() => removeTag(tag)} className="hover:text-red-400 cursor-pointer"><X className="w-3 h-3" /></button>
+                </span>
+              ))}
+            </div>
+            <input
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
+              placeholder="Add tag + Enter"
+              className="text-xs px-2 py-1 rounded-lg bg-transparent focus:outline-none"
+              style={{ color: "var(--text)", border: "1px solid var(--border)" }}
+            />
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2 mb-8">
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="text-xs px-2 py-0.5 rounded-full"
+                style={{ background: "rgba(2,132,199,0.1)", color: "var(--accent-mid)", border: "1px solid rgba(2,132,199,0.2)" }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {session && !editing && (
           <div className="flex gap-2 mb-8">
             <button
+              onClick={() => setEditing(true)}
               className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg transition-colors cursor-pointer"
               style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
             >
               <Edit3 className="w-3 h-3" /> Edit
             </button>
             <button
+              onClick={handleDelete}
               className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg transition-colors cursor-pointer"
               style={{ color: "#ff6464", border: "1px solid rgba(255,100,100,0.3)" }}
             >
@@ -90,20 +196,49 @@ export default function PostDetail() {
           </div>
         )}
 
-        {post.images && post.images.length > 0 && (
-          <ImageGallery images={post.images} />
+        {editing && (
+          <div className="flex gap-2 mb-8">
+            <button
+              onClick={handleSave}
+              className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg cursor-pointer"
+              style={{ background: "var(--accent)", color: "#fff" }}
+            >
+              <Save className="w-3 h-3" /> Save
+            </button>
+            <button
+              onClick={handleCancel}
+              className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg cursor-pointer"
+              style={{ color: "var(--text-muted)", border: "1px solid var(--border)" }}
+            >
+              <X className="w-3 h-3" /> Cancel
+            </button>
+          </div>
         )}
 
-        <div
-          className="rounded-xl p-6 mt-6"
-          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
-        >
-          <div
-            className="text-sm"
-            style={{ color: "var(--text)", lineHeight: 1.8 }}
-            dangerouslySetInnerHTML={{ __html: markdownToHtml(post.content) }}
-          />
-        </div>
+        {basePost.images && basePost.images.length > 0 && (
+          <ImageGallery images={basePost.images} />
+        )}
+
+        {editing ? (
+          <div className="rounded-xl p-6 mt-6" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={16}
+              className="w-full bg-transparent text-sm leading-relaxed focus:outline-none resize-y font-mono"
+              style={{ color: "var(--text)", lineHeight: 1.8 }}
+              placeholder="Post content (supports markdown)..."
+            />
+          </div>
+        ) : (
+          <div className="rounded-xl p-6 mt-6" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+            <div
+              className="text-sm"
+              style={{ color: "var(--text)", lineHeight: 1.8 }}
+              dangerouslySetInnerHTML={{ __html: markdownToHtml(content) }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

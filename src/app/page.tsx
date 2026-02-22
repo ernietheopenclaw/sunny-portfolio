@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { mockConcepts, mockProjects, mockSkills } from "@/data/mock";
+import { mockConcepts, mockProjects, mockSkills, mockPosts } from "@/data/mock";
 import { getAllConcepts } from "@/lib/concepts";
 import Navbar from "@/components/Navbar";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -25,19 +25,31 @@ const GalaxyVisualization = dynamic(
 export default function Home() {
   const [concepts, setConcepts] = useState(mockConcepts);
   const [projects, setProjects] = useState(mockProjects);
+  const [posts, setPosts] = useState(mockPosts);
   const [galaxyReady, setGalaxyReady] = useState(false);
 
-  // Load user-added concepts and hidden projects from localStorage after mount
+  // Load user-added concepts and hidden projects/posts from localStorage after mount
   useEffect(() => {
     setConcepts(getAllConcepts());
-    const hidden = JSON.parse(localStorage.getItem("hidden-projects") || "[]") as string[];
-    if (hidden.length > 0) {
-      setProjects(mockProjects.filter((p) => !hidden.includes(p.id)));
+    const hiddenProjects = JSON.parse(localStorage.getItem("hidden-projects") || "[]") as string[];
+    if (hiddenProjects.length > 0) {
+      setProjects(mockProjects.filter((p) => !hiddenProjects.includes(p.id)));
+    }
+    const hiddenPosts = JSON.parse(localStorage.getItem("hidden-posts") || "[]") as string[];
+    if (hiddenPosts.length > 0) {
+      setPosts(mockPosts.filter((p) => !hiddenPosts.includes(p.id)));
     }
   }, []);
 
   const handleConceptAdded = useCallback(() => {
     setConcepts(getAllConcepts());
+  }, []);
+
+  const handleDeletePost = useCallback((id: string) => {
+    const hidden = JSON.parse(localStorage.getItem("hidden-posts") || "[]") as string[];
+    hidden.push(id);
+    localStorage.setItem("hidden-posts", JSON.stringify(hidden));
+    setPosts((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
   const handleDeleteProject = useCallback((id: string) => {
@@ -64,7 +76,7 @@ export default function Home() {
           <About />
           <Projects projects={projects} onDelete={handleDeleteProject} />
           <Papers />
-          <Posts />
+          <Posts posts={posts} onDelete={handleDeletePost} />
           <Skills skills={mockSkills} projects={projects} />
           <Resume />
           <Links />

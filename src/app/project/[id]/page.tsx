@@ -33,6 +33,8 @@ export default function ProjectDetail() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [content, setContent] = useState("");
+  const [tech, setTech] = useState<string[]>([]);
+  const [newTech, setNewTech] = useState("");
 
   // Load any saved edits from localStorage
   useEffect(() => {
@@ -43,10 +45,12 @@ export default function ProjectDetail() {
       setTitle(data.title ?? baseProject.title);
       setDescription(data.description ?? baseProject.description);
       setContent(data.content ?? baseProject.content ?? "");
+      setTech(data.tech ?? [...baseProject.tech]);
     } else {
       setTitle(baseProject.title);
       setDescription(baseProject.description);
       setContent(baseProject.content ?? "");
+      setTech([...baseProject.tech]);
     }
   }, [baseProject]);
 
@@ -59,7 +63,7 @@ export default function ProjectDetail() {
   }
 
   const handleSave = () => {
-    localStorage.setItem(`project-edit-${baseProject.id}`, JSON.stringify({ title, description, content }));
+    localStorage.setItem(`project-edit-${baseProject.id}`, JSON.stringify({ title, description, content, tech }));
     setEditing(false);
   };
 
@@ -70,10 +74,12 @@ export default function ProjectDetail() {
       setTitle(data.title ?? baseProject.title);
       setDescription(data.description ?? baseProject.description);
       setContent(data.content ?? baseProject.content ?? "");
+      setTech(data.tech ?? [...baseProject.tech]);
     } else {
       setTitle(baseProject.title);
       setDescription(baseProject.description);
       setContent(baseProject.content ?? "");
+      setTech([...baseProject.tech]);
     }
     setEditing(false);
   };
@@ -127,21 +133,49 @@ export default function ProjectDetail() {
           </p>
         )}
 
-        <div className="flex flex-wrap gap-2 mb-6">
-          {baseProject.tech.map((t) => (
-            <span
-              key={t}
-              className="text-xs px-2 py-0.5 rounded-full"
-              style={{
-                background: "rgba(2,132,199,0.1)",
-                color: "var(--accent-mid)",
-                border: "1px solid rgba(2,132,199,0.2)",
+        {editing ? (
+          <div className="mb-6">
+            <div className="flex flex-wrap gap-2 mb-2">
+              {tech.map((t) => (
+                <span
+                  key={t}
+                  className="text-xs px-2 py-0.5 rounded-full flex items-center gap-1"
+                  style={{ background: "rgba(2,132,199,0.1)", color: "var(--accent-mid)", border: "1px solid rgba(2,132,199,0.2)" }}
+                >
+                  {t}
+                  <button onClick={() => setTech((prev) => prev.filter((x) => x !== t))} className="hover:text-red-400 cursor-pointer"><X className="w-3 h-3" /></button>
+                </span>
+              ))}
+            </div>
+            <input
+              value={newTech}
+              onChange={(e) => setNewTech(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const v = newTech.trim();
+                  if (v && !tech.includes(v)) setTech((prev) => [...prev, v]);
+                  setNewTech("");
+                }
               }}
-            >
-              {t}
-            </span>
-          ))}
-        </div>
+              placeholder="Add tech + Enter"
+              className="text-xs px-2 py-1 rounded-lg bg-transparent focus:outline-none"
+              style={{ color: "var(--text)", border: "1px solid var(--border)" }}
+            />
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {tech.map((t) => (
+              <span
+                key={t}
+                className="text-xs px-2 py-0.5 rounded-full"
+                style={{ background: "rgba(2,132,199,0.1)", color: "var(--accent-mid)", border: "1px solid rgba(2,132,199,0.2)" }}
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="flex gap-3 mb-4">
           {baseProject.link && (

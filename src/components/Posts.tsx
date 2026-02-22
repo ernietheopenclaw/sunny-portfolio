@@ -1,10 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { mockPosts } from "@/data/mock";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { X } from "lucide-react";
+import { Post } from "@/types";
 
-export default function Posts() {
+export default function Posts({ posts, onDelete }: { posts: Post[]; onDelete?: (id: string) => void }) {
+  const { data: session } = useSession();
   return (
     <section id="posts" className="py-24 px-4 max-w-4xl mx-auto">
       <motion.div
@@ -21,16 +24,28 @@ export default function Posts() {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {mockPosts.map((post, i) => (
+          {posts.map((post, i) => (
             <motion.div
               key={post.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="rounded-xl p-6 flex flex-col"
+              className="group relative rounded-xl p-6 flex flex-col overflow-visible"
               style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
             >
+              {session && onDelete && (
+                <button
+                  onClick={() => {
+                    if (confirm(`Delete "${post.title}"?`)) onDelete(post.id);
+                  }}
+                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10"
+                  style={{ background: "#ff4444", color: "#fff", boxShadow: "0 2px 8px rgba(255,68,68,0.4)" }}
+                  title="Delete post"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
               <p className="text-xs font-mono mb-2" style={{ color: "var(--text-muted)" }}>
                 {new Date(post.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
               </p>
