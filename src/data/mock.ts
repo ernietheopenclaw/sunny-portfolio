@@ -158,7 +158,7 @@ Measuring decision quality through:
     id: "sublora-bounds",
     title: "Extending Non-Vacuous Generalization Bounds for LLMs",
     description: "Extended SubLoRA framework for PAC-Bayes generalization bounds on GPT-2 with adaptive per-layer subspace allocation. Resolved 857x performance bottleneck on A100 GPUs via tensor caching.",
-    tech: ["Python", "PyTorch", "Deep Learning", "HPC", "Machine Learning"],
+    tech: ["Python", "PyTorch", "Deep Learning", "HPC", "Singularity", "Machine Learning"],
     content: `## Overview
 
 Extended the SubLoRA framework to achieve non-vacuous PAC-Bayes generalization bounds on GPT-2, developing adaptive per-layer subspace allocation that better captures the varying complexity across transformer layers.
