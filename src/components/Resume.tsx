@@ -69,6 +69,7 @@ const interests = [
 const languages = [
   { lang: "Mandarin", level: "Proficient" },
   { lang: "Spanish", level: "Elementary" },
+  { lang: "Japanese", level: "Elementary" },
 ];
 
 export default function Resume() {
