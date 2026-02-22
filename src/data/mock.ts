@@ -544,7 +544,8 @@ export const mockSkills: Skill[] = [
   { name: "Supabase", level: 78, category: "Cloud & Infrastructure" },
   // MLOps & Tools
   { name: "Git", level: 88, category: "MLOps & Tools" },
-  { name: "Docker / Singularity", level: 75, category: "MLOps & Tools" },
+  { name: "Docker", level: 75, category: "MLOps & Tools" },
+  { name: "Singularity", level: 70, category: "MLOps & Tools" },
   { name: "Next.js", level: 82, category: "MLOps & Tools" },
   { name: "React", level: 80, category: "MLOps & Tools" },
   { name: "Three.js", level: 75, category: "MLOps & Tools", tags: ["WebGL"] },
