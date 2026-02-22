@@ -7,6 +7,7 @@ import { ArrowLeft, Edit3, Save, X, Trash2 } from "lucide-react";
 import { getAllConcepts, hideConcept } from "@/lib/concepts";
 import { Concept } from "@/types";
 import LatexText from "@/components/LatexText";
+import ImageGallery from "@/components/ImageGallery";
 
 export default function ConceptDetail() {
   const params = useParams();
@@ -124,9 +125,14 @@ export default function ConceptDetail() {
               style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
             />
           ) : (
-            <LatexText as="div" className="text-sm leading-relaxed" style={{ color: "var(--text)", lineHeight: 1.8 }}>
-              {concept.long_summary}
-            </LatexText>
+            <>
+              <LatexText as="div" className="text-sm leading-relaxed" style={{ color: "var(--text)", lineHeight: 1.8 }}>
+                {concept.long_summary}
+              </LatexText>
+              {concept.images && concept.images.length > 0 && (
+                <ImageGallery images={concept.images} />
+              )}
+            </>
           )}
         </div>
       </div>

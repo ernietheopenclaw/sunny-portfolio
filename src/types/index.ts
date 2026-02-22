@@ -10,6 +10,7 @@ export interface Concept {
   user_id?: string;
   isFiller?: boolean;
   embedding?: number[];
+  images?: string[];
 }
 
 export interface Project {
@@ -21,6 +22,7 @@ export interface Project {
   link?: string;
   github?: string;
   image?: string;
+  images?: string[];
 }
 
 export interface Post {
@@ -30,6 +32,7 @@ export interface Post {
   content: string;
   date: string;
   tags: string[];
+  images?: string[];
 }
 
 export interface Skill {

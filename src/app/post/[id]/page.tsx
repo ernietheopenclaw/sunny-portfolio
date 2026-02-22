@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ArrowLeft, Edit3, Trash2 } from "lucide-react";
 import { mockPosts } from "@/data/mock";
+import ImageGallery from "@/components/ImageGallery";
 
 function markdownToHtml(md: string): string {
   return md
@@ -89,8 +90,12 @@ export default function PostDetail() {
           </div>
         )}
 
+        {post.images && post.images.length > 0 && (
+          <ImageGallery images={post.images} />
+        )}
+
         <div
-          className="rounded-xl p-6"
+          className="rounded-xl p-6 mt-6"
           style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
         >
           <div
