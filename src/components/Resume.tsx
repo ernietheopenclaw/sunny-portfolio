@@ -112,7 +112,7 @@ export default function Resume() {
           <a
             href="/resume.pdf"
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors"
-            style={{ background: "rgba(33,131,128,0.1)", color: "var(--accent-mid)", border: "1px solid rgba(33,131,128,0.3)" }}
+            style={{ background: "rgba(2,132,199,0.1)", color: "var(--accent-mid)", border: "1px solid rgba(2,132,199,0.3)" }}
           >
             <Download className="w-4 h-4" /> Download PDF
           </a>
@@ -198,7 +198,7 @@ export default function Resume() {
                     <span
                       key={item}
                       className="text-[11px] px-2 py-0.5 rounded-full"
-                      style={{ background: "rgba(33,131,128,0.1)", color: "var(--accent-mid)", border: "1px solid rgba(33,131,128,0.2)" }}
+                      style={{ background: "rgba(2,132,199,0.1)", color: "var(--accent-mid)", border: "1px solid rgba(2,132,199,0.2)" }}
                     >
                       {item}
                     </span>
@@ -287,7 +287,7 @@ export default function Resume() {
                   <span
                     key={interest}
                     className="text-[11px] px-2 py-0.5 rounded-full"
-                    style={{ background: "rgba(33,131,128,0.05)", color: "var(--text-muted)", border: "1px solid var(--border)" }}
+                    style={{ background: "rgba(2,132,199,0.05)", color: "var(--text-muted)", border: "1px solid var(--border)" }}
                   >
                     {interest}
                   </span>

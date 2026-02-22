@@ -260,7 +260,7 @@ export default function SettingsPage() {
 
           <div className="flex items-center gap-2 mb-4">
             <span className="text-xs px-2 py-1 rounded-full" style={{
-              background: credentialStatus === "configured" ? "rgba(33,131,128,0.15)" : "rgba(255,255,255,0.05)",
+              background: credentialStatus === "configured" ? "rgba(2,132,199,0.15)" : "rgba(255,255,255,0.05)",
               color: credentialStatus === "configured" ? "var(--accent-mid)" : "var(--text-muted)",
             }}>
               {credentialStatus === "configured" ? "✓ Configured" : "Not configured"}
@@ -328,7 +328,7 @@ export default function SettingsPage() {
             <div className="space-y-3">
               {oauthConnected ? (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm p-3 rounded-lg" style={{ background: "rgba(33,131,128,0.1)", color: "var(--accent-mid)" }}>
+                  <div className="flex items-center gap-2 text-sm p-3 rounded-lg" style={{ background: "rgba(2,132,199,0.1)", color: "var(--accent-mid)" }}>
                     <Check className="w-4 h-4" /> Connected to Anthropic (Claude Pro/Max)
                   </div>
                   <button
@@ -507,7 +507,7 @@ export default function SettingsPage() {
           )}
 
           {saved && (
-            <div className="flex items-center gap-2 text-sm p-3 rounded-lg" style={{ background: "rgba(33,131,128,0.1)", color: "var(--accent-mid)" }}>
+            <div className="flex items-center gap-2 text-sm p-3 rounded-lg" style={{ background: "rgba(2,132,199,0.1)", color: "var(--accent-mid)" }}>
               <Check className="w-4 h-4" /> Concept saved! It will appear in the visualization.
             </div>
           )}

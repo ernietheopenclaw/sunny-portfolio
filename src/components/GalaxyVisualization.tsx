@@ -857,9 +857,9 @@ export default function GalaxyVisualization({ concepts, onReady }: Props) {
             onClick={() => setMode(m)}
             className="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-500 cursor-pointer"
             style={{
-              background: mode === m ? "rgba(33,131,128,0.2)" : "rgba(255,255,255,0.03)",
+              background: mode === m ? "rgba(2,132,199,0.2)" : "rgba(255,255,255,0.03)",
               color: mode === m ? "var(--accent-mid)" : "var(--text-muted)",
-              border: mode === m ? "1px solid rgba(33,131,128,0.5)" : "1px solid var(--border)",
+              border: mode === m ? "1px solid rgba(2,132,199,0.5)" : "1px solid var(--border)",
             }}
           >
             {m === "galaxy" ? "🌌 Galaxy" : m === "reduction" ? "🔬 Clusters" : "📅 Timeline"}

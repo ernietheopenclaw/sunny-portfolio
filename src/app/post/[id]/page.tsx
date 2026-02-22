@@ -62,9 +62,9 @@ export default function PostDetail() {
               key={tag}
               className="text-xs px-2 py-0.5 rounded-full"
               style={{
-                background: "rgba(33,131,128,0.1)",
+                background: "rgba(2,132,199,0.1)",
                 color: "var(--accent-mid)",
-                border: "1px solid rgba(33,131,128,0.2)",
+                border: "1px solid rgba(2,132,199,0.2)",
               }}
             >
               {tag}

@@ -70,12 +70,12 @@ export default function Skills({ skills, projects }: { skills: Skill[]; projects
                       style={{
                         background: isSelected
                           ? "var(--accent)"
-                          : "rgba(33,131,128,0.08)",
+                          : "rgba(2,132,199,0.08)",
                         color: isSelected ? "#fff" : "var(--text)",
                         border: isSelected
                           ? "1px solid var(--accent)"
                           : hasProjects
-                          ? "1px solid rgba(33,131,128,0.25)"
+                          ? "1px solid rgba(2,132,199,0.25)"
                           : "1px solid var(--border)",
                         transform: isSelected ? "scale(1.05)" : "scale(1)",
                       }}
@@ -155,7 +155,7 @@ export default function Skills({ skills, projects }: { skills: Skill[]; projects
                                 t.toLowerCase().includes(selectedSkill.toLowerCase()) ||
                                 selectedSkill.toLowerCase().includes(t.toLowerCase()) ||
                                 selectedSkill.toLowerCase().split(/\s*\/\s*/).some((p) => t.toLowerCase().includes(p.trim()))
-                                  ? "rgba(33,131,128,0.2)"
+                                  ? "rgba(2,132,199,0.2)"
                                   : "rgba(255,255,255,0.05)",
                               color:
                                 t.toLowerCase().includes(selectedSkill.toLowerCase()) ||
@@ -163,7 +163,7 @@ export default function Skills({ skills, projects }: { skills: Skill[]; projects
                                 selectedSkill.toLowerCase().split(/\s*\/\s*/).some((p) => t.toLowerCase().includes(p.trim()))
                                   ? "var(--accent-mid)"
                                   : "var(--text-muted)",
-                              border: "1px solid rgba(33,131,128,0.15)",
+                              border: "1px solid rgba(2,132,199,0.15)",
                             }}
                           >
                             {t}

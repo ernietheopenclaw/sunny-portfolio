@@ -49,7 +49,7 @@ export default function Papers() {
               style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
             >
               <div className="flex items-start gap-4">
-                <div className="p-2 rounded-lg flex-shrink-0 mt-1" style={{ background: "rgba(33,131,128,0.1)" }}>
+                <div className="p-2 rounded-lg flex-shrink-0 mt-1" style={{ background: "rgba(2,132,199,0.1)" }}>
                   <BookOpen className="w-5 h-5" style={{ color: "var(--accent-mid)" }} />
                 </div>
                 <div className="space-y-3">

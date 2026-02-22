@@ -39,7 +39,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                   <span
                     key={t}
                     className="text-[10px] px-2 py-0.5 rounded-full"
-                    style={{ background: "rgba(33,131,128,0.1)", color: "var(--accent-mid)", border: "1px solid rgba(33,131,128,0.2)" }}
+                    style={{ background: "rgba(2,132,199,0.1)", color: "var(--accent-mid)", border: "1px solid rgba(2,132,199,0.2)" }}
                   >
                     {t}
                   </span>

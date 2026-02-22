@@ -8,9 +8,9 @@
   --border-strong: rgba(255,255,255,0.15);
   --text: #e5e5e5;
   --text-muted: rgba(255,255,255,0.45);
-  --accent: #218380;
-  --accent-mid: #5aaca7;
-  --accent-light: #d4f0ee;
+  --accent: #0284c7;
+  --accent-mid: #38bdf8;
+  --accent-light: #e0f2fe;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
@@ -22,9 +22,9 @@
   --border-strong: #d4cfc9;
   --text: #2d2926;
   --text-muted: #8a8580;
-  --accent: #218380;
-  --accent-mid: #5aaca7;
-  --accent-light: #d4f0ee;
+  --accent: #0284c7;
+  --accent-mid: #38bdf8;
+  --accent-light: #e0f2fe;
 }
 
 html {
