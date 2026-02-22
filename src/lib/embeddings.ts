@@ -42,7 +42,7 @@ export function computeClusterPositions(
 
   // Seeded PRNG for deterministic UMAP output across page loads
   const seedRandom = (() => {
-    let s = 42;
+    let s = 123;
     return () => {
       s = (s * 16807 + 0) % 2147483647;
       return (s - 1) / 2147483646;
