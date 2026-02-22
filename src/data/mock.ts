@@ -527,13 +527,16 @@ export const mockSkills: Skill[] = [
   { name: "LoRA", level: 75, category: "AI / ML Frameworks", tags: ["Fine-tuning"] },
   { name: "Ollama", level: 72, category: "AI / ML Frameworks" },
   // Data & Compute
-  { name: "NumPy / Pandas / SciPy", level: 95, category: "Data & Compute" },
-  { name: "W&B / MLflow", level: 80, category: "Data & Compute", tags: ["Weights & Biases"] },
+  { name: "NumPy", level: 95, category: "Data & Compute" },
+  { name: "Pandas", level: 95, category: "Data & Compute" },
+  { name: "SciPy", level: 90, category: "Data & Compute" },
+  { name: "W&B", level: 80, category: "Data & Compute", tags: ["Weights & Biases", "Weights and Biases", "WandB"] },
+  { name: "MLflow", level: 75, category: "Data & Compute" },
   { name: "Apache Airflow", level: 75, category: "Data & Compute" },
   { name: "Raytune", level: 70, category: "Data & Compute" },
   // Cloud & Infrastructure
   { name: "AWS (S3, Bedrock, Redshift)", level: 82, category: "Cloud & Infrastructure", tags: ["AWS Bedrock", "Redshift", "S3", "AWS"] },
-  { name: "NYU HPC (SLURM)", level: 78, category: "Cloud & Infrastructure", tags: ["HPC"] },
+  { name: "HPC (SLURM)", level: 78, category: "Cloud & Infrastructure", tags: ["HPC", "SLURM"] },
   { name: "Vercel", level: 80, category: "Cloud & Infrastructure" },
   { name: "Supabase", level: 78, category: "Cloud & Infrastructure" },
   // MLOps & Tools
