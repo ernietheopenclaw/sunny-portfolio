@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Download, Briefcase, GraduationCap, Award, Code, Heart, Wrench } from "lucide-react";
+import { Download, Briefcase, GraduationCap, Award, Heart } from "lucide-react";
 
 const experience = [
   {
@@ -56,33 +56,8 @@ const education = [
   },
 ];
 
-const skills = {
-  "Programming Languages": ["Python", "R", "Java", "SQL", "JavaScript", "TypeScript", "HTML", "CSS", "Bash"],
-  "AI/ML Frameworks": ["NumPy", "Pandas", "SciPy", "OpenCV", "Hugging Face Transformers", "spaCy", "PyTorch", "Keras", "Scikit-Learn", "XGBoost", "Weights & Biases", "MLflow", "Apache Airflow", "Raytune", "LoRA", "Ollama"],
-  "Cloud Platforms": ["AWS", "AWS S3", "AWS Bedrock", "AWS Redshift", "NYU HPC (SLURM)", "Vercel", "Supabase"],
-  "MLOps Tools": ["Git", "Singularity/Docker", "Next.js", "React", "Three.js", "Tailwind CSS"],
-  "Specializations": ["Natural Language Processing", "Computer Vision", "Deep Learning", "Machine Learning", "Time Series Analysis"],
-};
-
 const certifications = [
   { title: "Machine Learning Engineering for Production (MLOps) Specialization", org: "DeepLearning.AI" },
-];
-
-const projects = [
-  {
-    title: "Extending Non-Vacuous Generalization Bounds for LLMs with Adaptive Per-Layer Weight",
-    bullets: [
-      "Diagnosed and resolved an 857x performance bottleneck in a PyTorch training pipeline on A100 GPUs by implementing tensor caching across projection classes, reducing per-experiment added training time from ~7 days to ~12 minutes",
-      "Extended the SubLoRA framework for PAC-Bayes generalization bounds on GPT-2 by developing adaptive per-layer subspace allocation and deploying training/evaluation pipeline on HPC, achieving competitive non-vacuous bounds on OpenWebText",
-    ],
-  },
-  {
-    title: "Curiosity – AI Chat Platform with Conversation Branching, Dialogue Trees, and Multi-Provider Support",
-    bullets: [
-      "Built a full-stack AI chat application (Next.js, Supabase, Vercel) with multi-provider LLM support (OpenAI, Anthropic, Gemini, local Ollama) featuring OAuth integration and a persistent vector-embedding memory system for retrieval-augmented context",
-      "Designed an interactive text-selection interface where users highlight any passage to spawn contextual conversation branches — with inline AI summaries, custom action shortcuts, and a navigable tree visualization for exploring nonlinear dialogue paths",
-    ],
-  },
 ];
 
 const interests = [
@@ -172,69 +147,6 @@ export default function Resume() {
                 <p className="text-sm" style={{ color: "var(--accent-mid)" }}>{edu.school}</p>
                 <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>{edu.period}</p>
                 <p className="text-sm" style={{ color: "var(--text-muted)" }}>{edu.detail}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Skills */}
-        <div className="mb-12">
-          <div className="flex items-center gap-2 mb-6">
-            <Wrench className="w-5 h-5" style={{ color: "var(--accent-mid)" }} />
-            <h3 className="text-lg font-semibold" style={{ color: "var(--text)" }}>Skills</h3>
-          </div>
-          <div className="space-y-4 pl-6">
-            {Object.entries(skills).map(([category, items], i) => (
-              <motion.div
-                key={category}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-                viewport={{ once: true }}
-              >
-                <p className="text-sm font-medium mb-2" style={{ color: "var(--text)" }}>{category}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {items.map((item) => (
-                    <span
-                      key={item}
-                      className="text-[11px] px-2 py-0.5 rounded-full"
-                      style={{ background: "rgba(2,132,199,0.1)", color: "var(--accent-mid)", border: "1px solid rgba(2,132,199,0.2)" }}
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Projects */}
-        <div className="mb-12">
-          <div className="flex items-center gap-2 mb-6">
-            <Code className="w-5 h-5" style={{ color: "var(--accent-mid)" }} />
-            <h3 className="text-lg font-semibold" style={{ color: "var(--text)" }}>Projects</h3>
-          </div>
-          <div className="space-y-6 pl-6" style={{ borderLeft: "2px solid var(--border-strong)" }}>
-            {projects.map((proj, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                viewport={{ once: true }}
-                className="relative"
-              >
-                <div className="absolute -left-[31px] top-1 w-3 h-3 rounded-full" style={{ background: "var(--accent)", border: "2px solid var(--bg)" }} />
-                <h4 className="font-semibold text-sm" style={{ color: "var(--text)" }}>{proj.title}</h4>
-                <ul className="space-y-1 mt-2">
-                  {proj.bullets.map((b, j) => (
-                    <li key={j} className="text-sm flex gap-2" style={{ color: "var(--text-muted)" }}>
-                      <span className="flex-shrink-0 mt-1.5 w-1 h-1 rounded-full" style={{ background: "var(--accent-mid)" }} />
-                      {b}
-                    </li>
-                  ))}
-                </ul>
               </motion.div>
             ))}
           </div>
