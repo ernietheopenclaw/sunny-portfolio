@@ -39,37 +39,6 @@ const experience = [
       "Implemented dimensionality reduction and spacio-temporal modeling to bridge theoretical gaps with trajectory inference, elucidating the impact of CXCL12's interaction with CXCR4, ACKR3 receptors in maintaining CD8+ T Cell presence within tumors",
     ],
   },
-  {
-    title: "Consulting Intern",
-    company: "Deloitte Touche Tohmatsu",
-    location: "New York, NY",
-    period: "Dec 2019 – Mar 2020",
-    bullets: [
-      "Employed technologies such as Audit Software 2 to perform due diligence and cross referencing in client data spreadsheets",
-      "Leveraged Excel to build loss reserve discount models, forecasting future tax liabilities in present value",
-      "Applied data structures to optimize data entry/access for organizational structures, improving integrity and processing efficiency",
-    ],
-  },
-  {
-    title: "Corporate Operations Analyst",
-    company: "Two Sigma",
-    location: "New York, NY",
-    period: "Jul 2019 – Oct 2019",
-    bullets: [
-      "Performed daily and month-end reconciliations to maintain accounting standards and P&L balances between firm and counterparties",
-      "Developed tools to improve existing process flows and controls by constructing spreadsheets in Excel using VBA to automate cash-balance reconciliations",
-    ],
-  },
-  {
-    title: "Computing Machinery and Intelligence Research Intern",
-    company: "Brookfield Asset Management",
-    location: "Toronto, Canada",
-    period: "May 2019 – Jul 2019",
-    bullets: [
-      "Executed daily trades with the Brookfield Capital Markets team using proprietary trading and hedging software accessed through SSH",
-      "Investigated global markets to understand, measure, and compose daily reports on \"induction points\" shifting global economies",
-    ],
-  },
 ];
 
 const education = [
