@@ -125,25 +125,47 @@ export const mockConcepts: Concept[] = [
 
 export const mockProjects: Project[] = [
   {
+    title: "Agentic BI Decision Engine",
+    description: "Designing an agentic BI decision engine at Globalink AI combining ML models, LLMs, and Knowledge Graphs to generate actionable e-commerce merchant recommendations across growth, margin optimization, and inventory risk.",
+    tech: ["Python", "LLM", "Knowledge Graphs", "Machine Learning", "Deep Learning", "NLP"],
+  },
+  {
+    title: "Extending Non-Vacuous Generalization Bounds for LLMs",
+    description: "Extended SubLoRA framework for PAC-Bayes generalization bounds on GPT-2 with adaptive per-layer subspace allocation. Resolved 857x performance bottleneck on A100 GPUs via tensor caching.",
+    tech: ["Python", "PyTorch", "Deep Learning", "HPC", "Machine Learning"],
+  },
+  {
+    title: "Curiosity – AI Chat Platform",
+    description: "Full-stack AI chat app with conversation branching, dialogue tree visualization, multi-provider LLM support (OpenAI, Anthropic, Gemini, Ollama), OAuth, and vector-embedding memory for RAG context.",
+    tech: ["TypeScript", "JavaScript", "Next.js", "React", "Supabase", "RAG", "NLP", "Tailwind CSS"],
+    link: "https://curiositylm.app",
+    github: "https://github.com/sunnydigital/curiosity",
+  },
+  {
     title: "Enterprise RAG LLM System",
     description: "Engineered an enterprise-scale RAG system at Amazon serving 15,000 tables across 200 schemas with automated DDL generation, git-style versioning, and Slack notifications using AWS S3, Bedrock, and Redshift.",
-    tech: ["Python", "AWS Bedrock", "Redshift", "S3", "RAG", "Slack API"],
+    tech: ["Python", "AWS Bedrock", "Redshift", "S3", "RAG", "SQL", "Slack API"],
   },
   {
     title: "DDPM for Histopathologic Images",
     description: "Built denoising diffusion probabilistic models for histopathologic cancer detection on the Patch Camelyon dataset with comprehensive ablation studies.",
-    tech: ["PyTorch", "Diffusion Models", "Computer Vision", "Deep Learning"],
+    tech: ["Python", "PyTorch", "Diffusion Models", "Computer Vision", "Deep Learning"],
+  },
+  {
+    title: "Medical Imaging Pipeline (NYU Langone)",
+    description: "End-to-end ML pipeline for biomedical data with U-Net CNN architectures, transfer learning, and pathway analysis for cardiovascular research. Reduced processing from 8 hours to 45 minutes.",
+    tech: ["Python", "PyTorch", "Keras", "Computer Vision", "Deep Learning", "R", "Scikit-Learn", "OpenCV"],
   },
   {
     title: "ChatGPT Web Summarizer Plugin",
     description: "A ChatGPT companion plugin that parses URL content (HTML/PDF) for conversational agents, enabling real-time webpage summarization and information extraction.",
-    tech: ["Python", "ChatGPT Plugins", "HTML Parsing", "PDF Extraction"],
+    tech: ["Python", "ChatGPT Plugins", "HTML Parsing", "NLP"],
     github: "https://github.com/sunnydigital/web-sum",
   },
   {
     title: "NYU DSC x Peak AI Datathon — Winner",
     description: "Built a winning recommender system using k-NN with GloVe-50d embeddings, competing against 50+ teams in the NYU Data Science Club x Peak.AI datathon.",
-    tech: ["Python", "k-NN", "GloVe", "Recommender Systems"],
+    tech: ["Python", "k-NN", "GloVe", "Recommender Systems", "Scikit-Learn"],
     github: "https://github.com/sunnydigital/datathon-f22",
   },
   {
@@ -154,7 +176,7 @@ export const mockProjects: Project[] = [
   {
     title: "ESG NLP Classification",
     description: "Fine-tuned language models on Reddit ESG data with SHAP feature attribution for interpretable ESG scoring and analysis.",
-    tech: ["Python", "NLP", "SHAP", "Transformers", "Scikit-Learn"],
+    tech: ["Python", "NLP", "SHAP", "Hugging Face Transformers", "Scikit-Learn"],
     github: "https://github.com/sunnydigital/nlp-f22",
   },
   {
@@ -168,16 +190,24 @@ export const mockProjects: Project[] = [
     tech: ["Python", "CLI", "NLP", "OpenAI"],
     github: "https://github.com/sunnydigital/cover-gen",
   },
+  {
+    title: "3D Galaxy Portfolio",
+    description: "This portfolio site — interactive 3D galaxy visualization with Three.js, scroll-driven mode transitions, UMAP clustering, and concept management.",
+    tech: ["TypeScript", "JavaScript", "Next.js", "React", "Three.js", "Tailwind CSS", "WebGL"],
+    link: "https://www.sunnyson.dev",
+  },
 ];
 
 export const mockSkills: Skill[] = [
-  // Languages
-  { name: "Python", level: 95, category: "Languages" },
-  { name: "R", level: 80, category: "Languages" },
-  { name: "Java", level: 70, category: "Languages" },
-  { name: "SQL", level: 85, category: "Languages" },
-  { name: "JavaScript", level: 78, category: "Languages" },
-  { name: "HTML / CSS", level: 75, category: "Languages" },
+  // Programming Languages
+  { name: "Python", level: 95, category: "Programming Languages" },
+  { name: "R", level: 80, category: "Programming Languages" },
+  { name: "Java", level: 70, category: "Programming Languages" },
+  { name: "SQL", level: 85, category: "Programming Languages" },
+  { name: "JavaScript", level: 78, category: "Programming Languages" },
+  { name: "TypeScript", level: 78, category: "Programming Languages" },
+  { name: "HTML / CSS", level: 75, category: "Programming Languages" },
+  { name: "Bash", level: 70, category: "Programming Languages" },
   // AI / ML Frameworks
   { name: "PyTorch", level: 90, category: "AI / ML Frameworks" },
   { name: "Keras", level: 85, category: "AI / ML Frameworks" },
@@ -186,19 +216,31 @@ export const mockSkills: Skill[] = [
   { name: "Hugging Face Transformers", level: 88, category: "AI / ML Frameworks" },
   { name: "spaCy", level: 80, category: "AI / ML Frameworks" },
   { name: "OpenCV", level: 78, category: "AI / ML Frameworks" },
+  { name: "LoRA", level: 75, category: "AI / ML Frameworks" },
+  { name: "Ollama", level: 72, category: "AI / ML Frameworks" },
   // Data & Compute
   { name: "NumPy / Pandas / SciPy", level: 95, category: "Data & Compute" },
   { name: "W&B / MLflow", level: 80, category: "Data & Compute" },
-  { name: "Airflow", level: 75, category: "Data & Compute" },
+  { name: "Apache Airflow", level: 75, category: "Data & Compute" },
   { name: "Raytune", level: 70, category: "Data & Compute" },
   // Cloud & Infrastructure
   { name: "AWS (S3, Bedrock, Redshift)", level: 82, category: "Cloud & Infrastructure" },
+  { name: "NYU HPC (SLURM)", level: 78, category: "Cloud & Infrastructure" },
+  { name: "Vercel", level: 80, category: "Cloud & Infrastructure" },
+  { name: "Supabase", level: 78, category: "Cloud & Infrastructure" },
+  // MLOps & Tools
+  { name: "Git", level: 88, category: "MLOps & Tools" },
+  { name: "Docker / Singularity", level: 75, category: "MLOps & Tools" },
+  { name: "Next.js", level: 82, category: "MLOps & Tools" },
+  { name: "React", level: 80, category: "MLOps & Tools" },
+  { name: "Three.js", level: 75, category: "MLOps & Tools" },
+  { name: "Tailwind CSS", level: 80, category: "MLOps & Tools" },
   // Specializations
   { name: "NLP", level: 92, category: "Specializations" },
   { name: "Computer Vision", level: 85, category: "Specializations" },
   { name: "Deep Learning", level: 90, category: "Specializations" },
-  { name: "Time Series Analysis", level: 82, category: "Specializations" },
-  { name: "Bioinformatics", level: 78, category: "Specializations" },
+  { name: "Machine Learning", level: 92, category: "Specializations" },
+  { name: "Time Series", level: 82, category: "Specializations" },
 ];
 
 export const mockPosts: Post[] = [
