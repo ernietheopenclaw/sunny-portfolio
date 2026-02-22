@@ -8,6 +8,18 @@ import SessionWrapper from "@/components/SessionWrapper";
 export const metadata: Metadata = {
   title: "Sunny Son",
   description: "Interactive portfolio showcasing concepts, projects, and skills through immersive 3D visualization.",
+  openGraph: {
+    title: "Sunny — AI/ML Engineer",
+    description: "Interactive portfolio showcasing concepts, projects, and skills through immersive 3D visualization.",
+    siteName: "Sunny Son",
+    url: "https://www.sunnyson.dev",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Sunny — AI/ML Engineer",
+    description: "Interactive portfolio showcasing concepts, projects, and skills through immersive 3D visualization.",
+  },
   icons: {
     icon: { url: "/favicon.svg", type: "image/svg+xml" },
   },
