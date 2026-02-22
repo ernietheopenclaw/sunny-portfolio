@@ -1,4 +1,4 @@
-import { Concept, Project, Skill, Post } from "@/types";
+import { Concept, Project, Skill, Post, Publication } from "@/types";
 
 export const mockConcepts: Concept[] = [
   {
@@ -549,6 +549,27 @@ export const mockSkills: Skill[] = [
   { name: "Deep Learning", level: 90, category: "Specializations", tags: ["Diffusion Models", "LLM"] },
   { name: "Machine Learning", level: 92, category: "Specializations", tags: ["Recommender Systems", "k-NN", "GloVe", "SHAP"] },
   { name: "Time Series", level: 82, category: "Specializations", tags: ["NeuralProphet"] },
+];
+
+export const mockPublications: Publication[] = [
+  {
+    id: "cardiac-lipid-droplets",
+    title: "Cardiac lipid droplets differ under pathological and physiological conditions",
+    journal: "Journal of Lipid Research",
+    date: "2025",
+    url: "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=tGaMcikAAAAJ&citation_for_view=tGaMcikAAAAJ:d1gkVwhDpl0C",
+    authors: "NH Son, S Son, M Verano, ZX Liu, W Younis, M Komack, KV Ruggles, et al.",
+    contribution: "Contributed to data analysis and computational methods for characterizing lipid droplet composition differences between pathological and physiological cardiac conditions.",
+  },
+  {
+    id: "t-cell-egress",
+    title: "T cell egress via lymphatic vessels is tuned by antigen encounter and limits tumor control",
+    journal: "Nature Immunology",
+    date: "2023",
+    url: "https://www.nature.com/articles/s41590-023-01443-y",
+    authors: "MM Steele, A Jaiswal, I Delclaux, ID Dryg, D Murugan, J Femel, S Son, et al.",
+    contribution: "Pipelined and analyzed genomic data, performing dimensionality reduction and subsetting to organize cell populations. Applied various semi-supervised and unsupervised methods to determine the optimal format for inferring the pseudotime trajectory of cell-fate in relation to gene expression.",
+  },
 ];
 
 export const mockPosts: Post[] = [

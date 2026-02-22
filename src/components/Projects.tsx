@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ExternalLink, Github, X } from "lucide-react";
+import { ExternalLink, Github, X, Plus } from "lucide-react";
 import { Project } from "@/types";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -20,7 +20,18 @@ export default function Projects({ projects, onDelete }: { projects: Project[]; 
         className="text-3xl font-bold mb-12"
         style={{ color: "var(--accent)" }}
       >
-        Projects
+        <span className="flex items-center gap-3">
+          Projects
+          {session && (
+            <button
+              onClick={() => router.push("/project/new")}
+              className="text-xs px-2.5 py-1 rounded-full flex items-center gap-1 cursor-pointer transition-colors"
+              style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
+            >
+              <Plus className="w-3.5 h-3.5" /> New Project
+            </button>
+          )}
+        </span>
       </motion.h2>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((project, i) => (

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Github, X } from "lucide-react";
+import { ExternalLink, Github, X, Plus } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { Skill, Project } from "@/types";
 
 // Map skill names to project tech tags (exact case-insensitive matching + tags)
@@ -30,8 +31,30 @@ function techMatchesSkill(techTag: string, skill: Skill): boolean {
 }
 
 export default function Skills({ skills, projects }: { skills: Skill[]; projects: Project[] }) {
+  const { data: session } = useSession();
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newCategory, setNewCategory] = useState("");
+  const [newLevel, setNewLevel] = useState(50);
+  const [newTags, setNewTags] = useState("");
   const categories = [...new Set(skills.map((s) => s.category))];
+
+  const handleAddSkill = () => {
+    if (!newName.trim()) return;
+    const cat = newCategory || categories[0] || "Other";
+    const skill: Skill = {
+      name: newName.trim(),
+      level: newLevel,
+      category: cat,
+      tags: newTags.trim() ? newTags.split(",").map((t) => t.trim()).filter(Boolean) : undefined,
+    };
+    const existing = JSON.parse(localStorage.getItem("user-skills") || "[]") as Skill[];
+    existing.push(skill);
+    localStorage.setItem("user-skills", JSON.stringify(existing));
+    setNewName(""); setNewCategory(""); setNewLevel(50); setNewTags(""); setShowNewForm(false);
+    window.location.reload();
+  };
 
   const selectedSkillObj = selectedSkill ? skills.find((s) => s.name === selectedSkill) ?? null : null;
   const matchedProjects = selectedSkillObj ? getProjectsForSkill(selectedSkillObj, projects) : [];
@@ -46,11 +69,60 @@ export default function Skills({ skills, projects }: { skills: Skill[]; projects
         className="text-3xl font-bold mb-4"
         style={{ color: "var(--accent)" }}
       >
-        Skills
+        <span className="flex items-center gap-3">
+          Skills
+          {session && (
+            <button
+              onClick={() => setShowNewForm((v) => !v)}
+              className="text-xs px-2.5 py-1 rounded-full flex items-center gap-1 cursor-pointer transition-colors"
+              style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
+            >
+              <Plus className="w-3.5 h-3.5" /> New Skill
+            </button>
+          )}
+        </span>
       </motion.h2>
-      <p className="text-sm mb-12" style={{ color: "var(--text-muted)" }}>
+      <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
         Click a skill to see where I&apos;ve used it.
       </p>
+
+      <AnimatePresence>
+        {showNewForm && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden mb-8"
+          >
+            <div className="rounded-xl p-5 space-y-3" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] font-semibold uppercase tracking-wider block mb-1" style={{ color: "var(--text-muted)" }}>Name</label>
+                  <input value={newName} onChange={(e) => setNewName(e.target.value)} className="w-full p-2 rounded-lg text-sm focus:outline-none" style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }} placeholder="Skill name" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-semibold uppercase tracking-wider block mb-1" style={{ color: "var(--text-muted)" }}>Category</label>
+                  <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full p-2 rounded-lg text-sm focus:outline-none" style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}>
+                    {[...categories, "Other"].map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold uppercase tracking-wider block mb-1" style={{ color: "var(--text-muted)" }}>Level: {newLevel}</label>
+                <input type="range" min={0} max={100} value={newLevel} onChange={(e) => setNewLevel(Number(e.target.value))} className="w-full" />
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold uppercase tracking-wider block mb-1" style={{ color: "var(--text-muted)" }}>Tags (comma-separated)</label>
+                <input value={newTags} onChange={(e) => setNewTags(e.target.value)} className="w-full p-2 rounded-lg text-sm focus:outline-none" style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }} placeholder="tag1, tag2" />
+              </div>
+              <div className="flex gap-2 pt-1">
+                <button onClick={handleAddSkill} className="text-xs px-3 py-1.5 rounded-lg cursor-pointer" style={{ background: "var(--accent)", color: "#fff" }}>Save</button>
+                <button onClick={() => setShowNewForm(false)} className="text-xs px-3 py-1.5 rounded-lg cursor-pointer" style={{ color: "var(--text-muted)", border: "1px solid var(--border)" }}>Cancel</button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="space-y-8">
         {categories.map((cat, catIdx) => (

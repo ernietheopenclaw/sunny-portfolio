@@ -1,31 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ExternalLink, BookOpen } from "lucide-react";
+import { ExternalLink, BookOpen, X, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Publication } from "@/types";
 import LatexText from "@/components/LatexText";
 
-const publications = [
-  {
-    title: "Cardiac lipid droplets differ under pathological and physiological conditions",
-    journal: "Journal of Lipid Research",
-    date: "2025",
-    url: "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=tGaMcikAAAAJ&citation_for_view=tGaMcikAAAAJ:d1gkVwhDpl0C",
-    authors: "NH Son, S Son, M Verano, ZX Liu, W Younis, M Komack, KV Ruggles, et al.",
-    contribution:
-      "Contributed to data analysis and computational methods for characterizing lipid droplet composition differences between pathological and physiological cardiac conditions.",
-  },
-  {
-    title: "T cell egress via lymphatic vessels is tuned by antigen encounter and limits tumor control",
-    journal: "Nature Immunology",
-    date: "2023",
-    url: "https://www.nature.com/articles/s41590-023-01443-y",
-    authors: "MM Steele, A Jaiswal, I Delclaux, ID Dryg, D Murugan, J Femel, S Son, et al.",
-    contribution:
-      "Pipelined and analyzed genomic data, performing dimensionality reduction and subsetting to organize cell populations. Applied various semi-supervised and unsupervised methods to determine the optimal format for inferring the pseudotime trajectory of cell-fate in relation to gene expression.",
-  },
-];
-
-export default function Papers() {
+export default function Papers({ publications, onDelete }: { publications: Publication[]; onDelete?: (id: string) => void }) {
+  const router = useRouter();
+  const { data: session } = useSession();
   return (
     <section id="papers" className="py-24 px-4 max-w-4xl mx-auto">
       <motion.div
@@ -35,19 +19,40 @@ export default function Papers() {
         viewport={{ once: true }}
       >
         <h2 className="text-3xl font-bold mb-12" style={{ color: "var(--accent)" }}>
-          Publications
+          <span className="flex items-center gap-3">
+            Publications
+            {session && (
+              <button
+                onClick={() => router.push("/publication/new")}
+                className="text-xs px-2.5 py-1 rounded-full flex items-center gap-1 cursor-pointer transition-colors"
+                style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
+              >
+                <Plus className="w-3.5 h-3.5" /> New Publication
+              </button>
+            )}
+          </span>
         </h2>
         <div className="space-y-8">
           {publications.map((pub, i) => (
             <motion.div
-              key={i}
+              key={pub.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="rounded-xl p-6"
+              className="group relative rounded-xl p-6"
               style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
             >
+              {session && onDelete && (
+                <button
+                  onClick={() => { if (confirm(`Delete "${pub.title}"?`)) onDelete(pub.id); }}
+                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10"
+                  style={{ background: "#ff4444", color: "#fff", boxShadow: "0 2px 8px rgba(255,68,68,0.4)" }}
+                  title="Delete publication"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
               <div className="flex items-start gap-4">
                 <div className="p-2 rounded-lg flex-shrink-0 mt-1" style={{ background: "rgba(2,132,199,0.1)" }}>
                   <BookOpen className="w-5 h-5" style={{ color: "var(--accent-mid)" }} />

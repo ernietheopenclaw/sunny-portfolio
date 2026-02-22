@@ -35,6 +35,16 @@ export interface Post {
   images?: string[];
 }
 
+export interface Publication {
+  id: string;
+  title: string;
+  journal: string;
+  date: string;
+  url: string;
+  authors: string;
+  contribution: string;
+}
+
 export interface Skill {
   name: string;
   level: number; // 0-100
