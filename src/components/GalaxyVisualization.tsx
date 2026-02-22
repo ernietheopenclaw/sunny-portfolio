@@ -467,6 +467,17 @@ function ConceptDots({ concepts, onHover, onClick }: ConceptDotsProps) {
     return closest;
   }, [concepts, camera, raycaster, pointer]);
 
+  // Periodically clear stale hover if pointer has drifted away
+  const lastHoverRef = useRef<string | null>(null);
+  useFrame(() => {
+    const result = findNearest();
+    const newId = result?.concept.id ?? null;
+    if (lastHoverRef.current !== null && newId === null) {
+      onHover(null, null);
+    }
+    lastHoverRef.current = newId;
+  });
+
   const handlePointerMove = useCallback(() => {
     const result = findNearest();
     if (result) {
@@ -483,12 +494,16 @@ function ConceptDots({ concepts, onHover, onClick }: ConceptDotsProps) {
     }
   }, [findNearest, onClick]);
 
+  const handlePointerLeave = useCallback(() => {
+    onHover(null, null);
+  }, [onHover]);
+
   return (
-    <group onPointerMove={handlePointerMove} onClick={handleClick}>
-      {/* Invisible large plane to capture pointer events across the whole scene */}
+    <group onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick}>
+      {/* Invisible large sphere to capture pointer events from any camera angle */}
       <mesh visible={false}>
-        <planeGeometry args={[100, 100]} />
-        <meshBasicMaterial transparent opacity={0} />
+        <sphereGeometry args={[50, 8, 8]} />
+        <meshBasicMaterial transparent opacity={0} side={THREE.DoubleSide} />
       </mesh>
       <instancedMesh ref={meshRef} args={[undefined, undefined, concepts.length]}>
         <sphereGeometry args={[1, 12, 12]} />
