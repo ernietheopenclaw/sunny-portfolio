@@ -40,11 +40,21 @@ export function computeClusterPositions(
   const data = withEmbedding.map((c) => c.embedding);
   const nNeighbors = Math.min(5, withEmbedding.length - 1);
 
+  // Seeded PRNG for deterministic UMAP output across page loads
+  const seedRandom = (() => {
+    let s = 42;
+    return () => {
+      s = (s * 16807 + 0) % 2147483647;
+      return (s - 1) / 2147483646;
+    };
+  })();
+
   const umap = new UMAP({
     nComponents: 3,
     nNeighbors,
     minDist: 0.3,
     spread: 1.5,
+    random: seedRandom,
   });
 
   const projected = umap.fit(data);
