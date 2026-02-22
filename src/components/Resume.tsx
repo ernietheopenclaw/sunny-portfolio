@@ -57,7 +57,7 @@ const education = [
 ];
 
 const certifications = [
-  { title: "Machine Learning Engineering for Production (MLOps) Specialization", org: "DeepLearning.AI" },
+  { title: "Machine Learning Engineering for Production (MLOps) Specialization", org: "DeepLearning.AI", url: "https://www.coursera.org/account/accomplishments/specialization/certificate/5MY8NWK6CAJH" },
 ];
 
 const interests = [
@@ -168,7 +168,11 @@ export default function Resume() {
                 viewport={{ once: true }}
                 className="flex items-baseline gap-2"
               >
-                <span className="text-sm font-medium" style={{ color: "var(--text)" }}>{c.title}</span>
+                {c.url ? (
+                  <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium transition-colors" style={{ color: "var(--text)" }} onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent-mid)")} onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text)")}>{c.title}</a>
+                ) : (
+                  <span className="text-sm font-medium" style={{ color: "var(--text)" }}>{c.title}</span>
+                )}
                 <span className="text-xs" style={{ color: "var(--text-muted)" }}>— {c.org}</span>
               </motion.div>
             ))}
