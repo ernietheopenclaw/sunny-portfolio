@@ -190,7 +190,7 @@ All experiments ran on NYU HPC (SLURM) with A100 GPUs, using a custom training/e
     id: "curiosity",
     title: "Curiosity – AI Chat Platform",
     description: "Full-stack AI chat app with conversation branching, dialogue tree visualization, multi-provider LLM support (OpenAI, Anthropic, Gemini, Ollama), OAuth, and vector-embedding memory for RAG context.",
-    tech: ["TypeScript", "JavaScript", "Next.js", "React", "Supabase", "RAG", "NLP", "Tailwind CSS"],
+    tech: ["TypeScript", "JavaScript", "Next.js", "React", "Supabase", "Vercel", "RAG", "NLP", "Tailwind CSS"],
     link: "https://curiositylm.app",
     github: "https://github.com/sunnydigital/curiosity",
     content: `## Overview
@@ -479,7 +479,7 @@ A CLI tool fits naturally into a job search workflow — scriptable, fast, and c
     id: "galaxy-portfolio",
     title: "3D Galaxy Portfolio",
     description: "This portfolio site — interactive 3D galaxy visualization with Three.js, scroll-driven mode transitions, UMAP clustering, and concept management.",
-    tech: ["TypeScript", "JavaScript", "Next.js", "React", "Three.js", "Tailwind CSS", "WebGL"],
+    tech: ["TypeScript", "JavaScript", "Next.js", "React", "Three.js", "Tailwind CSS", "Vercel", "WebGL"],
     link: "https://www.sunnyson.dev",
     content: `## Overview
 
