@@ -1,7 +1,8 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, ExternalLink, Github } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { ArrowLeft, ExternalLink, Github, Edit3, Trash2 } from "lucide-react";
 import { mockProjects } from "@/data/mock";
 import ImageGallery from "@/components/ImageGallery";
 
@@ -23,6 +24,7 @@ function markdownToHtml(md: string): string {
 export default function ProjectDetail() {
   const params = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
 
   const project = mockProjects.find((p) => p.id === params.id);
 
@@ -71,7 +73,7 @@ export default function ProjectDetail() {
           ))}
         </div>
 
-        <div className="flex gap-3 mb-8">
+        <div className="flex gap-3 mb-4">
           {project.link && (
             <a
               href={project.link}
@@ -95,6 +97,28 @@ export default function ProjectDetail() {
             </a>
           )}
         </div>
+
+        {session && (
+          <div className="flex gap-2 mb-8">
+            <button
+              className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg transition-colors cursor-pointer"
+              style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
+            >
+              <Edit3 className="w-3 h-3" /> Edit
+            </button>
+            <button
+              onClick={() => {
+                if (confirm(`Delete "${project.title}"? This cannot be undone.`)) {
+                  router.push("/#projects");
+                }
+              }}
+              className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg transition-colors cursor-pointer"
+              style={{ color: "#ff6464", border: "1px solid rgba(255,100,100,0.3)" }}
+            >
+              <Trash2 className="w-3 h-3" /> Delete
+            </button>
+          </div>
+        )}
 
         {project.images && project.images.length > 0 && (
           <ImageGallery images={project.images} />
