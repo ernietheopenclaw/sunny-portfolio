@@ -39,4 +39,5 @@ export interface Skill {
   name: string;
   level: number; // 0-100
   category: string;
+  tags?: string[]; // additional tech tags this skill matches against
 }

@@ -5,24 +5,36 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ExternalLink, Github, X } from "lucide-react";
 import { Skill, Project } from "@/types";
 
-// Map skill names to project tech tags (exact case-insensitive matching)
+// Map skill names to project tech tags (exact case-insensitive matching + tags)
 function exactMatch(a: string, b: string): boolean {
   return a.toLowerCase().trim() === b.toLowerCase().trim();
 }
 
-function getProjectsForSkill(skillName: string, projects: Project[]): Project[] {
-  // Split compound skills like "NumPy / Pandas / SciPy" or "W&B / MLflow"
-  const skillParts = skillName.split(/\s*\/\s*/).map((s) => s.trim());
+function getMatchTerms(skill: Skill): string[] {
+  // Combine skill name parts + any extra tags
+  const nameParts = skill.name.split(/\s*\/\s*/).map((s) => s.trim());
+  const tags = skill.tags ?? [];
+  return [...nameParts, ...tags];
+}
+
+function getProjectsForSkill(skill: Skill, projects: Project[]): Project[] {
+  const terms = getMatchTerms(skill);
   return projects.filter((p) =>
-    p.tech.some((t) => skillParts.some((part) => exactMatch(t, part)))
+    p.tech.some((t) => terms.some((term) => exactMatch(t, term)))
   );
+}
+
+function techMatchesSkill(techTag: string, skill: Skill): boolean {
+  const terms = getMatchTerms(skill);
+  return terms.some((term) => exactMatch(techTag, term));
 }
 
 export default function Skills({ skills, projects }: { skills: Skill[]; projects: Project[] }) {
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
   const categories = [...new Set(skills.map((s) => s.category))];
 
-  const matchedProjects = selectedSkill ? getProjectsForSkill(selectedSkill, projects) : [];
+  const selectedSkillObj = selectedSkill ? skills.find((s) => s.name === selectedSkill) ?? null : null;
+  const matchedProjects = selectedSkillObj ? getProjectsForSkill(selectedSkillObj, projects) : [];
 
   return (
     <section id="skills" className="py-24 px-4 max-w-4xl mx-auto">
@@ -60,7 +72,7 @@ export default function Skills({ skills, projects }: { skills: Skill[]; projects
                 .filter((s) => s.category === cat)
                 .map((skill) => {
                   const isSelected = selectedSkill === skill.name;
-                  const hasProjects = getProjectsForSkill(skill.name, projects).length > 0;
+                  const hasProjects = getProjectsForSkill(skill, projects).length > 0;
                   return (
                     <button
                       key={skill.name}
@@ -151,8 +163,7 @@ export default function Skills({ skills, projects }: { skills: Skill[]; projects
                             className="text-[9px] px-1.5 py-0.5 rounded-full"
                             style={{
                               ...(() => {
-                                const parts = selectedSkill.split(/\s*\/\s*/).map((s) => s.trim());
-                                const isMatch = parts.some((p) => exactMatch(t, p));
+                                const isMatch = selectedSkillObj ? techMatchesSkill(t, selectedSkillObj) : false;
                                 return {
                                   background: isMatch ? "rgba(2,132,199,0.2)" : "rgba(255,255,255,0.05)",
                                   color: isMatch ? "var(--accent-mid)" : "var(--text-muted)",
