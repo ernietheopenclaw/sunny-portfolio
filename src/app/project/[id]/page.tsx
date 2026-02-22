@@ -109,6 +109,9 @@ export default function ProjectDetail() {
             <button
               onClick={() => {
                 if (confirm(`Delete "${project.title}"? This cannot be undone.`)) {
+                  const hidden = JSON.parse(localStorage.getItem("hidden-projects") || "[]") as string[];
+                  hidden.push(project.id);
+                  localStorage.setItem("hidden-projects", JSON.stringify(hidden));
                   router.push("/#projects");
                 }
               }}
