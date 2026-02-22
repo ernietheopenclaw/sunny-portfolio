@@ -2,7 +2,8 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ArrowLeft, ExternalLink, Github, Edit3, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, ExternalLink, Github, Edit3, Trash2, Save, X } from "lucide-react";
 import { mockProjects } from "@/data/mock";
 import ImageGallery from "@/components/ImageGallery";
 
@@ -26,15 +27,65 @@ export default function ProjectDetail() {
   const router = useRouter();
   const { data: session } = useSession();
 
-  const project = mockProjects.find((p) => p.id === params.id);
+  const baseProject = mockProjects.find((p) => p.id === params.id);
 
-  if (!project) {
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [content, setContent] = useState("");
+
+  // Load any saved edits from localStorage
+  useEffect(() => {
+    if (!baseProject) return;
+    const saved = localStorage.getItem(`project-edit-${baseProject.id}`);
+    if (saved) {
+      const data = JSON.parse(saved);
+      setTitle(data.title ?? baseProject.title);
+      setDescription(data.description ?? baseProject.description);
+      setContent(data.content ?? baseProject.content ?? "");
+    } else {
+      setTitle(baseProject.title);
+      setDescription(baseProject.description);
+      setContent(baseProject.content ?? "");
+    }
+  }, [baseProject]);
+
+  if (!baseProject) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--bg)" }}>
         <p style={{ color: "var(--text-muted)" }}>Project not found.</p>
       </div>
     );
   }
+
+  const handleSave = () => {
+    localStorage.setItem(`project-edit-${baseProject.id}`, JSON.stringify({ title, description, content }));
+    setEditing(false);
+  };
+
+  const handleCancel = () => {
+    const saved = localStorage.getItem(`project-edit-${baseProject.id}`);
+    if (saved) {
+      const data = JSON.parse(saved);
+      setTitle(data.title ?? baseProject.title);
+      setDescription(data.description ?? baseProject.description);
+      setContent(data.content ?? baseProject.content ?? "");
+    } else {
+      setTitle(baseProject.title);
+      setDescription(baseProject.description);
+      setContent(baseProject.content ?? "");
+    }
+    setEditing(false);
+  };
+
+  const handleDelete = () => {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    const hidden = JSON.parse(localStorage.getItem("hidden-projects") || "[]") as string[];
+    hidden.push(baseProject.id);
+    localStorage.setItem("hidden-projects", JSON.stringify(hidden));
+    localStorage.removeItem(`project-edit-${baseProject.id}`);
+    router.push("/#projects");
+  };
 
   return (
     <div className="min-h-screen px-4 py-20" style={{ background: "var(--bg)" }}>
@@ -49,16 +100,35 @@ export default function ProjectDetail() {
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
 
-        <h1 className="text-4xl font-bold mb-4" style={{ color: "var(--text)" }}>
-          {project.title}
-        </h1>
+        {editing ? (
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="text-4xl font-bold mb-4 w-full bg-transparent focus:outline-none"
+            style={{ color: "var(--text)", borderBottom: "1px solid var(--border)" }}
+          />
+        ) : (
+          <h1 className="text-4xl font-bold mb-4" style={{ color: "var(--text)" }}>
+            {title}
+          </h1>
+        )}
 
-        <p className="text-sm mb-6" style={{ color: "var(--accent-mid)" }}>
-          {project.description}
-        </p>
+        {editing ? (
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={2}
+            className="text-sm mb-6 w-full bg-transparent focus:outline-none resize-y p-2 rounded-lg"
+            style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
+          />
+        ) : (
+          <p className="text-sm mb-6" style={{ color: "var(--accent-mid)" }}>
+            {description}
+          </p>
+        )}
 
         <div className="flex flex-wrap gap-2 mb-6">
-          {project.tech.map((t) => (
+          {baseProject.tech.map((t) => (
             <span
               key={t}
               className="text-xs px-2 py-0.5 rounded-full"
@@ -74,9 +144,9 @@ export default function ProjectDetail() {
         </div>
 
         <div className="flex gap-3 mb-4">
-          {project.link && (
+          {baseProject.link && (
             <a
-              href={project.link}
+              href={baseProject.link}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg transition-colors"
@@ -85,9 +155,9 @@ export default function ProjectDetail() {
               <ExternalLink className="w-3.5 h-3.5" /> Live Site
             </a>
           )}
-          {project.github && (
+          {baseProject.github && (
             <a
-              href={project.github}
+              href={baseProject.github}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg transition-colors"
@@ -98,23 +168,17 @@ export default function ProjectDetail() {
           )}
         </div>
 
-        {session && (
+        {session && !editing && (
           <div className="flex gap-2 mb-8">
             <button
+              onClick={() => setEditing(true)}
               className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg transition-colors cursor-pointer"
               style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
             >
               <Edit3 className="w-3 h-3" /> Edit
             </button>
             <button
-              onClick={() => {
-                if (confirm(`Delete "${project.title}"? This cannot be undone.`)) {
-                  const hidden = JSON.parse(localStorage.getItem("hidden-projects") || "[]") as string[];
-                  hidden.push(project.id);
-                  localStorage.setItem("hidden-projects", JSON.stringify(hidden));
-                  router.push("/#projects");
-                }
-              }}
+              onClick={handleDelete}
               className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg transition-colors cursor-pointer"
               style={{ color: "#ff6464", border: "1px solid rgba(255,100,100,0.3)" }}
             >
@@ -123,11 +187,44 @@ export default function ProjectDetail() {
           </div>
         )}
 
-        {project.images && project.images.length > 0 && (
-          <ImageGallery images={project.images} />
+        {editing && (
+          <div className="flex gap-2 mb-8">
+            <button
+              onClick={handleSave}
+              className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg cursor-pointer"
+              style={{ background: "var(--accent)", color: "#fff" }}
+            >
+              <Save className="w-3 h-3" /> Save
+            </button>
+            <button
+              onClick={handleCancel}
+              className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg cursor-pointer"
+              style={{ color: "var(--text-muted)", border: "1px solid var(--border)" }}
+            >
+              <X className="w-3 h-3" /> Cancel
+            </button>
+          </div>
         )}
 
-        {project.content && (
+        {baseProject.images && baseProject.images.length > 0 && (
+          <ImageGallery images={baseProject.images} />
+        )}
+
+        {editing ? (
+          <div
+            className="rounded-xl p-6 mt-6"
+            style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+          >
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={16}
+              className="w-full bg-transparent text-sm leading-relaxed focus:outline-none resize-y font-mono"
+              style={{ color: "var(--text)", lineHeight: 1.8 }}
+              placeholder="Project content (supports markdown)..."
+            />
+          </div>
+        ) : content ? (
           <div
             className="rounded-xl p-6 mt-6"
             style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
@@ -135,10 +232,10 @@ export default function ProjectDetail() {
             <div
               className="text-sm"
               style={{ color: "var(--text)", lineHeight: 1.8 }}
-              dangerouslySetInnerHTML={{ __html: markdownToHtml(project.content) }}
+              dangerouslySetInnerHTML={{ __html: markdownToHtml(content) }}
             />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
