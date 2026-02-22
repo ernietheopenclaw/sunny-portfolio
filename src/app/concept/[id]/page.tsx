@@ -15,24 +15,40 @@ export default function ConceptDetail() {
   const { data: session } = useSession();
   const [concept, setConcept] = useState<Concept | null>(null);
   const [editing, setEditing] = useState(false);
-  const [editText, setEditText] = useState("");
+  const [editName, setEditName] = useState("");
+  const [editShortSummary, setEditShortSummary] = useState("");
+  const [editLongSummary, setEditLongSummary] = useState("");
 
   useEffect(() => {
     const id = params.id as string;
     const allConcepts = getAllConcepts();
     const found = allConcepts.find((c) => c.id === id);
     if (found) {
-      // Check for custom long_summary in localStorage
-      const customSummary = localStorage.getItem(`concept-summary-${id}`);
-      setConcept({ ...found, long_summary: customSummary || found.long_summary });
-      setEditText(customSummary || found.long_summary);
+      // Migrate old key if exists
+      const oldKey = localStorage.getItem(`concept-summary-${id}`);
+      const savedRaw = localStorage.getItem(`concept-edit-${id}`);
+      let saved: { name?: string; short_summary?: string; long_summary?: string } | null = null;
+      if (savedRaw) {
+        saved = JSON.parse(savedRaw);
+      } else if (oldKey) {
+        saved = { long_summary: oldKey };
+        localStorage.setItem(`concept-edit-${id}`, JSON.stringify(saved));
+        localStorage.removeItem(`concept-summary-${id}`);
+      }
+      const name = saved?.name || found.name;
+      const short_summary = saved?.short_summary || found.short_summary;
+      const long_summary = saved?.long_summary || found.long_summary;
+      setConcept({ ...found, name, short_summary, long_summary });
+      setEditName(name);
+      setEditShortSummary(short_summary);
+      setEditLongSummary(long_summary);
     }
   }, [params.id]);
 
   const handleSave = () => {
     if (!concept) return;
-    localStorage.setItem(`concept-summary-${concept.id}`, editText);
-    setConcept({ ...concept, long_summary: editText });
+    localStorage.setItem(`concept-edit-${concept.id}`, JSON.stringify({ name: editName, short_summary: editShortSummary, long_summary: editLongSummary }));
+    setConcept({ ...concept, name: editName, short_summary: editShortSummary, long_summary: editLongSummary });
     setEditing(false);
   };
 
@@ -61,13 +77,32 @@ export default function ConceptDetail() {
           Added {new Date(concept.date_learned).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
         </div>
 
-        <h1 className="text-4xl font-bold mb-2" style={{ color: "var(--text)" }}>
-          {concept.name}
-        </h1>
+        {editing ? (
+          <input
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            className="text-4xl font-bold mb-2 w-full bg-transparent focus:outline-none"
+            style={{ color: "var(--text)", borderBottom: "1px solid var(--border)" }}
+          />
+        ) : (
+          <h1 className="text-4xl font-bold mb-2" style={{ color: "var(--text)" }}>
+            {concept.name}
+          </h1>
+        )}
 
-        <LatexText as="p" className="text-sm mb-8" style={{ color: "var(--accent-mid)" }}>
-          {concept.short_summary}
-        </LatexText>
+        {editing ? (
+          <textarea
+            value={editShortSummary}
+            onChange={(e) => setEditShortSummary(e.target.value)}
+            rows={2}
+            className="text-sm mb-8 w-full bg-transparent focus:outline-none resize-y p-2 rounded-lg"
+            style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
+          />
+        ) : (
+          <LatexText as="p" className="text-sm mb-8" style={{ color: "var(--accent-mid)" }}>
+            {concept.short_summary}
+          </LatexText>
+        )}
 
         <div className="p-6 rounded-xl" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
           <div className="flex items-center justify-between mb-4">
@@ -106,7 +141,7 @@ export default function ConceptDetail() {
                   <Save className="w-3 h-3" /> Save
                 </button>
                 <button
-                  onClick={() => { setEditing(false); setEditText(concept.long_summary); }}
+                  onClick={() => { setEditing(false); setEditName(concept.name); setEditShortSummary(concept.short_summary); setEditLongSummary(concept.long_summary); }}
                   className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg cursor-pointer"
                   style={{ color: "var(--text-muted)", border: "1px solid var(--border)" }}
                 >
@@ -118,8 +153,8 @@ export default function ConceptDetail() {
 
           {editing ? (
             <textarea
-              value={editText}
-              onChange={(e) => setEditText(e.target.value)}
+              value={editLongSummary}
+              onChange={(e) => setEditLongSummary(e.target.value)}
               rows={8}
               className="w-full p-4 rounded-lg text-sm leading-relaxed focus:outline-none resize-y"
               style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}

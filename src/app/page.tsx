@@ -36,9 +36,10 @@ export default function Home() {
       setProjects(mockProjects.filter((p) => !hiddenProjects.includes(p.id)));
     }
     const hiddenPosts = JSON.parse(localStorage.getItem("hidden-posts") || "[]") as string[];
-    if (hiddenPosts.length > 0) {
-      setPosts(mockPosts.filter((p) => !hiddenPosts.includes(p.id)));
-    }
+    const userPosts = JSON.parse(localStorage.getItem("user-posts") || "[]") as typeof mockPosts;
+    const filteredMock = hiddenPosts.length > 0 ? mockPosts.filter((p) => !hiddenPosts.includes(p.id)) : mockPosts;
+    const merged = [...userPosts, ...filteredMock];
+    setPosts(merged);
   }, []);
 
   const handleConceptAdded = useCallback(() => {

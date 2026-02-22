@@ -2,12 +2,14 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import { Post } from "@/types";
 
 export default function Posts({ posts, onDelete }: { posts: Post[]; onDelete?: (id: string) => void }) {
   const { data: session } = useSession();
+  const router = useRouter();
   return (
     <section id="posts" className="py-24 px-4 max-w-4xl mx-auto">
       <motion.div
@@ -16,9 +18,20 @@ export default function Posts({ posts, onDelete }: { posts: Post[]; onDelete?: (
         transition={{ duration: 0.7 }}
         viewport={{ once: true }}
       >
-        <h2 className="text-3xl font-bold mb-2" style={{ color: "var(--accent)" }}>
-          Posts
-        </h2>
+        <div className="flex items-center gap-3 mb-2">
+          <h2 className="text-3xl font-bold" style={{ color: "var(--accent)" }}>
+            Posts
+          </h2>
+          {session && (
+            <button
+              onClick={() => router.push("/post/new")}
+              className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg transition-colors cursor-pointer"
+              style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
+            >
+              <Plus className="w-3.5 h-3.5" /> New Post
+            </button>
+          )}
+        </div>
         <p className="text-sm mb-12" style={{ color: "var(--text-muted)" }}>
           Thoughts, tutorials, and deep dives
         </p>

@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Edit3, Trash2, Save, X } from "lucide-react";
 import { mockPosts } from "@/data/mock";
+import { Post } from "@/types";
 import ImageGallery from "@/components/ImageGallery";
 
 function markdownToHtml(md: string): string {
@@ -27,7 +28,8 @@ export default function PostDetail() {
   const router = useRouter();
   const { data: session } = useSession();
 
-  const basePost = mockPosts.find((p) => p.id === params.id);
+  const userPosts = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("user-posts") || "[]") as Post[] : [];
+  const basePost = mockPosts.find((p) => p.id === params.id) || userPosts.find((p) => p.id === params.id);
 
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState("");
