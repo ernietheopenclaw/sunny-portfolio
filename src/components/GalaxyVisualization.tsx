@@ -668,7 +668,7 @@ function TimelineOverlay({ concepts, mode, onLinesHidden }: { concepts: Concept[
   const groupRef = useRef<THREE.Group>(null!);
   const [visible, setVisible] = useState(false);
   const opacityRef = useRef(0);
-  const prevModeRef = useRef(mode);
+  const prevModeRef = useRef<string | null>(null); // null on first mount
   // Delay before lines appear (wait for stars to arrive)
   const enterDelayRef = useRef(0);
   const enteringRef = useRef(false);
@@ -680,10 +680,10 @@ function TimelineOverlay({ concepts, mode, onLinesHidden }: { concepts: Concept[
 
   useEffect(() => {
     if (mode === "timeline" && prevModeRef.current !== "timeline") {
-      // Entering timeline — delay lines until stars settle
+      // Entering timeline (or mounting in timeline mode) — delay lines until stars settle
       setVisible(true);
       enteringRef.current = true;
-      enterDelayRef.current = 0;
+      enterDelayRef.current = prevModeRef.current === null ? 0.8 : 0; // shorter delay on remount since stars are already placed
       opacityRef.current = 0;
       leavingRef.current = false;
       leavingDoneRef.current = false;
