@@ -567,26 +567,76 @@ function ConceptDots({ concepts, onHover, onClick, overrideMode }: ConceptDotsPr
     onHover(null, null);
   }, [onHover]);
 
-  // Expose label positions (updated each frame) for galaxy/clusters modes
+  // Floating concept labels for galaxy/clusters — same pattern as TimelineOverlay
   const [labelPositions, setLabelPositions] = useState<{ id: string; name: string; pos: THREE.Vector3 }[]>([]);
-  const labelUpdateCounter = useRef(0);
+  const [labelsVisible, setLabelsVisible] = useState(false);
   const labelOpacityRef = useRef(0);
   const [labelOpacity, setLabelOpacity] = useState(0);
+  const labelPrevModeRef = useRef<string | null>(null);
+  const labelEnteringRef = useRef(false);
+  const labelEnterDelayRef = useRef(0);
+  const labelLeavingRef = useRef(false);
+  const labelUpdateCounter = useRef(0);
 
-  // Update label positions periodically (every 10 frames to avoid perf hit)
-  // Labels fade out instantly on mode change, fade in after stars settle (transition progress >= 0.95)
+  // Detect mode changes — mirror TimelineOverlay pattern
+  useEffect(() => {
+    const isNonTimeline = mode !== "timeline";
+    const wasNonTimeline = labelPrevModeRef.current !== null && labelPrevModeRef.current !== "timeline";
+    const modeChanged = labelPrevModeRef.current !== null && labelPrevModeRef.current !== mode;
+
+    if (isNonTimeline && (labelPrevModeRef.current === null || !wasNonTimeline || modeChanged)) {
+      // Entering a non-timeline mode — show labels after stars settle
+      setLabelsVisible(true);
+      labelEnteringRef.current = true;
+      labelEnterDelayRef.current = labelPrevModeRef.current === null ? 0.8 : 0;
+      labelOpacityRef.current = 0;
+      labelLeavingRef.current = false;
+    } else if (!isNonTimeline && wasNonTimeline) {
+      // Leaving to timeline — fade out labels first
+      labelLeavingRef.current = true;
+      labelEnteringRef.current = false;
+    } else if (isNonTimeline && modeChanged) {
+      // Switching between galaxy and clusters — fade out then back in
+      labelLeavingRef.current = true;
+      labelEnteringRef.current = false;
+    }
+    labelPrevModeRef.current = mode;
+  }, [mode]);
+
   useFrame((_, delta) => {
-    const settled = transitionRef.current.progress >= 0.95;
-    const targetOpacity = (mode !== "timeline" && settled) ? 1 : 0;
-    const speed = targetOpacity === 0 ? 8 : 1.5; // fast fade out, gentle fade in
-    labelOpacityRef.current += (targetOpacity - labelOpacityRef.current) * Math.min(delta * speed, 1);
-    
+    if (labelEnteringRef.current) {
+      // Wait 1.6s for stars to arrive before fading in
+      labelEnterDelayRef.current += delta;
+      if (labelEnterDelayRef.current >= 1.6) {
+        labelEnteringRef.current = false;
+      }
+      labelOpacityRef.current = 0;
+    } else if (labelLeavingRef.current) {
+      // Fade out quickly (0.5s)
+      labelOpacityRef.current = Math.max(labelOpacityRef.current - delta * 2, 0);
+      if (labelOpacityRef.current <= 0.01) {
+        labelLeavingRef.current = false;
+        setLabelsVisible(false);
+        // If we're still in a non-timeline mode (galaxy↔clusters switch), re-enter
+        if (mode !== "timeline") {
+          setLabelsVisible(true);
+          labelEnteringRef.current = true;
+          labelEnterDelayRef.current = 0;
+          labelOpacityRef.current = 0;
+        }
+      }
+    } else if (mode !== "timeline" && labelsVisible) {
+      // Fade in over ~0.8s
+      labelOpacityRef.current = Math.min(labelOpacityRef.current + delta * 1.25, 1);
+    }
+
+    // Update positions periodically
     labelUpdateCounter.current++;
     if (labelUpdateCounter.current % 10 !== 0) return;
-    
+
     setLabelOpacity(labelOpacityRef.current);
-    
-    if (mode === "timeline" || labelOpacityRef.current < 0.02) { setLabelPositions([]); return; }
+
+    if (!labelsVisible || labelOpacityRef.current < 0.02) { setLabelPositions([]); return; }
     const labels: { id: string; name: string; pos: THREE.Vector3 }[] = [];
     const len = Math.min(concepts.length, currentPositions.current.length);
     for (let i = 0; i < len; i++) {
