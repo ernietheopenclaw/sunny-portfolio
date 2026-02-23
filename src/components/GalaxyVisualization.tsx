@@ -431,10 +431,12 @@ interface ConceptDotsProps {
   concepts: Concept[];
   onHover: (concept: Concept | null, pos: THREE.Vector3 | null) => void;
   onClick: (concept: Concept) => void;
+  overrideMode?: string;
 }
 
-function ConceptDots({ concepts, onHover, onClick }: ConceptDotsProps) {
-  const { mode } = useScroll();
+function ConceptDots({ concepts, onHover, onClick, overrideMode }: ConceptDotsProps) {
+  const { mode: scrollMode } = useScroll();
+  const mode = overrideMode ?? scrollMode;
   const meshRef = useRef<THREE.InstancedMesh>(null!);
   const transitionRef = useRef({ progress: 0, currentMode: "galaxy" as string });
 
@@ -659,27 +661,78 @@ function RightClickZoom() {
 }
 
 // Timeline constellation lines + labels
-function TimelineOverlay({ concepts, mode }: { concepts: Concept[]; mode: string }) {
+// Animation sequencing:
+//   Entering timeline: stars move first (1.5s), then lines/labels fade in
+//   Leaving timeline: lines/labels fade out first (0.5s), then stars move
+function TimelineOverlay({ concepts, mode, onLinesHidden }: { concepts: Concept[]; mode: string; onLinesHidden?: () => void }) {
   const groupRef = useRef<THREE.Group>(null!);
   const [visible, setVisible] = useState(false);
   const opacityRef = useRef(0);
+  const prevModeRef = useRef(mode);
+  // Delay before lines appear (wait for stars to arrive)
+  const enterDelayRef = useRef(0);
+  const enteringRef = useRef(false);
+  // Track leaving state — lines fade out before stars move
+  const leavingRef = useRef(false);
+  const leavingDoneRef = useRef(false);
 
   const timelineData = useMemo(() => getTimelineData(concepts), [concepts]);
 
   useEffect(() => {
-    if (mode === "timeline") setVisible(true);
+    if (mode === "timeline" && prevModeRef.current !== "timeline") {
+      // Entering timeline — delay lines until stars settle
+      setVisible(true);
+      enteringRef.current = true;
+      enterDelayRef.current = 0;
+      opacityRef.current = 0;
+      leavingRef.current = false;
+      leavingDoneRef.current = false;
+    } else if (mode !== "timeline" && prevModeRef.current === "timeline") {
+      // Leaving timeline — fade out lines first
+      leavingRef.current = true;
+      leavingDoneRef.current = false;
+      enteringRef.current = false;
+    }
+    prevModeRef.current = mode;
   }, [mode]);
 
-  // Chronological line geometry
-  const chronoGeometry = useMemo(() => {
-    const points: number[] = [];
-    for (const id of timelineData.chronologicalOrder) {
-      const p = timelineData.positions.get(id);
-      if (p) points.push(p.x, p.y, p.z);
+  // Intra-constellation chronological lines (solid)
+  const intraLines = useMemo(() => {
+    const lines: { geometry: THREE.BufferGeometry }[] = [];
+    for (const assignment of timelineData.constellationAssignments) {
+      const ids = assignment.conceptIds;
+      if (ids.length < 2) continue;
+      const points: number[] = [];
+      for (const id of ids) {
+        const p = timelineData.positions.get(id);
+        if (p) points.push(p.x, p.y, p.z);
+      }
+      if (points.length >= 6) {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.Float32BufferAttribute(points, 3));
+        lines.push({ geometry: geo });
+      }
     }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(points, 3));
-    return geo;
+    return lines;
+  }, [timelineData]);
+
+  // Inter-constellation lines (dashed) — connect last concept of one to first of next
+  const interLines = useMemo(() => {
+    const lines: { geometry: THREE.BufferGeometry }[] = [];
+    const assignments = timelineData.constellationAssignments;
+    for (let i = 0; i < assignments.length - 1; i++) {
+      const lastId = assignments[i].conceptIds[assignments[i].conceptIds.length - 1];
+      const firstId = assignments[i + 1].conceptIds[0];
+      const p1 = timelineData.positions.get(lastId);
+      const p2 = timelineData.positions.get(firstId);
+      if (p1 && p2) {
+        const points = [p1.x, p1.y, p1.z, p2.x, p2.y, p2.z];
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.Float32BufferAttribute(points, 3));
+        lines.push({ geometry: geo });
+      }
+    }
+    return lines;
   }, [timelineData]);
 
   // Constellation stick-figure lines
@@ -706,7 +759,7 @@ function TimelineOverlay({ concepts, mode }: { concepts: Concept[]; mode: string
     return lines;
   }, [timelineData]);
 
-  // Date + constellation labels (limited to ~20)
+  // Date + constellation labels
   const labels = useMemo(() => {
     const result: { position: THREE.Vector3; date: string; name: string }[] = [];
     for (const assignment of timelineData.constellationAssignments) {
@@ -734,14 +787,47 @@ function TimelineOverlay({ concepts, mode }: { concepts: Concept[]; mode: string
     }));
   }, [concepts, timelineData]);
 
+  // Create dashed line materials once
+  const dashedMaterials = useRef<THREE.LineDashedMaterial[]>([]);
+
   useFrame((_, delta) => {
-    const target = mode === "timeline" ? 1 : 0;
-    opacityRef.current += (target - opacityRef.current) * Math.min(delta * 3, 1);
-    if (opacityRef.current < 0.01 && mode !== "timeline") {
-      setVisible(false);
+    if (enteringRef.current) {
+      // Wait 1.6s for stars to arrive before fading in
+      enterDelayRef.current += delta;
+      if (enterDelayRef.current >= 1.6) {
+        enteringRef.current = false;
+        // Now start fading in
+      }
+      opacityRef.current = 0;
+    } else if (leavingRef.current) {
+      // Fade out quickly (0.5s)
+      opacityRef.current = Math.max(opacityRef.current - delta * 2, 0);
+      if (opacityRef.current <= 0.01) {
+        leavingRef.current = false;
+        leavingDoneRef.current = true;
+        setVisible(false);
+        onLinesHidden?.();
+      }
+    } else if (mode === "timeline") {
+      // Fade in over ~0.8s
+      opacityRef.current = Math.min(opacityRef.current + delta * 1.25, 1);
     }
+
+    // Update all line material opacities
     if (groupRef.current) {
-      groupRef.current.visible = visible;
+      groupRef.current.traverse((child) => {
+        if ((child as THREE.Line).isLine) {
+          const mat = (child as THREE.Line).material as THREE.LineBasicMaterial | THREE.LineDashedMaterial;
+          if (mat.userData?.baseOpacity != null) {
+            mat.opacity = mat.userData.baseOpacity * opacityRef.current;
+          }
+        }
+      });
+    }
+
+    // Update dashed materials
+    for (const mat of dashedMaterials.current) {
+      mat.opacity = (mat.userData?.baseOpacity ?? 0.3) * opacityRef.current;
     }
   });
 
@@ -749,16 +835,32 @@ function TimelineOverlay({ concepts, mode }: { concepts: Concept[]; mode: string
 
   return (
     <group ref={groupRef}>
-      {/* Chronological path line */}
-      <primitive object={new THREE.Line(chronoGeometry, new THREE.LineBasicMaterial({ color: "#0ea5e9", transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false }))} />
+      {/* Intra-constellation chronological path (solid) */}
+      {intraLines.map((line, i) => {
+        const mat = new THREE.LineBasicMaterial({ color: "#0ea5e9", transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+        mat.userData = { baseOpacity: 0.4 };
+        return <primitive key={`intra-${i}`} object={new THREE.Line(line.geometry, mat)} />;
+      })}
+      {/* Inter-constellation path (dashed) */}
+      {interLines.map((line, i) => {
+        const mat = new THREE.LineDashedMaterial({ color: "#0ea5e9", transparent: true, opacity: 0, dashSize: 0.15, gapSize: 0.1, blending: THREE.AdditiveBlending, depthWrite: false });
+        mat.userData = { baseOpacity: 0.3 };
+        // computeLineDistances needed for dashes to work
+        const lineObj = new THREE.Line(line.geometry, mat);
+        lineObj.computeLineDistances();
+        if (!dashedMaterials.current.includes(mat)) dashedMaterials.current.push(mat);
+        return <primitive key={`inter-${i}`} object={lineObj} />;
+      })}
       {/* Constellation stick figures */}
-      {constellationLines.map((line, i) => (
-        <primitive key={`const-line-${i}`} object={new THREE.LineSegments(line.geometry, new THREE.LineBasicMaterial({ color: "#4488cc", transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending, depthWrite: false }))} />
-      ))}
+      {constellationLines.map((line, i) => {
+        const mat = new THREE.LineBasicMaterial({ color: "#4488cc", transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+        mat.userData = { baseOpacity: 0.15 };
+        return <primitive key={`const-line-${i}`} object={new THREE.LineSegments(line.geometry, mat)} />;
+      })}
       {/* Date + constellation labels */}
-      {labels.map((label, i) => (
+      {opacityRef.current > 0.05 && labels.map((label, i) => (
         <Html key={`label-${i}`} position={label.position} center style={{ pointerEvents: "none" }}>
-          <div style={{ textAlign: "center" }}>
+          <div style={{ textAlign: "center", opacity: opacityRef.current }}>
             <div style={{
               fontSize: "10px",
               fontFamily: "monospace",
@@ -781,12 +883,12 @@ function TimelineOverlay({ concepts, mode }: { concepts: Concept[]; mode: string
         </Html>
       ))}
       {/* Concept name labels */}
-      {conceptLabels.map((cl) => (
+      {opacityRef.current > 0.05 && conceptLabels.map((cl) => (
         <Html key={`cname-${cl.id}`} position={cl.position} center style={{ pointerEvents: "none" }}>
           <div style={{
             fontSize: "9px",
             color: "var(--text-muted)",
-            opacity: 0.4,
+            opacity: 0.4 * opacityRef.current,
             whiteSpace: "nowrap",
             fontFamily: "monospace",
           }}>
@@ -803,6 +905,28 @@ function Scene({ concepts, dispersionRef, onConceptClick, hasSession }: { concep
   const [hoveredPos, setHoveredPos] = useState<THREE.Vector3 | null>(null);
   const { mode } = useScroll();
   const [dispersionProgress, setDispersionProgress] = useState(0);
+  // Deferred mode: when leaving timeline, stars wait until lines fade out
+  const [deferredMode, setDeferredMode] = useState(mode);
+  const prevModeRef = useRef(mode);
+
+  useEffect(() => {
+    if (mode === "timeline") {
+      // Entering timeline — stars move immediately
+      setDeferredMode("timeline");
+    } else if (prevModeRef.current === "timeline") {
+      // Leaving timeline — defer star movement until lines hidden
+      // deferredMode stays "timeline" until onLinesHidden fires
+    } else {
+      // Not involving timeline — immediate
+      setDeferredMode(mode);
+    }
+    prevModeRef.current = mode;
+  }, [mode]);
+
+  const handleLinesHidden = useCallback(() => {
+    // Lines have faded out — now let stars move
+    setDeferredMode(prevModeRef.current);
+  }, []);
 
   const handleHover = useCallback((concept: Concept | null, pos: THREE.Vector3 | null) => {
     setHovered(concept);
@@ -822,8 +946,8 @@ function Scene({ concepts, dispersionRef, onConceptClick, hasSession }: { concep
           <GalaxyStars dispersionProgress={dispersionProgress} />
         </group>
       </group>
-      <ConceptDots concepts={concepts} onHover={handleHover} onClick={onConceptClick} />
-      <TimelineOverlay concepts={concepts} mode={mode} />
+      <ConceptDots concepts={concepts} onHover={handleHover} onClick={onConceptClick} overrideMode={deferredMode} />
+      <TimelineOverlay concepts={concepts} mode={mode} onLinesHidden={handleLinesHidden} />
       <Tooltip concept={hovered} position={hoveredPos} />
       <OrbitControls
         enableZoom={false}
