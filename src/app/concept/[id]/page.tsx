@@ -10,6 +10,7 @@ import LatexText from "@/components/LatexText";
 import ImageGallery from "@/components/ImageGallery";
 import ImageUploader from "@/components/ImageUploader";
 import { renderLatex } from "@/lib/latex";
+import { parseLocalDate } from "@/lib/date";
 
 function convertTablesToLists(md: string): string {
   // Convert markdown tables to bullet lists
@@ -215,7 +216,7 @@ export default function ConceptDetail() {
         </button>
 
         <div className="mb-2 text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-          Added {new Date(concept.date_learned).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+          Added {parseLocalDate(concept.date_learned).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
         </div>
 
         {editing ? (

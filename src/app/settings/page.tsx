@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Sparkles, Loader2, Save, Check, Key, Shield, LogIn, LogOut, ClipboardPaste, X } from "lucide-react";
 import { Concept } from "@/types";
 import { getAllConcepts, hideConcept } from "@/lib/concepts";
+import { parseLocalDate } from "@/lib/date";
 
 export default function SettingsPage() {
   const { data: session, status } = useSession();
@@ -594,7 +595,7 @@ export default function SettingsPage() {
                         </div>
                         <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{c.short_summary}</p>
                         <p className="text-[10px] mt-1 font-mono" style={{ color: "var(--text-muted)", opacity: 0.6 }}>
-                          {new Date(c.date_learned).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                          {parseLocalDate(c.date_learned).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
                         </p>
                       </div>
                       <button

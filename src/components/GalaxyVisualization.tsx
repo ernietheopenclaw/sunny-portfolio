@@ -13,6 +13,7 @@ import { useScroll } from "@/lib/scroll";
 import { useRouter } from "next/navigation";
 import { computeClusterPositions } from "@/lib/embeddings";
 import { renderLatex } from "@/lib/latex";
+import { parseLocalDate } from "@/lib/date";
 import { useSession } from "next-auth/react";
 import { constellations } from "@/data/constellations";
 
@@ -161,7 +162,7 @@ interface TimelineResult {
 
 function getTimelineData(concepts: Concept[]): TimelineResult {
   const sorted = [...concepts].sort(
-    (a, b) => new Date(a.date_learned).getTime() - new Date(b.date_learned).getTime()
+    (a, b) => parseLocalDate(a.date_learned).getTime() - parseLocalDate(b.date_learned).getTime()
   );
   const map = new Map<string, THREE.Vector3>();
   const assignments: TimelineResult["constellationAssignments"] = [];
@@ -189,7 +190,7 @@ function getTimelineData(concepts: Concept[]): TimelineResult {
       assignments.push({
         constellationIndex: ci,
         conceptIds: ids,
-        firstDate: new Date(conceptsForThis[0].date_learned),
+        firstDate: parseLocalDate(conceptsForThis[0].date_learned),
       });
     }
 
@@ -706,7 +707,7 @@ function Tooltip({ concept, position }: { concept: Concept | null; position: THR
         <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }} dangerouslySetInnerHTML={{ __html: renderLatex(displaySummary) }} />
         {concept.date_learned && (
           <p style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "4px", opacity: 0.7 }}>
-            Added: {new Date(concept.date_learned).toLocaleDateString()}
+            Added: {parseLocalDate(concept.date_learned).toLocaleDateString()}
           </p>
         )}
       </div>
@@ -898,7 +899,7 @@ function TimelineOverlay({ concepts, mode, onLinesHidden }: { concepts: Concept[
   // Concept name labels (limit to 25)
   const conceptLabels = useMemo(() => {
     const sorted = [...concepts].sort(
-      (a, b) => new Date(a.date_learned).getTime() - new Date(b.date_learned).getTime()
+      (a, b) => parseLocalDate(a.date_learned).getTime() - parseLocalDate(b.date_learned).getTime()
     );
     return sorted.slice(0, 25).map(c => ({
       id: c.id,
