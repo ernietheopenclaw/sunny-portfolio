@@ -26,7 +26,10 @@ export function renderLatex(text: string): string {
   });
 
   // Inline math: $...$ (but not $$) and \(...\)
-  result = result.replace(/(?<!\$)\$(?!\$)(.+?)(?<!\$)\$(?!\$)/g, (_, tex) => {
+  // Skip currency like $1M, $100B — require non-digit start or math-like content
+  result = result.replace(/(?<!\$)\$(?!\$)(?!\d[A-Za-z])(.+?)(?<!\$)\$(?!\$)/g, (_, tex) => {
+    const looksLikeMath = /[\\^_{}]/.test(tex) || tex.length <= 30;
+    if (!looksLikeMath) return `$${tex}$`; // not math, return as-is
     try {
       return katex.renderToString(tex.trim(), { displayMode: false, throwOnError: false });
     } catch {
