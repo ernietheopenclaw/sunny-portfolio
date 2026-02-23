@@ -570,12 +570,23 @@ function ConceptDots({ concepts, onHover, onClick, overrideMode }: ConceptDotsPr
   // Expose label positions (updated each frame) for galaxy/clusters modes
   const [labelPositions, setLabelPositions] = useState<{ id: string; name: string; pos: THREE.Vector3 }[]>([]);
   const labelUpdateCounter = useRef(0);
+  const labelOpacityRef = useRef(0);
+  const [labelOpacity, setLabelOpacity] = useState(0);
 
   // Update label positions periodically (every 10 frames to avoid perf hit)
-  useFrame(() => {
+  // Labels fade out instantly on mode change, fade in after stars settle (transition progress >= 0.95)
+  useFrame((_, delta) => {
+    const settled = transitionRef.current.progress >= 0.95;
+    const targetOpacity = (mode !== "timeline" && settled) ? 1 : 0;
+    const speed = targetOpacity === 0 ? 8 : 1.5; // fast fade out, gentle fade in
+    labelOpacityRef.current += (targetOpacity - labelOpacityRef.current) * Math.min(delta * speed, 1);
+    
     labelUpdateCounter.current++;
     if (labelUpdateCounter.current % 10 !== 0) return;
-    if (mode === "timeline") { setLabelPositions([]); return; }
+    
+    setLabelOpacity(labelOpacityRef.current);
+    
+    if (mode === "timeline" || labelOpacityRef.current < 0.02) { setLabelPositions([]); return; }
     const labels: { id: string; name: string; pos: THREE.Vector3 }[] = [];
     const len = Math.min(concepts.length, currentPositions.current.length);
     for (let i = 0; i < len; i++) {
@@ -603,12 +614,12 @@ function ConceptDots({ concepts, onHover, onClick, overrideMode }: ConceptDotsPr
         <meshBasicMaterial toneMapped={false} transparent opacity={0.9} />
       </instancedMesh>
       {/* Floating concept name labels in galaxy/clusters modes */}
-      {mode !== "timeline" && labelPositions.map((lp) => (
+      {labelPositions.length > 0 && labelPositions.map((lp) => (
         <Html key={`clabel-${lp.id}`} position={lp.pos} center style={{ pointerEvents: "none" }}>
           <div style={{
             fontSize: "8px",
             color: "var(--text-muted)",
-            opacity: 0.35,
+            opacity: 0.35 * labelOpacity,
             whiteSpace: "nowrap",
             fontFamily: "monospace",
             textShadow: "0 0 4px rgba(0,0,0,0.8)",
