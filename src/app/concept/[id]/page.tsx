@@ -50,31 +50,56 @@ function markdownToHtml(md: string): string {
     return `\n%%CODEBLOCK_${idx}%%\n`;
   });
 
-  // Process line by line to properly wrap lists
+  // Remove horizontal rules (--- or ___ or ***)
+  processed = processed.replace(/^[\s]*[-_*]{3,}[\s]*$/gm, '');
+
+  // Process line by line to properly wrap lists (supports nested bullets)
   const lines = processed.split('\n');
   const output: string[] = [];
-  let inUl = false, inOl = false;
+  type ListType = 'ul' | 'ol';
+  const listStack: ListType[] = [];
+
+  function closeListsTo(depth: number) {
+    while (listStack.length > depth) {
+      const t = listStack.pop();
+      output.push(t === 'ol' ? '</ol>' : '</ul>');
+    }
+  }
 
   for (const line of lines) {
-    const ulMatch = line.match(/^- (.+)$/);
-    const olMatch = line.match(/^\d+\. (.+)$/);
+    // Match bullets at any indent: "- ", "  - ", "    - " etc.
+    const ulMatch = line.match(/^(\s*)[-•]\s+(.+)$/);
+    const olMatch = line.match(/^(\s*)\d+\.\s+(.+)$/);
 
     if (ulMatch) {
-      if (inOl) { output.push('</ol>'); inOl = false; }
-      if (!inUl) { output.push('<ul style="margin:0.5rem 0;padding-left:1.5rem">'); inUl = true; }
-      output.push(`<li style="list-style:disc;margin-bottom:0.25rem">${ulMatch[1]}</li>`);
+      const depth = Math.floor(ulMatch[1].length / 2) + 1;
+      if (depth > listStack.length) {
+        // Open new nested ul
+        while (listStack.length < depth) {
+          output.push('<ul style="margin:0.25rem 0;padding-left:1.5rem">');
+          listStack.push('ul');
+        }
+      } else {
+        closeListsTo(depth);
+      }
+      output.push(`<li style="list-style:disc;margin-bottom:0.25rem">${ulMatch[2]}</li>`);
     } else if (olMatch) {
-      if (inUl) { output.push('</ul>'); inUl = false; }
-      if (!inOl) { output.push('<ol style="margin:0.5rem 0;padding-left:1.5rem">'); inOl = true; }
-      output.push(`<li style="list-style:decimal;margin-bottom:0.25rem">${olMatch[1]}</li>`);
+      const depth = Math.floor(olMatch[1].length / 2) + 1;
+      if (depth > listStack.length) {
+        while (listStack.length < depth) {
+          output.push('<ol style="margin:0.25rem 0;padding-left:1.5rem">');
+          listStack.push('ol');
+        }
+      } else {
+        closeListsTo(depth);
+      }
+      output.push(`<li style="list-style:decimal;margin-bottom:0.25rem">${olMatch[2]}</li>`);
     } else {
-      if (inUl) { output.push('</ul>'); inUl = false; }
-      if (inOl) { output.push('</ol>'); inOl = false; }
+      closeListsTo(0);
       output.push(line);
     }
   }
-  if (inUl) output.push('</ul>');
-  if (inOl) output.push('</ol>');
+  closeListsTo(0);
 
   let html = output.join('\n')
     .replace(/^### (.+)$/gm, '<h3 style="font-size:1.15rem;font-weight:700;margin:1.5rem 0 0.5rem;color:var(--text)">$1</h3>')
