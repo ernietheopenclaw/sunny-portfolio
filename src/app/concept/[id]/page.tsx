@@ -191,7 +191,7 @@ export default function ConceptDetail() {
               <div
                 className="text-sm leading-relaxed"
                 style={{ color: "var(--text)", lineHeight: 1.8 }}
-                dangerouslySetInnerHTML={{ __html: markdownToHtml(concept.long_summary) }}
+                dangerouslySetInnerHTML={{ __html: markdownToHtml(concept.long_summary.replace(/^##?\s*Overview\s*\n+/i, "")) }}
               />
               {concept.images && concept.images.length > 0 && (
                 <ImageGallery images={concept.images} />
