@@ -9,6 +9,26 @@ import { Concept } from "@/types";
 import LatexText from "@/components/LatexText";
 import ImageGallery from "@/components/ImageGallery";
 import ImageUploader from "@/components/ImageUploader";
+import { renderLatex } from "@/lib/latex";
+
+function markdownToHtml(md: string): string {
+  let html = md
+    .replace(/^### (.+)$/gm, '<h3 style="font-size:1.15rem;font-weight:700;margin:1.5rem 0 0.5rem;color:var(--text)">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 style="font-size:1.35rem;font-weight:700;margin:2rem 0 0.75rem;color:var(--accent-mid)">$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1 style="font-size:1.75rem;font-weight:800;margin:0 0 1rem;color:var(--text)">$1</h1>')
+    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre style="background:var(--bg);padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid var(--border)"><code style="font-size:0.85em;font-family:var(--font-mono);color:var(--text-muted)">$2</code></pre>')
+    .replace(/`([^`]+)`/g, '<code style="background:var(--border);padding:0.15rem 0.4rem;border-radius:4px;font-size:0.85em;font-family:var(--font-mono)">$1</code>')
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(/^- (.+)$/gm, '<li style="margin-left:1.5rem;list-style:disc;margin-bottom:0.25rem">$1</li>')
+    .replace(/^\d+\. (.+)$/gm, '<li style="margin-left:1.5rem;list-style:decimal;margin-bottom:0.25rem">$1</li>')
+    .replace(/\n\n/g, '</p><p style="margin-bottom:1rem;line-height:1.8">')
+    .replace(/^/, '<p style="margin-bottom:1rem;line-height:1.8">')
+    .concat("</p>");
+  // Render LaTeX
+  html = renderLatex(html);
+  return html;
+}
 
 export default function ConceptDetail() {
   const params = useParams();
@@ -168,9 +188,11 @@ export default function ConceptDetail() {
             </>
           ) : (
             <>
-              <LatexText as="div" className="text-sm leading-relaxed" style={{ color: "var(--text)", lineHeight: 1.8 }}>
-                {concept.long_summary}
-              </LatexText>
+              <div
+                className="text-sm leading-relaxed"
+                style={{ color: "var(--text)", lineHeight: 1.8 }}
+                dangerouslySetInnerHTML={{ __html: markdownToHtml(concept.long_summary) }}
+              />
               {concept.images && concept.images.length > 0 && (
                 <ImageGallery images={concept.images} />
               )}

@@ -53,13 +53,29 @@ export async function POST(req: NextRequest) {
           timestamp: Date.now(),
           content: `Generate a JSON object for the concept "${name}" with these fields:
 - "short_summary": A concise 1-sentence summary (under 120 chars)
-- "long_summary": A detailed explanation that is exactly ${summaryLength} sentence${summaryLength === 1 ? "" : "s"} long
+- "long_summary": A comprehensive markdown breakdown of the concept. Include:
+  ## Overview
+  A clear explanation of what it is and why it matters.
+  
+  ## Key Concepts
+  Break down the main ideas, components, or principles. Use bullet points where helpful.
+  
+  ## How It Works
+  Explain the mechanism, algorithm, or process. Include mathematical notation where relevant using LaTeX ($...$ for inline, $$...$$ for block).
+  
+  ## Applications
+  Real-world use cases and examples.
+  
+  ## Related Topics
+  Brief mentions of related concepts.
+  
+  The breakdown should be thorough (${summaryLength * 50}-${summaryLength * 100} words), well-structured with markdown headers (##), bullet points, bold terms, and code blocks where appropriate. Write it as educational content suitable for a portfolio/knowledge base.
 - "x": A float between -3 and 3 (semantic x-coordinate for visualization)
 - "y": A float between -3 and 3 (semantic y-coordinate)
 - "z": A float between -2 and 2 (semantic z-coordinate)
 Position similar concepts near each other in the coordinate space (e.g., ML concepts near each other, web dev concepts near each other).
 
-Respond with ONLY the JSON object, no markdown.`,
+Respond with ONLY the JSON object, no markdown wrapping. The long_summary field value should be a markdown string.`,
         },
       ],
     }, {
