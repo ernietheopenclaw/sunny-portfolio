@@ -29,6 +29,9 @@ export default function SettingsPage() {
   // Summary length
   const [summaryLength, setSummaryLength] = useState(4);
 
+  // Model selection
+  const [selectedModel, setSelectedModel] = useState("claude-sonnet-4-20250514");
+
   // Concept generation
   const [conceptName, setConceptName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -60,6 +63,9 @@ export default function SettingsPage() {
 
     const storedLength = localStorage.getItem("summary-length");
     if (storedLength) setSummaryLength(parseInt(storedLength, 10));
+
+    const storedModel = localStorage.getItem("concept-model");
+    if (storedModel) setSelectedModel(storedModel);
 
     setAllConceptsList(getAllConcepts());
   }, []);
@@ -134,7 +140,8 @@ export default function SettingsPage() {
     if (!conceptName.trim()) return;
     const storedType = localStorage.getItem("auth-type") || "apikey";
 
-    let body: Record<string, unknown> = { name: conceptName, authType: storedType, summaryLength };
+    const storedModel = localStorage.getItem("concept-model") || "claude-sonnet-4-20250514";
+    let body: Record<string, unknown> = { name: conceptName, authType: storedType, summaryLength, modelId: storedModel };
 
     if (storedType === "oauth-browser") {
       const creds = localStorage.getItem("anthropic-oauth-credentials");
@@ -417,6 +424,37 @@ export default function SettingsPage() {
               </div>
             </>
           )}
+        </section>
+
+        {/* Model Selection */}
+        <section className="p-6 rounded-xl" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text)" }}>
+            <Sparkles className="w-5 h-5" /> Model
+          </h2>
+          <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>
+            Select which Claude model to use for concept generation
+          </p>
+          <select
+            value={selectedModel}
+            onChange={(e) => {
+              setSelectedModel(e.target.value);
+              localStorage.setItem("concept-model", e.target.value);
+            }}
+            className="w-full p-2.5 rounded-lg text-sm focus:outline-none"
+            style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
+          >
+            <optgroup label="Claude 4">
+              <option value="claude-opus-4-20250514">Claude Opus 4 (most capable)</option>
+              <option value="claude-sonnet-4-20250514">Claude Sonnet 4 (balanced)</option>
+            </optgroup>
+            <optgroup label="Claude 3.5">
+              <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet (fast)</option>
+              <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku (fastest)</option>
+            </optgroup>
+          </select>
+          <p className="text-xs mt-2" style={{ color: "var(--text-muted)", opacity: 0.6 }}>
+            Opus produces the most detailed breakdowns. Haiku is fastest but less thorough.
+          </p>
         </section>
 
         {/* Summary Length */}
