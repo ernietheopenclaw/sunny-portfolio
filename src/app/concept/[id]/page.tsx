@@ -50,6 +50,31 @@ function markdownToHtml(md: string): string {
     return `\n%%CODEBLOCK_${idx}%%\n`;
   });
 
+  // Extract LaTeX blocks BEFORE markdown processing to protect * _ etc inside math
+  const latexBlocks: string[] = [];
+  // Block LaTeX: $$...$$ and \[...\]
+  processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, (_m, tex) => {
+    const idx = latexBlocks.length;
+    latexBlocks.push(`$$${tex}$$`);
+    return `%%LATEX_${idx}%%`;
+  });
+  processed = processed.replace(/\\\[([\s\S]*?)\\\]/g, (_m, tex) => {
+    const idx = latexBlocks.length;
+    latexBlocks.push(`\\[${tex}\\]`);
+    return `%%LATEX_${idx}%%`;
+  });
+  // Inline LaTeX: $...$ and \(...\)
+  processed = processed.replace(/\$([^\$\n]+?)\$/g, (_m, tex) => {
+    const idx = latexBlocks.length;
+    latexBlocks.push(`$${tex}$`);
+    return `%%LATEX_${idx}%%`;
+  });
+  processed = processed.replace(/\\\((.+?)\\\)/g, (_m, tex) => {
+    const idx = latexBlocks.length;
+    latexBlocks.push(`\\(${tex}\\)`);
+    return `%%LATEX_${idx}%%`;
+  });
+
   // Remove horizontal rules (--- or ___ or ***)
   processed = processed.replace(/^[\s]*[-_*]{3,}[\s]*$/gm, '');
 
@@ -114,6 +139,9 @@ function markdownToHtml(md: string): string {
 
   // Restore code blocks
   html = html.replace(/%%CODEBLOCK_(\d+)%%/g, (_m, idx) => codeBlocks[parseInt(idx)]);
+
+  // Restore LaTeX blocks (before renderLatex processes them)
+  html = html.replace(/%%LATEX_(\d+)%%/g, (_m, idx) => latexBlocks[parseInt(idx)]);
 
   html = renderLatex(html);
   return html;
