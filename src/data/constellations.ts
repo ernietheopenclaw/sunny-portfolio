@@ -128,7 +128,7 @@ const rawConstellations: Omit<ConstellationData, "offset">[] = [
 ];
 
 // Place constellations along a winding 3D path
-const pathRadius = 4;
+const pathRadius = 7;
 export const constellations: ConstellationData[] = rawConstellations.map((c, i) => {
   const t = i / (rawConstellations.length - 1); // 0 to 1
   const angle = t * Math.PI * 1.8; // ~324 degrees of winding
