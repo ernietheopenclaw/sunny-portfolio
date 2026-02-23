@@ -290,7 +290,7 @@ Diffusion-pretrained features transferred beautifully to classification, improvi
     id: "medical-imaging",
     title: "Medical Imaging Pipeline (NYU Langone)",
     description: "End-to-end ML pipeline for biomedical data with U-Net CNN architectures, transfer learning, and pathway analysis for cardiovascular research. Reduced processing from 8 hours to 45 minutes.",
-    tech: ["Python", "PyTorch", "Keras", "Computer Vision", "Deep Learning", "R", "Scikit-Learn", "OpenCV"],
+    tech: ["Python", "PyTorch", "Keras", "NumPy", "Pandas", "SciPy", "Computer Vision", "Deep Learning", "R", "Scikit-Learn", "OpenCV"],
     content: `## Overview
 
 Developed a comprehensive machine learning pipeline at NYU Langone Health for biomedical data analysis, supporting cardiovascular research through computer vision and bioinformatics approaches.
@@ -351,7 +351,7 @@ A ChatGPT companion plugin that enables real-time webpage summarization by parsi
     id: "datathon-winner",
     title: "NYU DSC x Peak AI Datathon — Winner",
     description: "Built a winning recommender system using k-NN with GloVe-50d embeddings, competing against 50+ teams in the NYU Data Science Club x Peak.AI datathon.",
-    tech: ["Python", "k-NN", "GloVe", "Recommender Systems", "Scikit-Learn"],
+    tech: ["Python", "NumPy", "Pandas", "SciPy", "k-NN", "GloVe", "Recommender Systems", "Scikit-Learn"],
     github: "https://github.com/sunnydigital/datathon-f22",
     content: `## Overview
 
@@ -375,7 +375,7 @@ The approach outperformed more complex models (neural collaborative filtering, m
     id: "stock-forecasting",
     title: "NeuralProphet Stock Forecasting",
     description: "Stock price forecasting using NeuralProphet time-series decomposition with AR-Net and additive events for IT sector stocks.",
-    tech: ["Python", "NeuralProphet", "Time Series", "PyTorch"],
+    tech: ["Python", "NumPy", "Pandas", "SciPy", "NeuralProphet", "Time Series", "PyTorch"],
     content: `## Overview
 
 Built a stock price forecasting system for IT sector stocks using NeuralProphet, which combines the decomposability of Prophet with the power of neural networks.
@@ -398,7 +398,7 @@ NeuralProphet decomposes time series into:
     id: "esg-nlp",
     title: "ESG NLP Classification",
     description: "Fine-tuned language models on Reddit ESG data with SHAP feature attribution for interpretable ESG scoring and analysis.",
-    tech: ["Python", "NLP", "SHAP", "Hugging Face Transformers", "Scikit-Learn"],
+    tech: ["Python", "NumPy", "Pandas", "SciPy", "NLP", "SHAP", "Hugging Face Transformers", "Scikit-Learn"],
     github: "https://github.com/sunnydigital/nlp-f22",
     content: `## Overview
 
@@ -425,7 +425,7 @@ ESG scoring needs to be explainable — investors and analysts need to understan
     id: "persona-emulation",
     title: "Persona Emulation & Dialogue",
     description: "Fine-tuning GPT-3 on movie, book, and game dialogue (LotR, Harry Potter, FF XIV) to generate character-specific responses.",
-    tech: ["Python", "GPT-3", "Fine-tuning", "NLP"],
+    tech: ["Python", "NumPy", "Pandas", "SciPy", "GPT-3", "Fine-tuning", "NLP"],
     content: `## Overview
 
 Fine-tuned GPT-3 on dialogue from iconic fictional universes to generate character-specific responses that capture the voice, mannerisms, and knowledge of individual characters.
