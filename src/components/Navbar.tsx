@@ -72,7 +72,7 @@ export default function Navbar() {
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
 
-          {session ? (
+          {session && (
             <div className="flex items-center gap-2">
               {session.user?.image && (
                 <Image src={session.user.image} alt="" width={28} height={28} className="rounded-full" />
@@ -87,14 +87,6 @@ export default function Navbar() {
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
-          ) : (
-            <button
-              onClick={() => signIn("google")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer"
-              style={{ color: "var(--text-muted)", border: "1px solid var(--border)" }}
-            >
-              <LogIn className="w-3.5 h-3.5" /> Login
-            </button>
           )}
         </div>
         <button className="md:hidden" style={{ color: "var(--text-muted)" }} onClick={() => setOpen(!open)}>
@@ -123,13 +115,9 @@ export default function Navbar() {
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {theme === "dark" ? "Light mode" : "Dark mode"}
           </button>
-          {session ? (
+          {session && (
             <button onClick={() => signOut()} className="flex items-center gap-2 text-sm py-2" style={{ color: "var(--text-muted)" }}>
               <LogOut className="w-4 h-4" /> Sign out
-            </button>
-          ) : (
-            <button onClick={() => signIn("google")} className="flex items-center gap-2 text-sm py-2" style={{ color: "var(--text-muted)" }}>
-              <LogIn className="w-4 h-4" /> Login
             </button>
           )}
         </div>
