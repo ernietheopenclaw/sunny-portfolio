@@ -41,6 +41,16 @@ export default function SettingsPage() {
   const [allConceptsList, setAllConceptsList] = useState<Concept[]>([]);
   const [conceptDate, setConceptDate] = useState("");
 
+  // Toast state
+  const [showToast, setShowToast] = useState(false);
+  const [toastFading, setToastFading] = useState(false);
+  const triggerToast = () => {
+    setShowToast(true);
+    setToastFading(false);
+    setTimeout(() => setToastFading(true), 1600);
+    setTimeout(() => { setShowToast(false); setToastFading(false); }, 2000);
+  };
+
   useEffect(() => {
     const storedType = localStorage.getItem("auth-type") as "apikey" | "oauth" | "oauth-browser" | null;
     if (storedType) setAuthType(storedType);
@@ -79,6 +89,7 @@ export default function SettingsPage() {
       localStorage.setItem("anthropic-oauth-token", oauthToken);
       setCredentialStatus(oauthToken ? "configured" : "none");
     }
+    triggerToast();
   };
 
   // Start OAuth browser flow
@@ -122,6 +133,7 @@ export default function SettingsPage() {
       setCredentialStatus("configured");
       setOauthCodeVerifier(null);
       setOauthCode("");
+      triggerToast();
     } catch (err) {
       setOauthError(err instanceof Error ? err.message : "Exchange failed");
     } finally {
@@ -134,6 +146,7 @@ export default function SettingsPage() {
     localStorage.removeItem("anthropic-oauth-credentials");
     setOauthConnected(false);
     setCredentialStatus("none");
+    triggerToast();
   };
 
   const handleGenerate = async () => {
@@ -217,6 +230,7 @@ export default function SettingsPage() {
     setConceptDate("");
     setGenerated(null);
     setAllConceptsList(getAllConcepts());
+    triggerToast();
   };
 
   if (status === "loading") {
@@ -439,6 +453,7 @@ export default function SettingsPage() {
             onChange={(e) => {
               setSelectedModel(e.target.value);
               localStorage.setItem("concept-model", e.target.value);
+              triggerToast();
             }}
             className="w-full p-2.5 rounded-lg text-sm focus:outline-none"
             style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
@@ -482,6 +497,7 @@ export default function SettingsPage() {
                 const val = parseInt(e.target.value, 10);
                 setSummaryLength(val);
                 localStorage.setItem("summary-length", val.toString());
+                triggerToast();
               }}
               className="flex-1 accent-[#218380]"
               style={{ accentColor: "var(--accent)" }}
@@ -607,6 +623,30 @@ export default function SettingsPage() {
         {/* End grid */}
 
       </div>
+
+      {/* Saved toast */}
+      {showToast && (
+        <div style={{
+          position: "fixed",
+          bottom: 24,
+          right: 24,
+          background: "rgba(2,132,199,0.9)",
+          color: "#fff",
+          padding: "8px 16px",
+          borderRadius: 999,
+          fontSize: 14,
+          fontWeight: 500,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          zIndex: 9999,
+          opacity: toastFading ? 0 : 1,
+          transition: "opacity 0.4s ease",
+          pointerEvents: "none",
+        }}>
+          <Check className="w-4 h-4" /> Saved
+        </div>
+      )}
     </div>
   );
 }
