@@ -147,7 +147,7 @@ export const constellations: ConstellationData[] = rawConstellations.map((c, i) 
   return {
     name: c.name,
     stars: c.stars.map(s => ({
-      x: (s.x - cx) * scale,
+      x: -(s.x - cx) * scale,  // negate x to match sky-chart orientation (RA increases leftward)
       y: (s.y - cy) * scale,
       z: (s.z) * scale,
     })),

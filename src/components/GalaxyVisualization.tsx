@@ -861,8 +861,15 @@ function TimelineOverlay({ concepts, mode, onLinesHidden }: { concepts: Concept[
     const lines: { geometry: THREE.BufferGeometry }[] = [];
     for (const assignment of timelineData.constellationAssignments) {
       const constellation = constellations[assignment.constellationIndex];
+      // Only draw lines between star indices that have concepts assigned
+      const occupiedStarIndices = new Set<number>();
+      for (let si = 0; si < assignment.conceptIds.length; si++) {
+        occupiedStarIndices.add(si);
+      }
       const points: number[] = [];
       for (const [a, b] of constellation.connections) {
+        // Only draw this connection if BOTH endpoints have concepts
+        if (!occupiedStarIndices.has(a) || !occupiedStarIndices.has(b)) continue;
         const sa = constellation.stars[a];
         const sb = constellation.stars[b];
         if (sa && sb) {
