@@ -909,6 +909,8 @@ function TimelineOverlay({ concepts, mode, onLinesHidden }: { concepts: Concept[
 
   // Create dashed line materials once
   const dashedMaterials = useRef<THREE.LineDashedMaterial[]>([]);
+  const [labelOpacityState, setLabelOpacityState] = useState(0);
+  const labelUpdateThrottle = useRef(0);
 
   useFrame((_, delta) => {
     if (enteringRef.current) {
@@ -931,6 +933,12 @@ function TimelineOverlay({ concepts, mode, onLinesHidden }: { concepts: Concept[
     } else if (mode === "timeline") {
       // Fade in over ~0.8s
       opacityRef.current = Math.min(opacityRef.current + delta * 1.25, 1);
+    }
+
+    // Update label opacity state periodically (drives React re-renders for Html labels)
+    labelUpdateThrottle.current++;
+    if (labelUpdateThrottle.current % 5 === 0) {
+      setLabelOpacityState(opacityRef.current);
     }
 
     // Update all line material opacities
@@ -978,9 +986,9 @@ function TimelineOverlay({ concepts, mode, onLinesHidden }: { concepts: Concept[
         return <primitive key={`const-line-${i}`} object={new THREE.LineSegments(line.geometry, mat)} />;
       })}
       {/* Date + constellation labels */}
-      {opacityRef.current > 0.05 && labels.map((label, i) => (
+      {labelOpacityState > 0.05 && labels.map((label, i) => (
         <Html key={`label-${i}`} position={label.position} center style={{ pointerEvents: "none" }}>
-          <div style={{ textAlign: "center", opacity: opacityRef.current }}>
+          <div style={{ textAlign: "center", opacity: labelOpacityState }}>
             <div style={{
               fontSize: "10px",
               fontFamily: "monospace",
@@ -1003,12 +1011,12 @@ function TimelineOverlay({ concepts, mode, onLinesHidden }: { concepts: Concept[
         </Html>
       ))}
       {/* Concept name labels */}
-      {opacityRef.current > 0.05 && conceptLabels.map((cl) => (
+      {labelOpacityState > 0.05 && conceptLabels.map((cl) => (
         <Html key={`cname-${cl.id}`} position={cl.position} center style={{ pointerEvents: "none" }}>
           <div style={{
             fontSize: "9px",
             color: "var(--text-muted)",
-            opacity: 0.4 * opacityRef.current,
+            opacity: 0.4 * labelOpacityState,
             whiteSpace: "nowrap",
             fontFamily: "monospace",
           }}>
