@@ -645,7 +645,7 @@ function ConceptDots({ concepts, onHover, onClick, overrideMode }: ConceptDotsPr
         labels.push({
           id: concepts[i].id,
           name: concepts[i].name.length > 18 ? concepts[i].name.slice(0, 16) + "…" : concepts[i].name,
-          pos: p.clone().add(new THREE.Vector3(0, -0.12, 0)),
+          pos: p.clone().add(new THREE.Vector3(0, -0.15, 0)),
         });
       }
     }
