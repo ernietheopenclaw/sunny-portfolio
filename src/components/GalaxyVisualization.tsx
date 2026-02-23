@@ -527,6 +527,15 @@ function ConceptDots({ concepts, onHover, onClick, overrideMode }: ConceptDotsPr
     lastHoverRef.current = newId;
   });
 
+  // Track pointer down position/time to distinguish clicks from drags
+  const pointerDownRef = useRef<{ x: number; y: number; time: number } | null>(null);
+
+  const handlePointerDown = useCallback((e: { clientX?: number; clientY?: number; nativeEvent?: { clientX: number; clientY: number } }) => {
+    const clientX = e.clientX ?? e.nativeEvent?.clientX ?? 0;
+    const clientY = e.clientY ?? e.nativeEvent?.clientY ?? 0;
+    pointerDownRef.current = { x: clientX, y: clientY, time: Date.now() };
+  }, []);
+
   const handlePointerMove = useCallback(() => {
     const result = findNearest();
     if (result) {
@@ -536,7 +545,18 @@ function ConceptDots({ concepts, onHover, onClick, overrideMode }: ConceptDotsPr
     }
   }, [findNearest, onHover]);
 
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((e: { clientX?: number; clientY?: number; nativeEvent?: { clientX: number; clientY: number } }) => {
+    const down = pointerDownRef.current;
+    if (down) {
+      const clientX = e.clientX ?? e.nativeEvent?.clientX ?? 0;
+      const clientY = e.clientY ?? e.nativeEvent?.clientY ?? 0;
+      const dx = clientX - down.x;
+      const dy = clientY - down.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const elapsed = Date.now() - down.time;
+      // Only treat as click if pointer moved < 8px and held < 500ms
+      if (dist > 8 || elapsed > 500) return;
+    }
     const result = findNearest();
     if (result) {
       onClick(result.concept);
@@ -547,8 +567,32 @@ function ConceptDots({ concepts, onHover, onClick, overrideMode }: ConceptDotsPr
     onHover(null, null);
   }, [onHover]);
 
+  // Expose label positions (updated each frame) for galaxy/clusters modes
+  const [labelPositions, setLabelPositions] = useState<{ id: string; name: string; pos: THREE.Vector3 }[]>([]);
+  const labelUpdateCounter = useRef(0);
+
+  // Update label positions periodically (every 10 frames to avoid perf hit)
+  useFrame(() => {
+    labelUpdateCounter.current++;
+    if (labelUpdateCounter.current % 10 !== 0) return;
+    if (mode === "timeline") { setLabelPositions([]); return; }
+    const labels: { id: string; name: string; pos: THREE.Vector3 }[] = [];
+    const len = Math.min(concepts.length, currentPositions.current.length);
+    for (let i = 0; i < len; i++) {
+      const p = currentPositions.current[i];
+      if (p) {
+        labels.push({
+          id: concepts[i].id,
+          name: concepts[i].name.length > 18 ? concepts[i].name.slice(0, 16) + "…" : concepts[i].name,
+          pos: p.clone().add(new THREE.Vector3(0, -0.12, 0)),
+        });
+      }
+    }
+    setLabelPositions(labels);
+  });
+
   return (
-    <group onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick}>
+    <group onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} onClick={handleClick}>
       {/* Invisible large sphere to capture pointer events from any camera angle */}
       <mesh visible={false}>
         <sphereGeometry args={[50, 8, 8]} />
@@ -558,6 +602,21 @@ function ConceptDots({ concepts, onHover, onClick, overrideMode }: ConceptDotsPr
         <sphereGeometry args={[1, 12, 12]} />
         <meshBasicMaterial toneMapped={false} transparent opacity={0.9} />
       </instancedMesh>
+      {/* Floating concept name labels in galaxy/clusters modes */}
+      {mode !== "timeline" && labelPositions.map((lp) => (
+        <Html key={`clabel-${lp.id}`} position={lp.pos} center style={{ pointerEvents: "none" }}>
+          <div style={{
+            fontSize: "8px",
+            color: "var(--text-muted)",
+            opacity: 0.35,
+            whiteSpace: "nowrap",
+            fontFamily: "monospace",
+            textShadow: "0 0 4px rgba(0,0,0,0.8)",
+          }}>
+            {lp.name}
+          </div>
+        </Html>
+      ))}
     </group>
   );
 }
