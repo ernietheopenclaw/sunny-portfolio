@@ -75,15 +75,6 @@ export async function POST(req: NextRequest) {
   ## Real-World Applications
   Specific, detailed use cases — not just bullet points. For each application, explain the problem it solves, how this concept is applied, and what results it achieves. Include industry examples.
   
-  ## Common Misconceptions
-  Things people frequently get wrong about this concept. For each misconception, state the wrong belief and then the correct understanding.
-  
-  ## Related Topics
-  Connections to other concepts with brief explanations of HOW they relate (not just names). Indicate whether each is a prerequisite, extension, alternative, or application.
-  
-  ## Further Reading
-  Suggested topics to learn next, ordered from most to least relevant. For each, briefly explain what you'd gain from studying it.
-  
   The breakdown should be thorough but focused (${summaryLength * 80}-${summaryLength * 120} words), well-structured with markdown headers (##), bullet points, bold terms, code blocks, and LaTeX equations. IMPORTANT: Do NOT use markdown tables — use bullet points or dashes instead for any comparisons or structured data. Do NOT use numbered lists (1., 2., 3.) — use bullet points (- ) instead. Do NOT use horizontal rules (---) as section separators — the ## headers are sufficient. Write it as quality educational content suitable for a portfolio/knowledge base.
 - "x": A float between -3 and 3 (semantic x-coordinate for visualization)
 - "y": A float between -3 and 3 (semantic y-coordinate)
