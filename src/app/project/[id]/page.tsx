@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, ExternalLink, Github, Edit3, Trash2, Save, X } from "lucide-react";
 import { mockProjects } from "@/data/mock";
 import ImageGallery from "@/components/ImageGallery";
+import ImageUploader from "@/components/ImageUploader";
 
 function markdownToHtml(md: string): string {
   return md
@@ -35,6 +36,7 @@ export default function ProjectDetail() {
   const [content, setContent] = useState("");
   const [tech, setTech] = useState<string[]>([]);
   const [newTech, setNewTech] = useState("");
+  const [images, setImages] = useState<string[]>([]);
 
   // Load any saved edits from localStorage
   useEffect(() => {
@@ -46,11 +48,13 @@ export default function ProjectDetail() {
       setDescription(data.description ?? baseProject.description);
       setContent(data.content ?? baseProject.content ?? "");
       setTech(data.tech ?? [...baseProject.tech]);
+      setImages(data.images ?? baseProject.images ?? []);
     } else {
       setTitle(baseProject.title);
       setDescription(baseProject.description);
       setContent(baseProject.content ?? "");
       setTech([...baseProject.tech]);
+      setImages(baseProject.images ?? []);
     }
   }, [baseProject]);
 
@@ -63,7 +67,7 @@ export default function ProjectDetail() {
   }
 
   const handleSave = () => {
-    localStorage.setItem(`project-edit-${baseProject.id}`, JSON.stringify({ title, description, content, tech }));
+    localStorage.setItem(`project-edit-${baseProject.id}`, JSON.stringify({ title, description, content, tech, images }));
     setEditing(false);
   };
 
@@ -75,11 +79,13 @@ export default function ProjectDetail() {
       setDescription(data.description ?? baseProject.description);
       setContent(data.content ?? baseProject.content ?? "");
       setTech(data.tech ?? [...baseProject.tech]);
+      setImages(data.images ?? baseProject.images ?? []);
     } else {
       setTitle(baseProject.title);
       setDescription(baseProject.description);
       setContent(baseProject.content ?? "");
       setTech([...baseProject.tech]);
+      setImages(baseProject.images ?? []);
     }
     setEditing(false);
   };
@@ -240,8 +246,12 @@ export default function ProjectDetail() {
           </div>
         )}
 
-        {baseProject.images && baseProject.images.length > 0 && (
-          <ImageGallery images={baseProject.images} />
+        {editing && (
+          <ImageUploader images={images} onChange={setImages} />
+        )}
+
+        {!editing && images.length > 0 && (
+          <ImageGallery images={images} />
         )}
 
         {editing ? (

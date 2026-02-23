@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { ArrowLeft, Save, X } from "lucide-react";
 import { Post } from "@/types";
+import ImageUploader from "@/components/ImageUploader";
 
 export default function NewPost() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function NewPost() {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [content, setContent] = useState("");
+  const [images, setImages] = useState<string[]>([]);
 
   if (!session) {
     return (
@@ -33,6 +35,7 @@ export default function NewPost() {
       content: content.trim(),
       date: new Date().toISOString().split("T")[0],
       tags,
+      images: images.length > 0 ? images : undefined,
     };
     const existing = JSON.parse(localStorage.getItem("user-posts") || "[]") as Post[];
     existing.unshift(post);
@@ -109,6 +112,8 @@ export default function NewPost() {
               style={{ background: "var(--bg)", color: "var(--text)", border: "1px solid var(--border)" }}
             />
           </div>
+
+          <ImageUploader images={images} onChange={setImages} />
 
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider block mb-1" style={{ color: "var(--text-muted)" }}>Content</label>

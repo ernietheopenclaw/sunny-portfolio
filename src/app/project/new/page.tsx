@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { ArrowLeft, Save, X } from "lucide-react";
 import { Project } from "@/types";
+import ImageUploader from "@/components/ImageUploader";
 
 export default function NewProject() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function NewProject() {
   const [content, setContent] = useState("");
   const [link, setLink] = useState("");
   const [github, setGithub] = useState("");
+  const [images, setImages] = useState<string[]>([]);
 
   if (!session) {
     return (
@@ -36,6 +38,7 @@ export default function NewProject() {
       tech,
       link: link.trim() || undefined,
       github: github.trim() || undefined,
+      images: images.length > 0 ? images : undefined,
     };
     const existing = JSON.parse(localStorage.getItem("user-projects") || "[]") as Project[];
     existing.unshift(project);
@@ -88,6 +91,8 @@ export default function NewProject() {
             </div>
             <input value={techInput} onChange={(e) => setTechInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTech(); } }} placeholder="Add tech + Enter" className="text-xs px-3 py-1.5 rounded-lg focus:outline-none" style={{ background: "var(--bg)", color: "var(--text)", border: "1px solid var(--border)" }} />
           </div>
+
+          <ImageUploader images={images} onChange={setImages} />
 
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider block mb-1" style={{ color: "var(--text-muted)" }}>Content</label>

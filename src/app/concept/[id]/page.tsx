@@ -8,6 +8,7 @@ import { getAllConcepts, hideConcept } from "@/lib/concepts";
 import { Concept } from "@/types";
 import LatexText from "@/components/LatexText";
 import ImageGallery from "@/components/ImageGallery";
+import ImageUploader from "@/components/ImageUploader";
 
 export default function ConceptDetail() {
   const params = useParams();
@@ -18,6 +19,7 @@ export default function ConceptDetail() {
   const [editName, setEditName] = useState("");
   const [editShortSummary, setEditShortSummary] = useState("");
   const [editLongSummary, setEditLongSummary] = useState("");
+  const [images, setImages] = useState<string[]>([]);
 
   useEffect(() => {
     const id = params.id as string;
@@ -38,17 +40,19 @@ export default function ConceptDetail() {
       const name = saved?.name || found.name;
       const short_summary = saved?.short_summary || found.short_summary;
       const long_summary = saved?.long_summary || found.long_summary;
-      setConcept({ ...found, name, short_summary, long_summary });
+      const imgs = saved?.images ?? found.images ?? [];
+      setConcept({ ...found, name, short_summary, long_summary, images: imgs });
       setEditName(name);
       setEditShortSummary(short_summary);
       setEditLongSummary(long_summary);
+      setImages(imgs);
     }
   }, [params.id]);
 
   const handleSave = () => {
     if (!concept) return;
-    localStorage.setItem(`concept-edit-${concept.id}`, JSON.stringify({ name: editName, short_summary: editShortSummary, long_summary: editLongSummary }));
-    setConcept({ ...concept, name: editName, short_summary: editShortSummary, long_summary: editLongSummary });
+    localStorage.setItem(`concept-edit-${concept.id}`, JSON.stringify({ name: editName, short_summary: editShortSummary, long_summary: editLongSummary, images }));
+    setConcept({ ...concept, name: editName, short_summary: editShortSummary, long_summary: editLongSummary, images });
     setEditing(false);
   };
 
@@ -152,13 +156,16 @@ export default function ConceptDetail() {
           </div>
 
           {editing ? (
-            <textarea
-              value={editLongSummary}
-              onChange={(e) => setEditLongSummary(e.target.value)}
-              rows={8}
-              className="w-full p-4 rounded-lg text-sm leading-relaxed focus:outline-none resize-y"
-              style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
-            />
+            <>
+              <textarea
+                value={editLongSummary}
+                onChange={(e) => setEditLongSummary(e.target.value)}
+                rows={8}
+                className="w-full p-4 rounded-lg text-sm leading-relaxed focus:outline-none resize-y"
+                style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
+              />
+              <ImageUploader images={images} onChange={setImages} />
+            </>
           ) : (
             <>
               <LatexText as="div" className="text-sm leading-relaxed" style={{ color: "var(--text)", lineHeight: 1.8 }}>

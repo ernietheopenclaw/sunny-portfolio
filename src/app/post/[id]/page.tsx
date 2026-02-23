@@ -7,6 +7,7 @@ import { ArrowLeft, Edit3, Trash2, Save, X } from "lucide-react";
 import { mockPosts } from "@/data/mock";
 import { Post } from "@/types";
 import ImageGallery from "@/components/ImageGallery";
+import ImageUploader from "@/components/ImageUploader";
 
 function markdownToHtml(md: string): string {
   return md
@@ -37,6 +38,7 @@ export default function PostDetail() {
   const [content, setContent] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
+  const [images, setImages] = useState<string[]>([]);
 
   useEffect(() => {
     if (!basePost) return;
@@ -47,11 +49,13 @@ export default function PostDetail() {
       setExcerpt(data.excerpt ?? basePost.excerpt);
       setContent(data.content ?? basePost.content);
       setTags(data.tags ?? basePost.tags);
+      setImages(data.images ?? basePost.images ?? []);
     } else {
       setTitle(basePost.title);
       setExcerpt(basePost.excerpt);
       setContent(basePost.content);
       setTags([...basePost.tags]);
+      setImages(basePost.images ?? []);
     }
   }, [basePost]);
 
@@ -64,7 +68,7 @@ export default function PostDetail() {
   }
 
   const handleSave = () => {
-    localStorage.setItem(`post-edit-${basePost.id}`, JSON.stringify({ title, excerpt, content, tags }));
+    localStorage.setItem(`post-edit-${basePost.id}`, JSON.stringify({ title, excerpt, content, tags, images }));
     setEditing(false);
   };
 
@@ -76,11 +80,13 @@ export default function PostDetail() {
       setExcerpt(data.excerpt ?? basePost.excerpt);
       setContent(data.content ?? basePost.content);
       setTags(data.tags ?? basePost.tags);
+      setImages(data.images ?? basePost.images ?? []);
     } else {
       setTitle(basePost.title);
       setExcerpt(basePost.excerpt);
       setContent(basePost.content);
       setTags([...basePost.tags]);
+      setImages(basePost.images ?? []);
     }
     setEditing(false);
   };
@@ -217,8 +223,12 @@ export default function PostDetail() {
           </div>
         )}
 
-        {basePost.images && basePost.images.length > 0 && (
-          <ImageGallery images={basePost.images} />
+        {editing && (
+          <ImageUploader images={images} onChange={setImages} />
+        )}
+
+        {!editing && images.length > 0 && (
+          <ImageGallery images={images} />
         )}
 
         {editing ? (
