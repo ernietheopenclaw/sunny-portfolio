@@ -11,8 +11,38 @@ import ImageGallery from "@/components/ImageGallery";
 import ImageUploader from "@/components/ImageUploader";
 import { renderLatex } from "@/lib/latex";
 
+function convertTablesToLists(md: string): string {
+  // Convert markdown tables to bullet lists
+  const lines = md.split('\n');
+  const result: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    // Detect table header row (has |)
+    if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+      // Parse header
+      const headers = line.split('|').map(c => c.trim()).filter(Boolean);
+      // Skip separator row (|---|---|)
+      if (i + 1 < lines.length && /^\|[\s\-:|]+\|$/.test(lines[i + 1].trim())) {
+        i += 2; // skip header + separator
+        // Parse data rows
+        while (i < lines.length && lines[i].trim().startsWith('|') && lines[i].trim().endsWith('|')) {
+          const cells = lines[i].split('|').map(c => c.trim()).filter(Boolean);
+          const parts = cells.map((cell, idx) => headers[idx] ? `**${headers[idx]}:** ${cell}` : cell).join(' — ');
+          result.push(`- ${parts}`);
+          i++;
+        }
+        continue;
+      }
+    }
+    result.push(line);
+    i++;
+  }
+  return result.join('\n');
+}
+
 function markdownToHtml(md: string): string {
-  let html = md
+  let html = convertTablesToLists(md)
     .replace(/^### (.+)$/gm, '<h3 style="font-size:1.15rem;font-weight:700;margin:1.5rem 0 0.5rem;color:var(--text)">$1</h3>')
     .replace(/^## (.+)$/gm, '<h2 style="font-size:1.35rem;font-weight:700;margin:2rem 0 0.75rem;color:var(--accent-mid)">$1</h2>')
     .replace(/^# (.+)$/gm, '<h1 style="font-size:1.75rem;font-weight:800;margin:0 0 1rem;color:var(--text)">$1</h1>')

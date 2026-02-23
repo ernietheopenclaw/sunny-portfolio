@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
   ## Further Reading
   Suggested topics to learn next, ordered from most to least relevant. For each, briefly explain what you'd gain from studying it.
   
-  The breakdown should be extremely thorough (${summaryLength * 150}-${summaryLength * 250} words), richly structured with markdown headers (##), nested bullet points, bold terms, code blocks, LaTeX equations, and tables where appropriate. Write it as comprehensive educational content suitable for a portfolio/knowledge base — think textbook-quality reference material.
+  The breakdown should be extremely thorough (${summaryLength * 150}-${summaryLength * 250} words), richly structured with markdown headers (##), nested bullet points, bold terms, code blocks, and LaTeX equations. IMPORTANT: Do NOT use markdown tables — use bullet points or dashes instead for any comparisons or structured data. Write it as comprehensive educational content suitable for a portfolio/knowledge base — think textbook-quality reference material.
 - "x": A float between -3 and 3 (semantic x-coordinate for visualization)
 - "y": A float between -3 and 3 (semantic y-coordinate)
 - "z": A float between -2 and 2 (semantic z-coordinate)
