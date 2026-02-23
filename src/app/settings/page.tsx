@@ -20,7 +20,7 @@ export default function SettingsPage() {
   const [credentialStatus, setCredentialStatus] = useState<"none" | "configured">("none");
 
   // OAuth browser flow state
-  const [oauthSessionId, setOauthSessionId] = useState<string | null>(null);
+  const [oauthCodeVerifier, setOauthCodeVerifier] = useState<string | null>(null);
   const [oauthCode, setOauthCode] = useState("");
   const [oauthLoading, setOauthLoading] = useState(false);
   const [oauthConnected, setOauthConnected] = useState(false);
@@ -83,8 +83,8 @@ export default function SettingsPage() {
     try {
       const res = await fetch("/api/oauth/anthropic/authorize");
       if (!res.ok) throw new Error("Failed to start OAuth flow");
-      const { sessionId, authUrl } = await res.json();
-      setOauthSessionId(sessionId);
+      const { authUrl, codeVerifier } = await res.json();
+      setOauthCodeVerifier(codeVerifier);
       window.open(authUrl, "_blank");
     } catch (err) {
       setOauthError(err instanceof Error ? err.message : "Failed to start login");
@@ -95,14 +95,14 @@ export default function SettingsPage() {
 
   // Complete OAuth flow with pasted code
   const completeOAuthFlow = async () => {
-    if (!oauthCode.trim() || !oauthSessionId) return;
+    if (!oauthCode.trim() || !oauthCodeVerifier) return;
     setOauthLoading(true);
     setOauthError(null);
     try {
       const res = await fetch("/api/oauth/anthropic/exchange", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: oauthCode.trim(), sessionId: oauthSessionId }),
+        body: JSON.stringify({ code: oauthCode.trim(), codeVerifier: oauthCodeVerifier }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -114,7 +114,7 @@ export default function SettingsPage() {
       setAuthType("oauth-browser");
       setOauthConnected(true);
       setCredentialStatus("configured");
-      setOauthSessionId(null);
+      setOauthCodeVerifier(null);
       setOauthCode("");
     } catch (err) {
       setOauthError(err instanceof Error ? err.message : "Exchange failed");
@@ -345,7 +345,7 @@ export default function SettingsPage() {
                     Sign in with your Anthropic account (Claude Pro/Max). No API key needed — uses your subscription directly.
                   </p>
 
-                  {!oauthSessionId ? (
+                  {!oauthCodeVerifier ? (
                     <button
                       onClick={startOAuthFlow}
                       disabled={oauthLoading}
