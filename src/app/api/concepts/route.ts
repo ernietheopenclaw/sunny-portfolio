@@ -102,7 +102,12 @@ Respond with ONLY the JSON object, no markdown wrapping. The long_summary field 
       return NextResponse.json({ error: "No text response from model" }, { status: 500 });
     }
 
-    const parsed = JSON.parse(text.text);
+    // Strip markdown code fences if model wraps response
+    let jsonText = text.text.trim();
+    if (jsonText.startsWith("```")) {
+      jsonText = jsonText.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
+    }
+    const parsed = JSON.parse(jsonText);
 
     const result: Record<string, unknown> = {
       name,

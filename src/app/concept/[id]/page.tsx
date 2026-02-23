@@ -191,7 +191,7 @@ export default function ConceptDetail() {
       if (data.refreshedCredentials) localStorage.setItem("anthropic-oauth-credentials", JSON.stringify(data.refreshedCredentials));
       if (field === "short_summary") setEditShortSummary(data.short_summary);
       else setEditLongSummary(data.long_summary);
-    } catch { alert("Failed to generate."); } finally { setter(false); }
+    } catch (e) { alert("Failed to generate: " + (e instanceof Error ? e.message : String(e))); } finally { setter(false); }
   };
 
   useEffect(() => {
@@ -279,8 +279,8 @@ export default function ConceptDetail() {
             <button
               onClick={() => generateField("short_summary")}
               disabled={generatingSummary}
-              className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full cursor-pointer disabled:opacity-50 shrink-0 mt-1"
-              style={{ background: "rgba(56,189,248,0.15)", color: "var(--accent-mid)" }}
+              className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg cursor-pointer disabled:opacity-50 shrink-0 mt-1"
+              style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
               title="Auto-generate summary"
             >
               {generatingSummary ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
@@ -325,8 +325,8 @@ export default function ConceptDetail() {
                 <button
                   onClick={() => generateField("long_summary")}
                   disabled={generatingOverview}
-                  className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full cursor-pointer disabled:opacity-50"
-                  style={{ background: "rgba(56,189,248,0.15)", color: "var(--accent-mid)" }}
+                  className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg cursor-pointer disabled:opacity-50"
+                  style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
                 >
                   {generatingOverview ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
                   Generate
