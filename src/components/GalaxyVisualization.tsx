@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { computeClusterPositions } from "@/lib/embeddings";
 import { renderLatex } from "@/lib/latex";
 import { useSession } from "next-auth/react";
+import { constellations } from "@/data/constellations";
 
 extend({ EffectComposer, RenderPass, UnrealBloomPass, OutputPass });
 
@@ -152,23 +153,68 @@ function createStarTexture(): THREE.Texture {
   return tex;
 }
 
-function getTimelinePositions(concepts: Concept[]): Map<string, THREE.Vector3> {
+interface TimelineResult {
+  positions: Map<string, THREE.Vector3>;
+  constellationAssignments: { constellationIndex: number; conceptIds: string[]; firstDate: Date }[];
+  chronologicalOrder: string[];
+}
+
+function getTimelineData(concepts: Concept[]): TimelineResult {
   const sorted = [...concepts].sort(
     (a, b) => new Date(a.date_learned).getTime() - new Date(b.date_learned).getTime()
   );
-  const n = sorted.length;
-  const spacing = 1.5;
-  const startX = -(n - 1) * spacing * 0.5;
   const map = new Map<string, THREE.Vector3>();
-  sorted.forEach((c, i) => {
-    const x = startX + i * spacing;
-    // Pure sin(x) wave
-    const amplitude = 1.2;
-    const freq = 0.5;
-    const y = amplitude * Math.sin(freq * x);
-    map.set(c.id, new THREE.Vector3(x, y, 0));
-  });
-  return map;
+  const assignments: TimelineResult["constellationAssignments"] = [];
+  const chronologicalOrder = sorted.map(c => c.id);
+
+  let conceptIdx = 0;
+  for (let ci = 0; ci < constellations.length && conceptIdx < sorted.length; ci++) {
+    const constellation = constellations[ci];
+    const numStars = constellation.stars.length;
+    const conceptsForThis = sorted.slice(conceptIdx, conceptIdx + numStars);
+    const ids: string[] = [];
+
+    conceptsForThis.forEach((c, si) => {
+      const star = constellation.stars[si];
+      const pos = new THREE.Vector3(
+        star.x + constellation.offset.x,
+        star.y + constellation.offset.y,
+        star.z + constellation.offset.z
+      );
+      map.set(c.id, pos);
+      ids.push(c.id);
+    });
+
+    if (ids.length > 0) {
+      assignments.push({
+        constellationIndex: ci,
+        conceptIds: ids,
+        firstDate: new Date(conceptsForThis[0].date_learned),
+      });
+    }
+
+    conceptIdx += numStars;
+  }
+
+  // If we have leftover concepts, distribute them around the last constellation
+  while (conceptIdx < sorted.length) {
+    const c = sorted[conceptIdx];
+    const lastConst = constellations[constellations.length - 1];
+    const angle = (conceptIdx - sorted.length) * 0.8;
+    const pos = new THREE.Vector3(
+      Math.cos(angle) * 0.8 + lastConst.offset.x,
+      Math.sin(angle) * 0.8 + lastConst.offset.y,
+      lastConst.offset.z
+    );
+    map.set(c.id, pos);
+    conceptIdx++;
+  }
+
+  return { positions: map, constellationAssignments: assignments, chronologicalOrder };
+}
+
+function getTimelinePositions(concepts: Concept[]): Map<string, THREE.Vector3> {
+  return getTimelineData(concepts).positions;
 }
 
 function placeConceptsInGalaxy(concepts: Concept[]): Map<string, THREE.Vector3> {
@@ -612,6 +658,146 @@ function RightClickZoom() {
   return null;
 }
 
+// Timeline constellation lines + labels
+function TimelineOverlay({ concepts, mode }: { concepts: Concept[]; mode: string }) {
+  const groupRef = useRef<THREE.Group>(null!);
+  const [visible, setVisible] = useState(false);
+  const opacityRef = useRef(0);
+
+  const timelineData = useMemo(() => getTimelineData(concepts), [concepts]);
+
+  useEffect(() => {
+    if (mode === "timeline") setVisible(true);
+  }, [mode]);
+
+  // Chronological line geometry
+  const chronoGeometry = useMemo(() => {
+    const points: number[] = [];
+    for (const id of timelineData.chronologicalOrder) {
+      const p = timelineData.positions.get(id);
+      if (p) points.push(p.x, p.y, p.z);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(points, 3));
+    return geo;
+  }, [timelineData]);
+
+  // Constellation stick-figure lines
+  const constellationLines = useMemo(() => {
+    const lines: { geometry: THREE.BufferGeometry }[] = [];
+    for (const assignment of timelineData.constellationAssignments) {
+      const constellation = constellations[assignment.constellationIndex];
+      const points: number[] = [];
+      for (const [a, b] of constellation.connections) {
+        const sa = constellation.stars[a];
+        const sb = constellation.stars[b];
+        if (sa && sb) {
+          const off = constellation.offset;
+          points.push(sa.x + off.x, sa.y + off.y, sa.z + off.z);
+          points.push(sb.x + off.x, sb.y + off.y, sb.z + off.z);
+        }
+      }
+      if (points.length > 0) {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.Float32BufferAttribute(points, 3));
+        lines.push({ geometry: geo });
+      }
+    }
+    return lines;
+  }, [timelineData]);
+
+  // Date + constellation labels (limited to ~20)
+  const labels = useMemo(() => {
+    const result: { position: THREE.Vector3; date: string; name: string }[] = [];
+    for (const assignment of timelineData.constellationAssignments) {
+      const constellation = constellations[assignment.constellationIndex];
+      const firstId = assignment.conceptIds[0];
+      const pos = timelineData.positions.get(firstId);
+      if (pos) {
+        const d = assignment.firstDate;
+        const dateStr = d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+        result.push({ position: pos.clone().add(new THREE.Vector3(0, 0.9, 0)), date: dateStr, name: constellation.name });
+      }
+    }
+    return result;
+  }, [timelineData]);
+
+  // Concept name labels (limit to 25)
+  const conceptLabels = useMemo(() => {
+    const sorted = [...concepts].sort(
+      (a, b) => new Date(a.date_learned).getTime() - new Date(b.date_learned).getTime()
+    );
+    return sorted.slice(0, 25).map(c => ({
+      id: c.id,
+      name: c.name.length > 20 ? c.name.slice(0, 18) + "…" : c.name,
+      position: timelineData.positions.get(c.id)?.clone().add(new THREE.Vector3(0, -0.15, 0)) || new THREE.Vector3(),
+    }));
+  }, [concepts, timelineData]);
+
+  useFrame((_, delta) => {
+    const target = mode === "timeline" ? 1 : 0;
+    opacityRef.current += (target - opacityRef.current) * Math.min(delta * 3, 1);
+    if (opacityRef.current < 0.01 && mode !== "timeline") {
+      setVisible(false);
+    }
+    if (groupRef.current) {
+      groupRef.current.visible = visible;
+    }
+  });
+
+  if (!visible) return null;
+
+  return (
+    <group ref={groupRef}>
+      {/* Chronological path line */}
+      <primitive object={new THREE.Line(chronoGeometry, new THREE.LineBasicMaterial({ color: "#0ea5e9", transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false }))} />
+      {/* Constellation stick figures */}
+      {constellationLines.map((line, i) => (
+        <primitive key={`const-line-${i}`} object={new THREE.LineSegments(line.geometry, new THREE.LineBasicMaterial({ color: "#4488cc", transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending, depthWrite: false }))} />
+      ))}
+      {/* Date + constellation labels */}
+      {labels.map((label, i) => (
+        <Html key={`label-${i}`} position={label.position} center style={{ pointerEvents: "none" }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{
+              fontSize: "10px",
+              fontFamily: "monospace",
+              color: "var(--text-muted)",
+              opacity: 0.5,
+              whiteSpace: "nowrap",
+            }}>
+              {label.date}
+            </div>
+            <div style={{
+              fontSize: "11px",
+              color: "var(--text-muted)",
+              opacity: 0.25,
+              whiteSpace: "nowrap",
+              marginTop: "2px",
+            }}>
+              {label.name}
+            </div>
+          </div>
+        </Html>
+      ))}
+      {/* Concept name labels */}
+      {conceptLabels.map((cl) => (
+        <Html key={`cname-${cl.id}`} position={cl.position} center style={{ pointerEvents: "none" }}>
+          <div style={{
+            fontSize: "9px",
+            color: "var(--text-muted)",
+            opacity: 0.4,
+            whiteSpace: "nowrap",
+            fontFamily: "monospace",
+          }}>
+            {cl.name}
+          </div>
+        </Html>
+      ))}
+    </group>
+  );
+}
+
 function Scene({ concepts, dispersionRef, onConceptClick, hasSession }: { concepts: Concept[]; dispersionRef: React.MutableRefObject<{ target: number; current: number }>; onConceptClick: (concept: Concept) => void; hasSession: boolean }) {
   const [hovered, setHovered] = useState<Concept | null>(null);
   const [hoveredPos, setHoveredPos] = useState<THREE.Vector3 | null>(null);
@@ -637,6 +823,7 @@ function Scene({ concepts, dispersionRef, onConceptClick, hasSession }: { concep
         </group>
       </group>
       <ConceptDots concepts={concepts} onHover={handleHover} onClick={onConceptClick} />
+      <TimelineOverlay concepts={concepts} mode={mode} />
       <Tooltip concept={hovered} position={hoveredPos} />
       <OrbitControls
         enableZoom={false}

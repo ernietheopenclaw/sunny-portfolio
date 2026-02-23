@@ -40,7 +40,7 @@ export default function ConceptDetail() {
       const name = saved?.name || found.name;
       const short_summary = saved?.short_summary || found.short_summary;
       const long_summary = saved?.long_summary || found.long_summary;
-      const imgs = saved?.images ?? found.images ?? [];
+      const imgs = (saved as Record<string, unknown>)?.images as string[] ?? found.images ?? [];
       setConcept({ ...found, name, short_summary, long_summary, images: imgs });
       setEditName(name);
       setEditShortSummary(short_summary);
