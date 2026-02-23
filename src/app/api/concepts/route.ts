@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
           role: "user",
           timestamp: Date.now(),
           content: `Generate a JSON object for the concept "${name}" with these fields:
-- "short_summary": A concise 1-sentence summary (under 120 chars)
+- "short_summary": A concise 1-sentence description (under 120 chars). Do NOT restate the concept name at the start — jump straight into describing what it is. Bad: "React Hooks are functions that..." Good: "Functions that let you use state and lifecycle features in functional components."
 - "long_summary": The MOST in-depth, thorough markdown breakdown of the concept possible. Include ALL of the following sections:
   ## Overview
   What it is, historical context (who invented/discovered it, when, why), and why it matters today. Provide a clear, accessible definition followed by deeper context.
