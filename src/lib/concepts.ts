@@ -57,5 +57,24 @@ export function hideConcept(id: string): void {
 export function getAllConcepts(): Concept[] {
   const hidden = getHiddenIds();
   const visibleMock = mockConcepts.filter(c => !hidden.has(c.id));
-  return [...visibleMock, ...getUserConcepts()];
+  const all = [...visibleMock, ...getUserConcepts()];
+  // Apply any edits saved from concept detail pages
+  if (typeof window === "undefined") return all;
+  return all.map(c => {
+    try {
+      const raw = localStorage.getItem(`concept-edit-${c.id}`);
+      if (!raw) return c;
+      const edits = JSON.parse(raw);
+      return {
+        ...c,
+        ...(edits.name && { name: edits.name }),
+        ...(edits.short_summary && { short_summary: edits.short_summary }),
+        ...(edits.long_summary && { long_summary: edits.long_summary }),
+        ...(edits.date_learned && { date_learned: edits.date_learned }),
+        ...(edits.images && { images: edits.images }),
+      };
+    } catch {
+      return c;
+    }
+  });
 }
