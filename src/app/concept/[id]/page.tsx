@@ -42,20 +42,54 @@ function convertTablesToLists(md: string): string {
 }
 
 function markdownToHtml(md: string): string {
-  let html = convertTablesToLists(md)
+  // Pre-process: extract code blocks to protect them
+  const codeBlocks: string[] = [];
+  let processed = convertTablesToLists(md).replace(/```(\w*)\n([\s\S]*?)```/g, (_m, lang, code) => {
+    const idx = codeBlocks.length;
+    codeBlocks.push(`<pre style="background:var(--bg);padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid var(--border)"><code style="font-size:0.85em;font-family:var(--font-mono);color:var(--text-muted)">${code}</code></pre>`);
+    return `\n%%CODEBLOCK_${idx}%%\n`;
+  });
+
+  // Process line by line to properly wrap lists
+  const lines = processed.split('\n');
+  const output: string[] = [];
+  let inUl = false, inOl = false;
+
+  for (const line of lines) {
+    const ulMatch = line.match(/^- (.+)$/);
+    const olMatch = line.match(/^\d+\. (.+)$/);
+
+    if (ulMatch) {
+      if (inOl) { output.push('</ol>'); inOl = false; }
+      if (!inUl) { output.push('<ul style="margin:0.5rem 0;padding-left:1.5rem">'); inUl = true; }
+      output.push(`<li style="list-style:disc;margin-bottom:0.25rem">${ulMatch[1]}</li>`);
+    } else if (olMatch) {
+      if (inUl) { output.push('</ul>'); inUl = false; }
+      if (!inOl) { output.push('<ol style="margin:0.5rem 0;padding-left:1.5rem">'); inOl = true; }
+      output.push(`<li style="list-style:decimal;margin-bottom:0.25rem">${olMatch[1]}</li>`);
+    } else {
+      if (inUl) { output.push('</ul>'); inUl = false; }
+      if (inOl) { output.push('</ol>'); inOl = false; }
+      output.push(line);
+    }
+  }
+  if (inUl) output.push('</ul>');
+  if (inOl) output.push('</ol>');
+
+  let html = output.join('\n')
     .replace(/^### (.+)$/gm, '<h3 style="font-size:1.15rem;font-weight:700;margin:1.5rem 0 0.5rem;color:var(--text)">$1</h3>')
     .replace(/^## (.+)$/gm, '<h2 style="font-size:1.35rem;font-weight:700;margin:2rem 0 0.75rem;color:var(--accent-mid)">$1</h2>')
     .replace(/^# (.+)$/gm, '<h1 style="font-size:1.75rem;font-weight:800;margin:0 0 1rem;color:var(--text)">$1</h1>')
-    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre style="background:var(--bg);padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid var(--border)"><code style="font-size:0.85em;font-family:var(--font-mono);color:var(--text-muted)">$2</code></pre>')
     .replace(/`([^`]+)`/g, '<code style="background:var(--border);padding:0.15rem 0.4rem;border-radius:4px;font-size:0.85em;font-family:var(--font-mono)">$1</code>')
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    .replace(/^- (.+)$/gm, '<li style="margin-left:1.5rem;list-style:disc;margin-bottom:0.25rem">$1</li>')
-    .replace(/^\d+\. (.+)$/gm, '<li style="margin-left:1.5rem;list-style:decimal;margin-bottom:0.25rem">$1</li>')
     .replace(/\n\n/g, '</p><p style="margin-bottom:1rem;line-height:1.8">')
     .replace(/^/, '<p style="margin-bottom:1rem;line-height:1.8">')
     .concat("</p>");
-  // Render LaTeX
+
+  // Restore code blocks
+  html = html.replace(/%%CODEBLOCK_(\d+)%%/g, (_m, idx) => codeBlocks[parseInt(idx)]);
+
   html = renderLatex(html);
   return html;
 }
