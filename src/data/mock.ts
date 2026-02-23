@@ -128,7 +128,7 @@ export const mockProjects: Project[] = [
     id: "agentic-bi",
     title: "Agentic BI Decision Engine",
     description: "Designing an agentic BI decision engine at Globalink AI combining ML models, LLMs, and Knowledge Graphs to generate actionable e-commerce merchant recommendations across growth, margin optimization, and inventory risk.",
-    tech: ["Python", "LLM", "Knowledge Graphs", "Machine Learning", "Deep Learning", "NLP"],
+    tech: ["Git", "Python", "LLM", "Knowledge Graphs", "Machine Learning", "Deep Learning", "NLP"],
     content: `## Overview
 
 Building an agentic business intelligence system at Globalink AI that reasons across competing merchant objectives — growth vs. margin optimization vs. inventory risk — to produce actionable recommendations for e-commerce merchants.
@@ -158,7 +158,7 @@ Measuring decision quality through:
     id: "sublora-bounds",
     title: "Extending Non-Vacuous Generalization Bounds for LLMs",
     description: "Extended SubLoRA framework for PAC-Bayes generalization bounds on GPT-2 with adaptive per-layer subspace allocation. Resolved 857x performance bottleneck on A100 GPUs via tensor caching.",
-    tech: ["Python", "PyTorch", "Deep Learning", "HPC", "Singularity", "Machine Learning"],
+    tech: ["Git", "Python", "PyTorch", "Deep Learning", "HPC", "Singularity", "Machine Learning"],
     content: `## Overview
 
 Extended the SubLoRA framework to achieve non-vacuous PAC-Bayes generalization bounds on GPT-2, developing adaptive per-layer subspace allocation that better captures the varying complexity across transformer layers.
@@ -190,7 +190,7 @@ All experiments ran on NYU HPC (SLURM) with A100 GPUs, using a custom training/e
     id: "curiosity",
     title: "Curiosity – AI Chat Platform",
     description: "Full-stack AI chat app with conversation branching, dialogue tree visualization, multi-provider LLM support (OpenAI, Anthropic, Gemini, Ollama), OAuth, and vector-embedding memory for RAG context.",
-    tech: ["TypeScript", "JavaScript", "Next.js", "React", "Supabase", "Vercel", "RAG", "NLP", "Tailwind CSS"],
+    tech: ["Git", "TypeScript", "JavaScript", "Next.js", "React", "Supabase", "Vercel", "RAG", "NLP", "Tailwind CSS"],
     link: "https://curiositylm.app",
     github: "https://github.com/sunnydigital/curiosity",
     content: `## Overview
@@ -225,7 +225,7 @@ A persistent RAG system using vector embeddings that gives the AI long-term memo
     id: "enterprise-rag",
     title: "Enterprise RAG LLM System",
     description: "Engineered an enterprise-scale RAG system at Amazon serving 15,000 tables across 200 schemas with automated DDL generation, git-style versioning, and Slack notifications using AWS S3, Bedrock, and Redshift.",
-    tech: ["Python", "AWS Bedrock", "Redshift", "S3", "RAG", "SQL", "Slack API"],
+    tech: ["Git", "Python", "AWS Bedrock", "Redshift", "S3", "RAG", "SQL", "Slack API"],
     content: `## Overview
 
 Built an enterprise-scale Retrieval-Augmented Generation system at Amazon that serves 15,000 tables across 200 schemas, dramatically reducing the time engineers spend discovering and understanding data assets.
@@ -261,7 +261,7 @@ Slack API integration providing automated notifications on daily table schema mo
     id: "ddpm-histopath",
     title: "DDPM for Histopathologic Images",
     description: "Built denoising diffusion probabilistic models for histopathologic cancer detection on the Patch Camelyon dataset with comprehensive ablation studies.",
-    tech: ["Python", "PyTorch", "Diffusion Models", "Computer Vision", "Deep Learning"],
+    tech: ["Git", "Python", "PyTorch", "Diffusion Models", "Computer Vision", "Deep Learning"],
     content: `## Overview
 
 Applied Denoising Diffusion Probabilistic Models (DDPMs) to histopathologic cancer detection using the Patch Camelyon (PCam) dataset containing 327,680 image patches.
@@ -290,7 +290,7 @@ Diffusion-pretrained features transferred beautifully to classification, improvi
     id: "medical-imaging",
     title: "Medical Imaging Pipeline (NYU Langone)",
     description: "End-to-end ML pipeline for biomedical data with U-Net CNN architectures, transfer learning, and pathway analysis for cardiovascular research. Reduced processing from 8 hours to 45 minutes.",
-    tech: ["Python", "PyTorch", "Keras", "NumPy", "Pandas", "SciPy", "Computer Vision", "Deep Learning", "R", "Scikit-Learn", "OpenCV"],
+    tech: ["Git", "Python", "PyTorch", "Keras", "NumPy", "Pandas", "SciPy", "Computer Vision", "Deep Learning", "R", "Scikit-Learn", "OpenCV"],
     content: `## Overview
 
 Developed a comprehensive machine learning pipeline at NYU Langone Health for biomedical data analysis, supporting cardiovascular research through computer vision and bioinformatics approaches.
@@ -327,7 +327,7 @@ Identified key biological pathways involved in:
     id: "web-summarizer",
     title: "ChatGPT Web Summarizer Plugin",
     description: "A ChatGPT companion plugin that parses URL content (HTML/PDF) for conversational agents, enabling real-time webpage summarization and information extraction.",
-    tech: ["Python", "ChatGPT Plugins", "HTML Parsing", "NLP"],
+    tech: ["Git", "Python", "ChatGPT Plugins", "HTML Parsing", "NLP"],
     github: "https://github.com/sunnydigital/web-sum",
     content: `## Overview
 
@@ -351,7 +351,7 @@ A ChatGPT companion plugin that enables real-time webpage summarization by parsi
     id: "datathon-winner",
     title: "NYU DSC x Peak AI Datathon — Winner",
     description: "Built a winning recommender system using k-NN with GloVe-50d embeddings, competing against 50+ teams in the NYU Data Science Club x Peak.AI datathon.",
-    tech: ["Python", "NumPy", "Pandas", "SciPy", "k-NN", "GloVe", "Recommender Systems", "Scikit-Learn"],
+    tech: ["Git", "Python", "NumPy", "Pandas", "SciPy", "k-NN", "GloVe", "Recommender Systems", "Scikit-Learn"],
     github: "https://github.com/sunnydigital/datathon-f22",
     content: `## Overview
 
@@ -375,7 +375,7 @@ The approach outperformed more complex models (neural collaborative filtering, m
     id: "stock-forecasting",
     title: "NeuralProphet Stock Forecasting",
     description: "Stock price forecasting using NeuralProphet time-series decomposition with AR-Net and additive events for IT sector stocks.",
-    tech: ["Python", "NumPy", "Pandas", "SciPy", "NeuralProphet", "Time Series", "PyTorch"],
+    tech: ["Git", "Python", "NumPy", "Pandas", "SciPy", "NeuralProphet", "Time Series", "PyTorch"],
     content: `## Overview
 
 Built a stock price forecasting system for IT sector stocks using NeuralProphet, which combines the decomposability of Prophet with the power of neural networks.
@@ -398,7 +398,7 @@ NeuralProphet decomposes time series into:
     id: "esg-nlp",
     title: "ESG NLP Classification",
     description: "Fine-tuned language models on Reddit ESG data with SHAP feature attribution for interpretable ESG scoring and analysis.",
-    tech: ["Python", "NumPy", "Pandas", "SciPy", "NLP", "SHAP", "Hugging Face Transformers", "Scikit-Learn"],
+    tech: ["Git", "Python", "NumPy", "Pandas", "SciPy", "NLP", "SHAP", "Hugging Face Transformers", "Scikit-Learn"],
     github: "https://github.com/sunnydigital/nlp-f22",
     content: `## Overview
 
@@ -425,7 +425,7 @@ ESG scoring needs to be explainable — investors and analysts need to understan
     id: "persona-emulation",
     title: "Persona Emulation & Dialogue",
     description: "Fine-tuning GPT-3 on movie, book, and game dialogue (LotR, Harry Potter, FF XIV) to generate character-specific responses.",
-    tech: ["Python", "NumPy", "Pandas", "SciPy", "GPT-3", "Fine-tuning", "NLP"],
+    tech: ["Git", "Python", "NumPy", "Pandas", "SciPy", "GPT-3", "Fine-tuning", "NLP"],
     content: `## Overview
 
 Fine-tuned GPT-3 on dialogue from iconic fictional universes to generate character-specific responses that capture the voice, mannerisms, and knowledge of individual characters.
@@ -451,7 +451,7 @@ The models captured subtle character traits — Gandalf's tendency to speak in r
     id: "cover-gen",
     title: "Cover Letter Generator",
     description: "A Python CLI tool that generates tailored cover letters using AI, streamlining the job application process.",
-    tech: ["Python", "CLI", "NLP", "OpenAI"],
+    tech: ["Git", "Python", "CLI", "NLP", "OpenAI"],
     github: "https://github.com/sunnydigital/cover-gen",
     content: `## Overview
 
@@ -479,7 +479,7 @@ A CLI tool fits naturally into a job search workflow — scriptable, fast, and c
     id: "galaxy-portfolio",
     title: "3D Galaxy Portfolio",
     description: "This portfolio site — interactive 3D galaxy visualization with Three.js, scroll-driven mode transitions, UMAP clustering, and concept management.",
-    tech: ["TypeScript", "JavaScript", "Next.js", "React", "Three.js", "Tailwind CSS", "Vercel", "WebGL"],
+    tech: ["Git", "TypeScript", "JavaScript", "Next.js", "React", "Three.js", "Tailwind CSS", "Vercel", "WebGL"],
     link: "https://www.sunnyson.dev",
     content: `## Overview
 
