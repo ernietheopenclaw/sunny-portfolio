@@ -51,6 +51,10 @@ function markdownToHtml(md: string): string {
     return `\n%%CODEBLOCK_${idx}%%\n`;
   });
 
+  // Pre-process: convert \$ (escaped dollar for currency) to plain dollar sign
+  // This prevents \$ from interfering with LaTeX $ delimiters
+  processed = processed.replace(/\\\$/g, "＄");
+
   // Extract LaTeX blocks BEFORE markdown processing to protect * _ etc inside math
   const latexBlocks: string[] = [];
   // Block LaTeX: $$...$$ and \[...\]
@@ -67,8 +71,7 @@ function markdownToHtml(md: string): string {
   // Inline LaTeX: $...$ and \(...\)
   // Must NOT start with digit+letter (avoid $1M, $100B etc currency)
   // Content must look like math: contain \, ^, _, {, }, or be short (≤30 chars, likely a variable)
-  // Allow \$ (escaped dollar) inside the match
-  processed = processed.replace(/\$(?!\d[A-Za-z])((?:[^$\n]|\\\$)+?)\$/g, (_m, tex) => {
+  processed = processed.replace(/\$(?!\d[A-Za-z])([^\$\n]+?)\$/g, (_m, tex) => {
     const looksLikeMath = /[\\^_{}]/.test(tex) || tex.length <= 30;
     if (!looksLikeMath) return _m; // leave as-is, not LaTeX
     const idx = latexBlocks.length;
@@ -150,6 +153,8 @@ function markdownToHtml(md: string): string {
   html = html.replace(/%%LATEX_(\d+)%%/g, (_m, idx) => latexBlocks[parseInt(idx)]);
 
   html = renderLatex(html);
+  // Restore fullwidth dollar signs to normal $
+  html = html.replace(/＄/g, "$");
   return html;
 }
 
