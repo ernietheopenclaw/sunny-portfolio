@@ -73,7 +73,7 @@ export default function About() {
         transition={{ duration: 0.7 }}
         viewport={{ once: true }}
       >
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3 mb-8">
           <h2 className="text-3xl font-bold" style={{ color: "var(--accent)" }}>
             About Me
           </h2>
@@ -83,7 +83,7 @@ export default function About() {
               className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg transition-colors cursor-pointer"
               style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
             >
-              <Edit3 className="w-3 h-3" /> Edit
+              <Edit3 className="w-3.5 h-3.5" /> Edit
             </button>
           )}
           {editing && (
@@ -93,14 +93,14 @@ export default function About() {
                 className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg cursor-pointer"
                 style={{ background: "var(--accent)", color: "#fff" }}
               >
-                <Save className="w-3 h-3" /> Save
+                <Save className="w-3.5 h-3.5" /> Save
               </button>
               <button
                 onClick={handleCancel}
                 className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg cursor-pointer"
                 style={{ color: "var(--text-muted)", border: "1px solid var(--border)" }}
               >
-                <X className="w-3 h-3" /> Cancel
+                <X className="w-3.5 h-3.5" /> Cancel
               </button>
             </div>
           )}
