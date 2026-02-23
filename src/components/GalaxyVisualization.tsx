@@ -804,7 +804,7 @@ function TimelineOverlay({ concepts, mode, onLinesHidden }: { concepts: Concept[
       // Entering timeline (or mounting in timeline mode) — delay lines until stars settle
       setVisible(true);
       enteringRef.current = true;
-      enterDelayRef.current = 0; // accumulates to 1.6s threshold — wait for stars to finish animating
+      enterDelayRef.current = prevModeRef.current === null ? 0.8 : 0; // shorter delay on remount since stars are already placed
       opacityRef.current = 0;
       leavingRef.current = false;
       leavingDoneRef.current = false;
