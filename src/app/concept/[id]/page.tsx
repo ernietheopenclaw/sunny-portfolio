@@ -67,7 +67,8 @@ function markdownToHtml(md: string): string {
   // Inline LaTeX: $...$ and \(...\)
   // Must NOT start with digit+letter (avoid $1M, $100B etc currency)
   // Content must look like math: contain \, ^, _, {, }, or be short (≤30 chars, likely a variable)
-  processed = processed.replace(/\$(?!\d[A-Za-z])([^\$\n]+?)\$/g, (_m, tex) => {
+  // Allow \$ (escaped dollar) inside the match
+  processed = processed.replace(/\$(?!\d[A-Za-z])((?:[^$\n]|\\\$)+?)\$/g, (_m, tex) => {
     const looksLikeMath = /[\\^_{}]/.test(tex) || tex.length <= 30;
     if (!looksLikeMath) return _m; // leave as-is, not LaTeX
     const idx = latexBlocks.length;
