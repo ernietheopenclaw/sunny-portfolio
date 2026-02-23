@@ -18,20 +18,20 @@ export default function Posts({ posts, onDelete }: { posts: Post[]; onDelete?: (
         transition={{ duration: 0.7 }}
         viewport={{ once: true }}
       >
-        <div className="flex items-center gap-3 mb-2">
-          <h2 className="text-3xl font-bold" style={{ color: "var(--accent)" }}>
+        <h2 className="text-3xl font-bold mb-2" style={{ color: "var(--accent)" }}>
+          <span className="flex items-center gap-3">
             Posts
-          </h2>
-          {session && (
-            <button
-              onClick={() => router.push("/post/new")}
-              className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg transition-colors cursor-pointer"
-              style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
-            >
-              <Plus className="w-3.5 h-3.5" /> New Post
-            </button>
-          )}
-        </div>
+            {session && (
+              <button
+                onClick={() => router.push("/post/new")}
+                className="text-xs px-2.5 py-1 rounded-full flex items-center gap-1 cursor-pointer transition-colors"
+                style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
+              >
+                <Plus className="w-3.5 h-3.5" /> New Post
+              </button>
+            )}
+          </span>
+        </h2>
         <p className="text-sm mb-12" style={{ color: "var(--text-muted)" }}>
           Thoughts, tutorials, and deep dives
         </p>

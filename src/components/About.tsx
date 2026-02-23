@@ -73,38 +73,38 @@ export default function About() {
         transition={{ duration: 0.7 }}
         viewport={{ once: true }}
       >
-        <div className="flex items-center gap-3 mb-8">
-          <h2 className="text-3xl font-bold" style={{ color: "var(--accent)" }}>
+        <h2 className="text-3xl font-bold mb-8" style={{ color: "var(--accent)" }}>
+          <span className="flex items-center gap-3">
             About Me
-          </h2>
-          {session && !editing && (
-            <button
-              onClick={startEditing}
-              className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg transition-colors cursor-pointer"
-              style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
-            >
-              <Edit3 className="w-3.5 h-3.5" /> Edit
-            </button>
-          )}
-          {editing && (
-            <div className="flex gap-2">
+            {session && !editing && (
               <button
-                onClick={handleSave}
-                className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg cursor-pointer"
-                style={{ background: "var(--accent)", color: "#fff" }}
+                onClick={startEditing}
+                className="text-xs px-2.5 py-1 rounded-full flex items-center gap-1 cursor-pointer transition-colors"
+                style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
               >
-                <Save className="w-3.5 h-3.5" /> Save
+                <Edit3 className="w-3.5 h-3.5" /> Edit
               </button>
-              <button
-                onClick={handleCancel}
-                className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg cursor-pointer"
-                style={{ color: "var(--text-muted)", border: "1px solid var(--border)" }}
-              >
-                <X className="w-3.5 h-3.5" /> Cancel
-              </button>
-            </div>
-          )}
-        </div>
+            )}
+            {editing && (
+              <span className="flex gap-2">
+                <button
+                  onClick={handleSave}
+                  className="text-xs px-2.5 py-1 rounded-full flex items-center gap-1 cursor-pointer transition-colors"
+                  style={{ background: "var(--accent)", color: "#fff" }}
+                >
+                  <Save className="w-3.5 h-3.5" /> Save
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="text-xs px-2.5 py-1 rounded-full flex items-center gap-1 cursor-pointer transition-colors"
+                  style={{ color: "var(--text-muted)", border: "1px solid var(--border)" }}
+                >
+                  <X className="w-3.5 h-3.5" /> Cancel
+                </button>
+              </span>
+            )}
+          </span>
+        </h2>
         <div className="flex flex-col md:flex-row gap-8 items-start">
           <div className="w-40 h-40 rounded-2xl overflow-hidden flex-shrink-0" style={{ border: "1px solid var(--border-strong)" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
