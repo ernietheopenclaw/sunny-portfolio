@@ -7,11 +7,16 @@ import katex from "katex";
  *
  * Returns HTML string with rendered KaTeX spans.
  */
+function fixTexDollars(tex: string): string {
+  // Replace \$ with \text{\$} so KaTeX can render currency inside math
+  return tex.replace(/\\\$/g, "\\text{\\$}");
+}
+
 export function renderLatex(text: string): string {
   // Display math: $$...$$ and \[...\]
   let result = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, tex) => {
     try {
-      return katex.renderToString(tex.trim(), { displayMode: true, throwOnError: false });
+      return katex.renderToString(fixTexDollars(tex.trim()), { displayMode: true, throwOnError: false });
     } catch {
       return `<span class="katex-error">${tex}</span>`;
     }
@@ -19,7 +24,7 @@ export function renderLatex(text: string): string {
 
   result = result.replace(/\\\[([\s\S]+?)\\\]/g, (_, tex) => {
     try {
-      return katex.renderToString(tex.trim(), { displayMode: true, throwOnError: false });
+      return katex.renderToString(fixTexDollars(tex.trim()), { displayMode: true, throwOnError: false });
     } catch {
       return `<span class="katex-error">${tex}</span>`;
     }
@@ -32,7 +37,7 @@ export function renderLatex(text: string): string {
     const looksLikeMath = /[\\^_{}]/.test(tex) || tex.length <= 30;
     if (!looksLikeMath) return `$${tex}$`; // not math, return as-is
     try {
-      return katex.renderToString(tex.trim(), { displayMode: false, throwOnError: false });
+      return katex.renderToString(fixTexDollars(tex.trim()), { displayMode: false, throwOnError: false });
     } catch {
       return `<span class="katex-error">${tex}</span>`;
     }
@@ -40,7 +45,7 @@ export function renderLatex(text: string): string {
 
   result = result.replace(/\\\((.+?)\\\)/g, (_, tex) => {
     try {
-      return katex.renderToString(tex.trim(), { displayMode: false, throwOnError: false });
+      return katex.renderToString(fixTexDollars(tex.trim()), { displayMode: false, throwOnError: false });
     } catch {
       return `<span class="katex-error">${tex}</span>`;
     }
