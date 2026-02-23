@@ -31,6 +31,20 @@ export default function Home() {
   const [skills, setSkills] = useState(mockSkills);
   const [galaxyReady, setGalaxyReady] = useState(false);
 
+  // Reload concepts from localStorage (including edits) when returning from other pages
+  const reloadConcepts = useCallback(() => setConcepts(getAllConcepts()), []);
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === "visible") reloadConcepts(); };
+    window.addEventListener("focus", reloadConcepts);
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("popstate", reloadConcepts);
+    return () => {
+      window.removeEventListener("focus", reloadConcepts);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("popstate", reloadConcepts);
+    };
+  }, [reloadConcepts]);
+
   // Load user-added concepts and hidden projects/posts from localStorage after mount
   useEffect(() => {
     setConcepts(getAllConcepts());
