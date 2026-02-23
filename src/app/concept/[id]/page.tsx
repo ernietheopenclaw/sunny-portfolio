@@ -45,10 +45,21 @@ function convertTablesToLists(md: string): string {
 function markdownToHtml(md: string): string {
   // Pre-process: extract code blocks to protect them
   const codeBlocks: string[] = [];
-  let processed = convertTablesToLists(md).replace(/```(\w*)\n([\s\S]*?)```/g, (_m, lang, code) => {
+  // Match code fences: ```lang (with optional space/newline variations)
+  let processed = convertTablesToLists(md).replace(/```(\w*)\s*\n([\s\S]*?)```/g, (_m, lang, code) => {
     const idx = codeBlocks.length;
-    codeBlocks.push(`<pre style="background:var(--bg);padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid var(--border)"><code style="font-size:0.85em;font-family:var(--font-mono);color:var(--text-muted)">${code}</code></pre>`);
+    // HTML-escape the code content to prevent tags from being interpreted
+    const escaped = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    codeBlocks.push(`<pre style="background:var(--bg);padding:1rem;border-radius:8px;overflow-x:auto;margin:1rem 0;border:1px solid var(--border)"><code style="font-size:0.85em;font-family:var(--font-mono);color:var(--text-muted)">${escaped}</code></pre>`);
     return `\n%%CODEBLOCK_${idx}%%\n`;
+  });
+  // Also handle inline code before LaTeX extraction (protect backtick content)
+  const inlineCodeBlocks: string[] = [];
+  processed = processed.replace(/`([^`]+)`/g, (_m, code) => {
+    const idx = inlineCodeBlocks.length;
+    const escaped = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    inlineCodeBlocks.push(`<code style="background:var(--border);padding:0.15rem 0.4rem;border-radius:4px;font-size:0.85em;font-family:var(--font-mono)">${escaped}</code>`);
+    return `%%INLINECODE_${idx}%%`;
   });
 
   // Pre-process: convert \$ (escaped dollar for currency) to plain dollar sign
@@ -139,15 +150,15 @@ function markdownToHtml(md: string): string {
     .replace(/^### (.+)$/gm, '<h3 style="font-size:1.15rem;font-weight:700;margin:1.5rem 0 0.5rem;color:var(--text)">$1</h3>')
     .replace(/^## (.+)$/gm, '<h2 style="font-size:1.35rem;font-weight:700;margin:2rem 0 0.75rem;color:var(--accent-mid)">$1</h2>')
     .replace(/^# (.+)$/gm, '<h1 style="font-size:1.75rem;font-weight:800;margin:0 0 1rem;color:var(--text)">$1</h1>')
-    .replace(/`([^`]+)`/g, '<code style="background:var(--border);padding:0.15rem 0.4rem;border-radius:4px;font-size:0.85em;font-family:var(--font-mono)">$1</code>')
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
     .replace(/\n\n/g, '</p><p style="margin-bottom:1rem;line-height:1.8">')
     .replace(/^/, '<p style="margin-bottom:1rem;line-height:1.8">')
     .concat("</p>");
 
-  // Restore code blocks
+  // Restore code blocks and inline code
   html = html.replace(/%%CODEBLOCK_(\d+)%%/g, (_m, idx) => codeBlocks[parseInt(idx)]);
+  html = html.replace(/%%INLINECODE_(\d+)%%/g, (_m, idx) => inlineCodeBlocks[parseInt(idx)]);
 
   // Restore LaTeX blocks (before renderLatex processes them)
   html = html.replace(/%%LATEX_(\d+)%%/g, (_m, idx) => latexBlocks[parseInt(idx)]);
