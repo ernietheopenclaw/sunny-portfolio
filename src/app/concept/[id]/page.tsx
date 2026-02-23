@@ -162,6 +162,7 @@ export default function ConceptDetail() {
   const [editShortSummary, setEditShortSummary] = useState("");
   const [editLongSummary, setEditLongSummary] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [editDate, setEditDate] = useState("");
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [generatingOverview, setGeneratingOverview] = useState(false);
 
@@ -218,18 +219,20 @@ export default function ConceptDetail() {
       const short_summary = saved?.short_summary || found.short_summary;
       const long_summary = saved?.long_summary || found.long_summary;
       const imgs = (saved as Record<string, unknown>)?.images as string[] ?? found.images ?? [];
-      setConcept({ ...found, name, short_summary, long_summary, images: imgs });
+      const date_learned = (saved as Record<string, unknown>)?.date_learned as string ?? found.date_learned;
+      setConcept({ ...found, name, short_summary, long_summary, images: imgs, date_learned });
       setEditName(name);
       setEditShortSummary(short_summary);
       setEditLongSummary(long_summary);
       setImages(imgs);
+      setEditDate(date_learned);
     }
   }, [params.id]);
 
   const handleSave = () => {
     if (!concept) return;
-    localStorage.setItem(`concept-edit-${concept.id}`, JSON.stringify({ name: editName, short_summary: editShortSummary, long_summary: editLongSummary, images }));
-    setConcept({ ...concept, name: editName, short_summary: editShortSummary, long_summary: editLongSummary, images });
+    localStorage.setItem(`concept-edit-${concept.id}`, JSON.stringify({ name: editName, short_summary: editShortSummary, long_summary: editLongSummary, images, date_learned: editDate }));
+    setConcept({ ...concept, name: editName, short_summary: editShortSummary, long_summary: editLongSummary, images, date_learned: editDate });
     setEditing(false);
   };
 
@@ -254,8 +257,21 @@ export default function ConceptDetail() {
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
 
-        <div className="mb-2 text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-          Added {parseLocalDate(concept.date_learned).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+        <div className="mb-2 text-xs font-mono flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+          {editing ? (
+            <>
+              Added{" "}
+              <input
+                type="date"
+                value={editDate}
+                onChange={(e) => setEditDate(e.target.value)}
+                className="px-2 py-0.5 rounded text-xs font-mono focus:outline-none"
+                style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
+              />
+            </>
+          ) : (
+            <>Added {parseLocalDate(concept.date_learned).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</>
+          )}
         </div>
 
         {editing ? (
@@ -343,7 +359,7 @@ export default function ConceptDetail() {
                   <Save className="w-3 h-3" /> Save
                 </button>
                 <button
-                  onClick={() => { setEditing(false); setEditName(concept.name); setEditShortSummary(concept.short_summary); setEditLongSummary(concept.long_summary); }}
+                  onClick={() => { setEditing(false); setEditName(concept.name); setEditShortSummary(concept.short_summary); setEditLongSummary(concept.long_summary); setEditDate(concept.date_learned); }}
                   className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg cursor-pointer"
                   style={{ color: "var(--text-muted)", border: "1px solid var(--border)" }}
                 >
