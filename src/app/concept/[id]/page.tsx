@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Edit3, Save, X, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit3, Save, X, Trash2, Sparkles, Loader2 } from "lucide-react";
 import { getAllConcepts, hideConcept } from "@/lib/concepts";
 import { Concept } from "@/types";
 import LatexText from "@/components/LatexText";
@@ -158,6 +158,41 @@ export default function ConceptDetail() {
   const [editShortSummary, setEditShortSummary] = useState("");
   const [editLongSummary, setEditLongSummary] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [generatingOverview, setGeneratingOverview] = useState(false);
+
+  const generateField = async (field: "short_summary" | "long_summary") => {
+    const name = editName || concept?.name;
+    if (!name) return;
+    const setter = field === "short_summary" ? setGeneratingSummary : setGeneratingOverview;
+    setter(true);
+    try {
+      const authType = localStorage.getItem("auth-type") || "apikey";
+      const modelId = localStorage.getItem("concept-model") || "claude-sonnet-4-6";
+      const summaryLength = parseInt(localStorage.getItem("summary-length") || "4", 10);
+      const body: Record<string, unknown> = { name, authType, summaryLength, modelId };
+      if (authType === "oauth-browser") {
+        const creds = localStorage.getItem("anthropic-oauth-credentials");
+        if (!creds) { alert("Please sign in with Anthropic first in Settings."); return; }
+        body.oauthCredentials = JSON.parse(creds);
+        body.authType = "oauth";
+      } else if (authType === "oauth") {
+        const token = localStorage.getItem("anthropic-oauth-token");
+        if (!token) { alert("Please configure your OAuth token in Settings."); return; }
+        body.oauthToken = token;
+      } else {
+        const key = localStorage.getItem("anthropic-api-key");
+        if (!key) { alert("Please configure your API key in Settings."); return; }
+        body.apiKey = key;
+      }
+      const res = await fetch("/api/concepts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      if (!res.ok) { const err = await res.json(); alert(err.error || "Generation failed"); return; }
+      const data = await res.json();
+      if (data.refreshedCredentials) localStorage.setItem("anthropic-oauth-credentials", JSON.stringify(data.refreshedCredentials));
+      if (field === "short_summary") setEditShortSummary(data.short_summary);
+      else setEditLongSummary(data.long_summary);
+    } catch { alert("Failed to generate."); } finally { setter(false); }
+  };
 
   useEffect(() => {
     const id = params.id as string;
@@ -233,13 +268,25 @@ export default function ConceptDetail() {
         )}
 
         {editing ? (
-          <textarea
-            value={editShortSummary}
-            onChange={(e) => setEditShortSummary(e.target.value)}
-            rows={2}
-            className="text-sm mb-8 w-full bg-transparent focus:outline-none resize-y p-2 rounded-lg"
-            style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
-          />
+          <div className="flex gap-2 mb-8 items-start">
+            <textarea
+              value={editShortSummary}
+              onChange={(e) => setEditShortSummary(e.target.value)}
+              rows={2}
+              className="text-sm flex-1 bg-transparent focus:outline-none resize-y p-2 rounded-lg"
+              style={{ color: "var(--accent-mid)", border: "1px solid var(--border)" }}
+            />
+            <button
+              onClick={() => generateField("short_summary")}
+              disabled={generatingSummary}
+              className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full cursor-pointer disabled:opacity-50 shrink-0 mt-1"
+              style={{ background: "rgba(56,189,248,0.15)", color: "var(--accent-mid)" }}
+              title="Auto-generate summary"
+            >
+              {generatingSummary ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+              Generate
+            </button>
+          </div>
         ) : (
           <LatexText as="p" className="text-sm mb-8" style={{ color: "var(--accent-mid)" }}>
             {concept.short_summary}
@@ -275,6 +322,15 @@ export default function ConceptDetail() {
             )}
             {editing && (
               <div className="flex gap-2">
+                <button
+                  onClick={() => generateField("long_summary")}
+                  disabled={generatingOverview}
+                  className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full cursor-pointer disabled:opacity-50"
+                  style={{ background: "rgba(56,189,248,0.15)", color: "var(--accent-mid)" }}
+                >
+                  {generatingOverview ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                  Generate
+                </button>
                 <button
                   onClick={handleSave}
                   className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg cursor-pointer"
