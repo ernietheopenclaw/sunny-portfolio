@@ -30,7 +30,7 @@ export default function SettingsPage() {
   const [summaryLength, setSummaryLength] = useState(4);
 
   // Model selection
-  const [selectedModel, setSelectedModel] = useState("claude-sonnet-4-20250514");
+  const [selectedModel, setSelectedModel] = useState("claude-sonnet-4-6");
 
   // Concept generation
   const [conceptName, setConceptName] = useState("");
@@ -140,7 +140,7 @@ export default function SettingsPage() {
     if (!conceptName.trim()) return;
     const storedType = localStorage.getItem("auth-type") || "apikey";
 
-    const storedModel = localStorage.getItem("concept-model") || "claude-sonnet-4-20250514";
+    const storedModel = localStorage.getItem("concept-model") || "claude-sonnet-4-6";
     let body: Record<string, unknown> = { name: conceptName, authType: storedType, summaryLength, modelId: storedModel };
 
     if (storedType === "oauth-browser") {
@@ -443,17 +443,23 @@ export default function SettingsPage() {
             className="w-full p-2.5 rounded-lg text-sm focus:outline-none"
             style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
           >
-            <optgroup label="Claude 4">
-              <option value="claude-opus-4-20250514">Claude Opus 4 (most capable)</option>
-              <option value="claude-sonnet-4-20250514">Claude Sonnet 4 (balanced)</option>
+            <optgroup label="Latest (Claude 4.6)">
+              <option value="claude-opus-4-6">Claude Opus 4.6 — most intelligent</option>
+              <option value="claude-sonnet-4-6">Claude Sonnet 4.6 — speed + intelligence</option>
             </optgroup>
-            <optgroup label="Claude 3.5">
-              <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet (fast)</option>
-              <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku (fastest)</option>
+            <optgroup label="Claude 4.5">
+              <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 — fastest, near-frontier</option>
+              <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5</option>
+              <option value="claude-opus-4-5-20251101">Claude Opus 4.5</option>
+            </optgroup>
+            <optgroup label="Claude 4">
+              <option value="claude-opus-4-1-20250805">Claude Opus 4.1</option>
+              <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+              <option value="claude-opus-4-20250514">Claude Opus 4</option>
             </optgroup>
           </select>
           <p className="text-xs mt-2" style={{ color: "var(--text-muted)", opacity: 0.6 }}>
-            Opus produces the most detailed breakdowns. Haiku is fastest but less thorough.
+            Opus 4.6 produces the most detailed breakdowns. Haiku 4.5 is fastest but less thorough.
           </p>
         </section>
 

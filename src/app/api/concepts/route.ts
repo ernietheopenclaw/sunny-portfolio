@@ -4,7 +4,7 @@ import { refreshAnthropicToken } from "@mariozechner/pi-ai";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, apiKey, oauthToken, oauthCredentials, authType, summaryLength = 4, modelId = "claude-sonnet-4-20250514" } = await req.json();
+    const { name, apiKey, oauthToken, oauthCredentials, authType, summaryLength = 4, modelId = "claude-sonnet-4-6" } = await req.json();
 
     if (!name) {
       return NextResponse.json({ error: "Concept name is required" }, { status: 400 });
