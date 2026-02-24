@@ -88,13 +88,20 @@ export function invalidateConceptsCache() {
 
 // ---- Write operations via API routes ----
 
+// Only these fields exist in the Supabase concepts table
+const CONCEPT_DB_FIELDS = ["id", "name", "short_summary", "long_summary", "date_learned", "x", "y", "z", "images", "is_user_created", "is_hidden"];
+
 export async function saveConceptToDb(concept: Partial<Concept> & { id: string; is_user_created?: boolean; is_hidden?: boolean }) {
-  // Strip fields that aren't in the DB schema
-  const { embedding, ...dbFields } = concept as Record<string, unknown>;
+  // Whitelist only DB-valid fields
+  const dbFields: Record<string, unknown> = {};
+  for (const key of CONCEPT_DB_FIELDS) {
+    if (key in concept) dbFields[key] = (concept as Record<string, unknown>)[key];
+  }
+  dbFields.updated_at = new Date().toISOString();
   const res = await fetch("/api/db/concepts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...dbFields, updated_at: new Date().toISOString() }),
+    body: JSON.stringify(dbFields),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
