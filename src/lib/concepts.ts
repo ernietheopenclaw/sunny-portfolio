@@ -89,10 +89,12 @@ export function invalidateConceptsCache() {
 // ---- Write operations via API routes ----
 
 export async function saveConceptToDb(concept: Partial<Concept> & { id: string; is_user_created?: boolean; is_hidden?: boolean }) {
+  // Strip fields that aren't in the DB schema
+  const { embedding, ...dbFields } = concept as Record<string, unknown>;
   const res = await fetch("/api/db/concepts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...concept, updated_at: new Date().toISOString() }),
+    body: JSON.stringify({ ...dbFields, updated_at: new Date().toISOString() }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
