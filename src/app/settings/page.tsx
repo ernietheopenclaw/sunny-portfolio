@@ -235,7 +235,10 @@ export default function SettingsPage() {
     };
     try {
       await saveConceptToDb({ ...concept, is_user_created: true });
-    } catch {}
+    } catch (e) {
+      alert("Failed to save concept: " + (e instanceof Error ? e.message : String(e)));
+      return;
+    }
     setSaved(true);
     setConceptName("");
     setConceptDate("");
