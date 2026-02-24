@@ -4,7 +4,8 @@ import { useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { mockConcepts, mockProjects, mockSkills, mockPosts, mockPublications } from "@/data/mock";
 import { Publication, Skill } from "@/types";
-import { getAllConcepts } from "@/lib/concepts";
+import { getAllConceptsAsync, invalidateConceptsCache } from "@/lib/concepts";
+import { getProjectsAsync, getPostsAsync, getPublicationsAsync, getSkillsAsync, hideInDb } from "@/lib/db";
 import Navbar from "@/components/Navbar";
 import ThemeToggle from "@/components/ThemeToggle";
 import ScrollIndicator from "@/components/ScrollIndicator";
@@ -31,81 +32,50 @@ export default function Home() {
   const [skills, setSkills] = useState(mockSkills);
   const [galaxyReady, setGalaxyReady] = useState(false);
 
-  // Reload concepts from localStorage (including edits) when returning from other pages
-  const reloadConcepts = useCallback(() => setConcepts(getAllConcepts()), []);
-  useEffect(() => {
-    const onVisible = () => { if (document.visibilityState === "visible") reloadConcepts(); };
-    window.addEventListener("focus", reloadConcepts);
-    document.addEventListener("visibilitychange", onVisible);
-    window.addEventListener("popstate", reloadConcepts);
-    return () => {
-      window.removeEventListener("focus", reloadConcepts);
-      document.removeEventListener("visibilitychange", onVisible);
-      window.removeEventListener("popstate", reloadConcepts);
-    };
-  }, [reloadConcepts]);
-
-  // Load user-added concepts and hidden projects/posts from localStorage after mount
-  useEffect(() => {
-    setConcepts(getAllConcepts());
-
-    // Projects: filter hidden, apply localStorage edits, merge user-created
-    const hiddenProjects = JSON.parse(localStorage.getItem("hidden-projects") || "[]") as string[];
-    const userProjects = JSON.parse(localStorage.getItem("user-projects") || "[]") as typeof mockProjects;
-    const filteredProjects = (hiddenProjects.length > 0
-      ? mockProjects.filter((p) => !hiddenProjects.includes(p.id))
-      : [...mockProjects]
-    ).map((p) => {
-      const saved = localStorage.getItem(`project-edit-${p.id}`);
-      if (saved) {
-        const data = JSON.parse(saved);
-        return { ...p, ...data, tech: data.tech ?? p.tech };
-      }
-      return p;
-    });
-    setProjects([...userProjects, ...filteredProjects]);
-
-    // Posts
-    const hiddenPosts = JSON.parse(localStorage.getItem("hidden-posts") || "[]") as string[];
-    const userPosts = JSON.parse(localStorage.getItem("user-posts") || "[]") as typeof mockPosts;
-    const filteredMock = hiddenPosts.length > 0 ? mockPosts.filter((p) => !hiddenPosts.includes(p.id)) : mockPosts;
-    setPosts([...userPosts, ...filteredMock]);
-
-    // Publications
-    const hiddenPubs = JSON.parse(localStorage.getItem("hidden-publications") || "[]") as string[];
-    const userPubs = JSON.parse(localStorage.getItem("user-publications") || "[]") as Publication[];
-    const filteredPubs = hiddenPubs.length > 0
-      ? mockPublications.filter((p) => !hiddenPubs.includes(p.id))
-      : [...mockPublications];
-    setPublications([...userPubs, ...filteredPubs]);
-
-    // Skills
-    const userSkills = JSON.parse(localStorage.getItem("user-skills") || "[]") as Skill[];
-    setSkills([...mockSkills, ...userSkills]);
+  // Load all data from Supabase on mount
+  const loadData = useCallback(async () => {
+    const [c, p, po, pu, s] = await Promise.all([
+      getAllConceptsAsync(),
+      getProjectsAsync(),
+      getPostsAsync(),
+      getPublicationsAsync(),
+      getSkillsAsync(),
+    ]);
+    setConcepts(c);
+    setProjects(p);
+    setPosts(po);
+    setPublications(pu);
+    setSkills(s);
   }, []);
 
+  // Reload on mount and when returning to page
+  useEffect(() => {
+    loadData();
+    const onVisible = () => { if (document.visibilityState === "visible") { invalidateConceptsCache(); loadData(); } };
+    window.addEventListener("focus", () => { invalidateConceptsCache(); loadData(); });
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [loadData]);
+
   const handleConceptAdded = useCallback(() => {
-    setConcepts(getAllConcepts());
+    invalidateConceptsCache();
+    getAllConceptsAsync().then(setConcepts);
   }, []);
 
   const handleDeletePost = useCallback((id: string) => {
-    const hidden = JSON.parse(localStorage.getItem("hidden-posts") || "[]") as string[];
-    hidden.push(id);
-    localStorage.setItem("hidden-posts", JSON.stringify(hidden));
+    hideInDb("posts", id).catch(() => {});
     setPosts((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
   const handleDeletePublication = useCallback((id: string) => {
-    const hidden = JSON.parse(localStorage.getItem("hidden-publications") || "[]") as string[];
-    hidden.push(id);
-    localStorage.setItem("hidden-publications", JSON.stringify(hidden));
+    hideInDb("publications", id).catch(() => {});
     setPublications((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
   const handleDeleteProject = useCallback((id: string) => {
-    const hidden = JSON.parse(localStorage.getItem("hidden-projects") || "[]") as string[];
-    hidden.push(id);
-    localStorage.setItem("hidden-projects", JSON.stringify(hidden));
+    hideInDb("projects", id).catch(() => {});
     setProjects((prev) => prev.filter((p) => p.id !== id));
   }, []);
 

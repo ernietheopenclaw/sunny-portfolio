@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Sparkles, Loader2 } from "lucide-react";
-import { addUserConcept } from "@/lib/concepts";
+import { saveConceptToDb } from "@/lib/concepts";
 import { getEmbedding } from "@/lib/embedding-model";
 
 export default function ConceptInput({ onConceptAdded }: { onConceptAdded?: () => void }) {
@@ -104,7 +104,7 @@ export default function ConceptInput({ onConceptAdded }: { onConceptAdded?: () =
         ...(embedding ? { embedding } : data.embedding ? { embedding: data.embedding } : {}),
       };
 
-      addUserConcept(newConcept);
+      await saveConceptToDb({ ...newConcept, is_user_created: true });
       setConcept("");
       setDate("");
       setIsOpen(false);

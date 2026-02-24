@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Edit3, Save, X, Trash2, Sparkles, Loader2 } from "lucide-react";
-import { getAllConcepts, hideConcept } from "@/lib/concepts";
+import { getAllConceptsAsync, saveConceptToDb, hideConceptInDb } from "@/lib/concepts";
 import { Concept } from "@/types";
 import LatexText from "@/components/LatexText";
 import ImageGallery from "@/components/ImageGallery";
@@ -192,6 +192,8 @@ export default function ConceptDetail() {
       const authType = localStorage.getItem("auth-type") || "apikey";
       const modelId = localStorage.getItem("concept-model") || "claude-sonnet-4-6";
       const summaryLength = parseInt(localStorage.getItem("summary-length") || "4", 10);
+      // Note: settings are still read from localStorage for auth credentials (API keys, OAuth tokens)
+      // since those are sensitive and shouldn't be stored in the DB
       const body: Record<string, unknown> = { name, authType, summaryLength, modelId };
       if (authType === "oauth-browser") {
         const creds = localStorage.getItem("anthropic-oauth-credentials");
@@ -218,39 +220,29 @@ export default function ConceptDetail() {
 
   useEffect(() => {
     const id = params.id as string;
-    const allConcepts = getAllConcepts();
-    const found = allConcepts.find((c) => c.id === id);
-    if (found) {
-      // Migrate old key if exists
-      const oldKey = localStorage.getItem(`concept-summary-${id}`);
-      const savedRaw = localStorage.getItem(`concept-edit-${id}`);
-      let saved: { name?: string; short_summary?: string; long_summary?: string } | null = null;
-      if (savedRaw) {
-        saved = JSON.parse(savedRaw);
-      } else if (oldKey) {
-        saved = { long_summary: oldKey };
-        localStorage.setItem(`concept-edit-${id}`, JSON.stringify(saved));
-        localStorage.removeItem(`concept-summary-${id}`);
+    getAllConceptsAsync().then((allConcepts) => {
+      const found = allConcepts.find((c) => c.id === id);
+      if (found) {
+        setConcept(found);
+        setEditName(found.name);
+        setEditShortSummary(found.short_summary);
+        setEditLongSummary(found.long_summary);
+        setImages(found.images ?? []);
+        setEditDate(found.date_learned);
       }
-      const name = saved?.name || found.name;
-      const short_summary = saved?.short_summary || found.short_summary;
-      const long_summary = saved?.long_summary || found.long_summary;
-      const imgs = (saved as Record<string, unknown>)?.images as string[] ?? found.images ?? [];
-      const date_learned = (saved as Record<string, unknown>)?.date_learned as string ?? found.date_learned;
-      setConcept({ ...found, name, short_summary, long_summary, images: imgs, date_learned });
-      setEditName(name);
-      setEditShortSummary(short_summary);
-      setEditLongSummary(long_summary);
-      setImages(imgs);
-      setEditDate(date_learned);
-    }
+    });
   }, [params.id]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!concept) return;
-    localStorage.setItem(`concept-edit-${concept.id}`, JSON.stringify({ name: editName, short_summary: editShortSummary, long_summary: editLongSummary, images, date_learned: editDate }));
-    setConcept({ ...concept, name: editName, short_summary: editShortSummary, long_summary: editLongSummary, images, date_learned: editDate });
+    const updates = { id: concept.id, name: editName, short_summary: editShortSummary, long_summary: editLongSummary, images, date_learned: editDate };
+    setConcept({ ...concept, ...updates });
     setEditing(false);
+    try {
+      await saveConceptToDb(updates);
+    } catch {
+      // silently fail, data is still shown from local state
+    }
   };
 
   if (!concept) {
@@ -345,9 +337,9 @@ export default function ConceptDetail() {
                   <Edit3 className="w-3 h-3" /> Edit
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (!confirm(`Delete "${concept.name}"? This cannot be undone.`)) return;
-                    hideConcept(concept.id);
+                    await hideConceptInDb(concept.id).catch(() => {});
                     router.push("/");
                   }}
                   className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg transition-colors cursor-pointer"

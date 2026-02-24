@@ -7,6 +7,8 @@ import { ArrowLeft, ExternalLink, Github, Edit3, Trash2, Save, X } from "lucide-
 import { mockProjects } from "@/data/mock";
 import ImageGallery from "@/components/ImageGallery";
 import ImageUploader from "@/components/ImageUploader";
+import { saveToDb, hideInDb } from "@/lib/db";
+import { supabase } from "@/lib/supabase";
 
 function markdownToHtml(md: string): string {
   return md
@@ -38,24 +40,25 @@ export default function ProjectDetail() {
   const [newTech, setNewTech] = useState("");
   const [images, setImages] = useState<string[]>([]);
 
-  // Load any saved edits from localStorage
+  // Load any saved edits from Supabase
   useEffect(() => {
     if (!baseProject) return;
-    const saved = localStorage.getItem(`project-edit-${baseProject.id}`);
-    if (saved) {
-      const data = JSON.parse(saved);
-      setTitle(data.title ?? baseProject.title);
-      setDescription(data.description ?? baseProject.description);
-      setContent(data.content ?? baseProject.content ?? "");
-      setTech(data.tech ?? [...baseProject.tech]);
-      setImages(data.images ?? baseProject.images ?? []);
-    } else {
-      setTitle(baseProject.title);
-      setDescription(baseProject.description);
-      setContent(baseProject.content ?? "");
-      setTech([...baseProject.tech]);
-      setImages(baseProject.images ?? []);
-    }
+    // Set defaults from mock
+    setTitle(baseProject.title);
+    setDescription(baseProject.description);
+    setContent(baseProject.content ?? "");
+    setTech([...baseProject.tech]);
+    setImages(baseProject.images ?? []);
+    // Fetch DB override
+    supabase.from("projects").select("*").eq("id", baseProject.id).single().then(({ data }) => {
+      if (data) {
+        if (data.title) setTitle(data.title);
+        if (data.description) setDescription(data.description);
+        if (data.content) setContent(data.content);
+        if (data.tech) setTech(data.tech);
+        if (data.images) setImages(data.images);
+      }
+    });
   }, [baseProject]);
 
   if (!baseProject) {
@@ -67,35 +70,22 @@ export default function ProjectDetail() {
   }
 
   const handleSave = () => {
-    localStorage.setItem(`project-edit-${baseProject.id}`, JSON.stringify({ title, description, content, tech, images }));
+    saveToDb("projects", { id: baseProject.id, title, description, content, tech, images }).catch(() => {});
     setEditing(false);
   };
 
   const handleCancel = () => {
-    const saved = localStorage.getItem(`project-edit-${baseProject.id}`);
-    if (saved) {
-      const data = JSON.parse(saved);
-      setTitle(data.title ?? baseProject.title);
-      setDescription(data.description ?? baseProject.description);
-      setContent(data.content ?? baseProject.content ?? "");
-      setTech(data.tech ?? [...baseProject.tech]);
-      setImages(data.images ?? baseProject.images ?? []);
-    } else {
-      setTitle(baseProject.title);
-      setDescription(baseProject.description);
-      setContent(baseProject.content ?? "");
-      setTech([...baseProject.tech]);
-      setImages(baseProject.images ?? []);
-    }
+    setTitle(baseProject.title);
+    setDescription(baseProject.description);
+    setContent(baseProject.content ?? "");
+    setTech([...baseProject.tech]);
+    setImages(baseProject.images ?? []);
     setEditing(false);
   };
 
   const handleDelete = () => {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    const hidden = JSON.parse(localStorage.getItem("hidden-projects") || "[]") as string[];
-    hidden.push(baseProject.id);
-    localStorage.setItem("hidden-projects", JSON.stringify(hidden));
-    localStorage.removeItem(`project-edit-${baseProject.id}`);
+    hideInDb("projects", baseProject.id).catch(() => {});
     router.push("/#projects");
   };
 

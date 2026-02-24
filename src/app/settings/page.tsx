@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Sparkles, Loader2, Save, Check, Key, Shield, LogIn, LogOut, ClipboardPaste, X } from "lucide-react";
 import { Concept } from "@/types";
-import { getAllConcepts, hideConcept } from "@/lib/concepts";
+import { getAllConceptsAsync, saveConceptToDb, hideConceptInDb, invalidateConceptsCache } from "@/lib/concepts";
+import { getSettingsAsync, saveToDb } from "@/lib/db";
 import { parseLocalDate } from "@/lib/date";
 
 export default function SettingsPage() {
@@ -78,7 +79,16 @@ export default function SettingsPage() {
     const storedModel = localStorage.getItem("concept-model");
     if (storedModel) setSelectedModel(storedModel);
 
-    setAllConceptsList(getAllConcepts());
+    // Load settings from Supabase (overrides localStorage)
+    getSettingsAsync().then((s) => {
+      if (s) {
+        if (s.auth_type) { setAuthType(s.auth_type as "apikey" | "oauth" | "oauth-browser"); localStorage.setItem("auth-type", s.auth_type); }
+        if (s.summary_length) { setSummaryLength(s.summary_length); localStorage.setItem("summary-length", s.summary_length.toString()); }
+        if (s.selected_model) { setSelectedModel(s.selected_model); localStorage.setItem("concept-model", s.selected_model); }
+      }
+    });
+
+    getAllConceptsAsync().then(setAllConceptsList);
   }, []);
 
   const saveCredentials = () => {
@@ -90,6 +100,7 @@ export default function SettingsPage() {
       localStorage.setItem("anthropic-oauth-token", oauthToken);
       setCredentialStatus(oauthToken ? "configured" : "none");
     }
+    saveToDb("settings", { id: "main", auth_type: authType }).catch(() => {});
     triggerToast();
   };
 
@@ -210,7 +221,7 @@ export default function SettingsPage() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!generated) return;
     const concept: Concept = {
       id: Date.now().toString(),
@@ -222,15 +233,15 @@ export default function SettingsPage() {
       z: generated.z,
       date_learned: conceptDate || new Date().toISOString().split("T")[0],
     };
-    const existing = localStorage.getItem("user-concepts");
-    const concepts: Concept[] = existing ? JSON.parse(existing) : [];
-    concepts.push(concept);
-    localStorage.setItem("user-concepts", JSON.stringify(concepts));
+    try {
+      await saveConceptToDb({ ...concept, is_user_created: true });
+    } catch {}
     setSaved(true);
     setConceptName("");
     setConceptDate("");
     setGenerated(null);
-    setAllConceptsList(getAllConcepts());
+    invalidateConceptsCache();
+    getAllConceptsAsync().then(setAllConceptsList);
     triggerToast();
   };
 
@@ -454,6 +465,7 @@ export default function SettingsPage() {
             onChange={(e) => {
               setSelectedModel(e.target.value);
               localStorage.setItem("concept-model", e.target.value);
+              saveToDb("settings", { id: "main", selected_model: e.target.value }).catch(() => {});
               triggerToast();
             }}
             className="w-full p-2.5 rounded-lg text-sm focus:outline-none"
@@ -498,6 +510,7 @@ export default function SettingsPage() {
                 const val = parseInt(e.target.value, 10);
                 setSummaryLength(val);
                 localStorage.setItem("summary-length", val.toString());
+                saveToDb("settings", { id: "main", summary_length: val }).catch(() => {});
                 triggerToast();
               }}
               className="flex-1 accent-[#218380]"
@@ -599,10 +612,11 @@ export default function SettingsPage() {
                         </p>
                       </div>
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           if (!confirm(`Delete "${c.name}"?`)) return;
-                          hideConcept(c.id);
-                          setAllConceptsList(getAllConcepts());
+                          await hideConceptInDb(c.id).catch(() => {});
+                          invalidateConceptsCache();
+                          getAllConceptsAsync().then(setAllConceptsList);
                         }}
                         className="p-2 rounded-lg transition-opacity cursor-pointer shrink-0"
                         style={{ color: "#e74c3c", opacity: 0.4 }}

@@ -13,7 +13,7 @@
     "@mariozechner/pi-ai": "^0.53.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
-    "@supabase/supabase-js": "^2.96.0",
+    "@supabase/supabase-js": "^2.97.0",
     "@types/p5": "^1.7.7",
     "@types/three": "^0.182.0",
     "@vercel/blob": "^2.3.0",

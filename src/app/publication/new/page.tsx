@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { ArrowLeft, Save } from "lucide-react";
 import { Publication } from "@/types";
+import { saveToDb } from "@/lib/db";
 
 export default function NewPublication() {
   const router = useRouter();
@@ -36,9 +37,7 @@ export default function NewPublication() {
       authors: authors.trim(),
       contribution: contribution.trim(),
     };
-    const existing = JSON.parse(localStorage.getItem("user-publications") || "[]") as Publication[];
-    existing.unshift(pub);
-    localStorage.setItem("user-publications", JSON.stringify(existing));
+    saveToDb("publications", { ...pub, is_user_created: true }).catch(() => {});
     router.push("/#papers");
   };
 

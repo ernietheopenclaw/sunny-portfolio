@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ExternalLink, Github, X, Plus, Lightbulb } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Skill, Project } from "@/types";
+import { saveToDb } from "@/lib/db";
 
 // Map skill names to project tech tags (exact case-insensitive matching + tags)
 function exactMatch(a: string, b: string): boolean {
@@ -84,9 +85,8 @@ export default function Skills({ skills, projects }: { skills: Skill[]; projects
       category: cat,
       tags: newTags.trim() ? newTags.split(",").map((t) => t.trim()).filter(Boolean) : undefined,
     };
-    const existing = JSON.parse(localStorage.getItem("user-skills") || "[]") as Skill[];
-    existing.push(skill);
-    localStorage.setItem("user-skills", JSON.stringify(existing));
+    const skillId = newName.trim().toLowerCase().replace(/\s+/g, "-");
+    saveToDb("skills", { id: skillId, ...skill, is_user_created: true }).catch(() => {});
     setNewName(""); setNewCategory(""); setNewLevel(50); setNewTags(""); setShowNewForm(false);
     window.location.reload();
   };
@@ -99,9 +99,8 @@ export default function Skills({ skills, projects }: { skills: Skill[]; projects
       category: editCategory,
       tags: editTags.trim() ? editTags.split(",").map((t) => t.trim()).filter(Boolean) : undefined,
     };
-    const existing = JSON.parse(localStorage.getItem("user-skills") || "[]") as Skill[];
-    existing.push(skill);
-    localStorage.setItem("user-skills", JSON.stringify(existing));
+    const skillId = editingTag.toLowerCase().replace(/\s+/g, "-");
+    saveToDb("skills", { id: skillId, ...skill, is_user_created: true }).catch(() => {});
     setEditingTag(null); setEditCategory("Other"); setEditLevel(50); setEditTags("");
     window.location.reload();
   };

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { Edit3, Save, X } from "lucide-react";
+import { getAboutAsync, saveToDb } from "@/lib/db";
 
 const DEFAULT_INTRO = `Hi, I'm Sunny Son — an MS Data Science candidate at NYU Center for Data Science (class of 2026), former AI Engineer Intern at Amazon, and a data scientist with 2+ years at NYU Langone Health building deep learning pipelines for biomedical research.`;
 
@@ -37,13 +38,13 @@ export default function About() {
   const [editBody2, setEditBody2] = useState("");
 
   useEffect(() => {
-    const saved = localStorage.getItem("about-edit");
-    if (saved) {
-      const data = JSON.parse(saved);
-      if (data.intro) setIntro(data.intro);
-      if (data.body1) setBody1(data.body1);
-      if (data.body2) setBody2(data.body2);
-    }
+    getAboutAsync().then((data) => {
+      if (data) {
+        if (data.intro) setIntro(data.intro);
+        if (data.body1) setBody1(data.body1);
+        if (data.body2) setBody2(data.body2);
+      }
+    });
   }, []);
 
   const startEditing = () => {
@@ -57,8 +58,8 @@ export default function About() {
     setIntro(editIntro);
     setBody1(editBody1);
     setBody2(editBody2);
-    localStorage.setItem("about-edit", JSON.stringify({ intro: editIntro, body1: editBody1, body2: editBody2 }));
     setEditing(false);
+    saveToDb("about", { id: "main", intro: editIntro, body1: editBody1, body2: editBody2 }).catch(() => {});
   };
 
   const handleCancel = () => {

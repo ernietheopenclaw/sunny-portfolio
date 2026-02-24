@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ArrowLeft, Save, X } from "lucide-react";
 import { Project } from "@/types";
 import ImageUploader from "@/components/ImageUploader";
+import { saveToDb } from "@/lib/db";
 
 export default function NewProject() {
   const router = useRouter();
@@ -40,9 +41,7 @@ export default function NewProject() {
       github: github.trim() || undefined,
       images: images.length > 0 ? images : undefined,
     };
-    const existing = JSON.parse(localStorage.getItem("user-projects") || "[]") as Project[];
-    existing.unshift(project);
-    localStorage.setItem("user-projects", JSON.stringify(existing));
+    saveToDb("projects", { ...project, is_user_created: true }).catch(() => {});
     router.push("/#projects");
   };
 

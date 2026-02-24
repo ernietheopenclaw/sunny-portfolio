@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ArrowLeft, Save, X } from "lucide-react";
 import { Post } from "@/types";
 import ImageUploader from "@/components/ImageUploader";
+import { saveToDb } from "@/lib/db";
 
 export default function NewPost() {
   const router = useRouter();
@@ -37,9 +38,7 @@ export default function NewPost() {
       tags,
       images: images.length > 0 ? images : undefined,
     };
-    const existing = JSON.parse(localStorage.getItem("user-posts") || "[]") as Post[];
-    existing.unshift(post);
-    localStorage.setItem("user-posts", JSON.stringify(existing));
+    saveToDb("posts", { ...post, is_user_created: true }).catch(() => {});
     router.push("/#posts");
   };
 

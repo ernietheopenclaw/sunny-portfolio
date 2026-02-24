@@ -8,6 +8,8 @@ import { mockPosts } from "@/data/mock";
 import { Post } from "@/types";
 import ImageGallery from "@/components/ImageGallery";
 import ImageUploader from "@/components/ImageUploader";
+import { saveToDb, hideInDb } from "@/lib/db";
+import { supabase } from "@/lib/supabase";
 
 function markdownToHtml(md: string): string {
   return md
@@ -29,8 +31,8 @@ export default function PostDetail() {
   const router = useRouter();
   const { data: session } = useSession();
 
-  const userPosts = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("user-posts") || "[]") as Post[] : [];
-  const basePost = mockPosts.find((p) => p.id === params.id) || userPosts.find((p) => p.id === params.id);
+  const [dbPost, setDbPost] = useState<Post | null>(null);
+  const basePost = mockPosts.find((p) => p.id === params.id) || dbPost;
 
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState("");
@@ -40,23 +42,33 @@ export default function PostDetail() {
   const [newTag, setNewTag] = useState("");
   const [images, setImages] = useState<string[]>([]);
 
+  // Fetch from Supabase (for user-created posts or overrides)
+  useEffect(() => {
+    const id = params.id as string;
+    supabase.from("posts").select("*").eq("id", id).single().then(({ data }) => {
+      if (data) {
+        setDbPost(data as unknown as Post);
+      }
+    });
+  }, [params.id]);
+
   useEffect(() => {
     if (!basePost) return;
-    const saved = localStorage.getItem(`post-edit-${basePost.id}`);
-    if (saved) {
-      const data = JSON.parse(saved);
-      setTitle(data.title ?? basePost.title);
-      setExcerpt(data.excerpt ?? basePost.excerpt);
-      setContent(data.content ?? basePost.content);
-      setTags(data.tags ?? basePost.tags);
-      setImages(data.images ?? basePost.images ?? []);
-    } else {
-      setTitle(basePost.title);
-      setExcerpt(basePost.excerpt);
-      setContent(basePost.content);
-      setTags([...basePost.tags]);
-      setImages(basePost.images ?? []);
-    }
+    setTitle(basePost.title);
+    setExcerpt(basePost.excerpt);
+    setContent(basePost.content);
+    setTags([...basePost.tags]);
+    setImages(basePost.images ?? []);
+    // Apply DB overrides
+    supabase.from("posts").select("*").eq("id", basePost.id).single().then(({ data }) => {
+      if (data) {
+        if (data.title) setTitle(data.title);
+        if (data.excerpt) setExcerpt(data.excerpt);
+        if (data.content) setContent(data.content);
+        if (data.tags) setTags(data.tags);
+        if (data.images) setImages(data.images);
+      }
+    });
   }, [basePost]);
 
   if (!basePost) {
@@ -68,35 +80,22 @@ export default function PostDetail() {
   }
 
   const handleSave = () => {
-    localStorage.setItem(`post-edit-${basePost.id}`, JSON.stringify({ title, excerpt, content, tags, images }));
+    saveToDb("posts", { id: basePost.id, title, excerpt, content, tags, images }).catch(() => {});
     setEditing(false);
   };
 
   const handleCancel = () => {
-    const saved = localStorage.getItem(`post-edit-${basePost.id}`);
-    if (saved) {
-      const data = JSON.parse(saved);
-      setTitle(data.title ?? basePost.title);
-      setExcerpt(data.excerpt ?? basePost.excerpt);
-      setContent(data.content ?? basePost.content);
-      setTags(data.tags ?? basePost.tags);
-      setImages(data.images ?? basePost.images ?? []);
-    } else {
-      setTitle(basePost.title);
-      setExcerpt(basePost.excerpt);
-      setContent(basePost.content);
-      setTags([...basePost.tags]);
-      setImages(basePost.images ?? []);
-    }
+    setTitle(basePost.title);
+    setExcerpt(basePost.excerpt);
+    setContent(basePost.content);
+    setTags([...basePost.tags]);
+    setImages(basePost.images ?? []);
     setEditing(false);
   };
 
   const handleDelete = () => {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    const hidden = JSON.parse(localStorage.getItem("hidden-posts") || "[]") as string[];
-    hidden.push(basePost.id);
-    localStorage.setItem("hidden-posts", JSON.stringify(hidden));
-    localStorage.removeItem(`post-edit-${basePost.id}`);
+    hideInDb("posts", basePost.id).catch(() => {});
     router.push("/#posts");
   };
 
