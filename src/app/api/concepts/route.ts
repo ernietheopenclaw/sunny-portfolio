@@ -57,8 +57,8 @@ export async function POST(req: NextRequest) {
   ## Overview
   What it is, historical context (who invented/discovered it, when, why), and why it matters today. Provide a clear, accessible definition followed by deeper context.
   
-  ## Mathematical Foundation
-  Formal definitions, key equations using LaTeX ($...$ for inline, $$...$$ for block), derivations where applicable. If the concept isn't inherently mathematical, describe any formal models, logical frameworks, or quantitative aspects that underpin it.
+  ## Mathematical Foundation (ONLY if applicable)
+  Include this section ONLY for concepts that are inherently mathematical or algorithmic (e.g., machine learning algorithms, statistical methods, optimization techniques). Use LaTeX ($...$ for inline, $$...$$ for block) for equations. SKIP this section entirely for technology stacks, frameworks, tools, platforms, design patterns, or other non-mathematical concepts (e.g., Supabase, React, Docker, REST APIs).
   
   ## Key Concepts & Principles
   Detailed breakdown of every major component, sub-concept, and principle. Use nested bullet points to show hierarchy. Bold key terms on first use. Explain how each piece fits into the whole.
