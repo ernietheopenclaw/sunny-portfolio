@@ -94,7 +94,10 @@ export async function saveConceptToDb(concept: Partial<Concept> & { id: string; 
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ...concept, updated_at: new Date().toISOString() }),
   });
-  if (!res.ok) throw new Error("Failed to save concept");
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`Failed to save concept: ${res.status} ${JSON.stringify(err)}`);
+  }
   invalidateConceptsCache();
   return res.json();
 }
