@@ -162,7 +162,7 @@ export default function SettingsPage() {
   };
 
   const handleGenerate = async () => {
-    if (!conceptName.trim()) return;
+    if (!conceptName.trim()) { alert("Please enter a concept name."); return; }
     const storedType = localStorage.getItem("auth-type") || "apikey";
 
     const storedModel = localStorage.getItem("concept-model") || "claude-sonnet-4-6";
@@ -214,8 +214,8 @@ export default function SettingsPage() {
       }
 
       setGenerated(data);
-    } catch {
-      alert("Failed to generate concept.");
+    } catch (e) {
+      alert("Failed to generate concept: " + (e instanceof Error ? e.message : String(e)));
     } finally {
       setLoading(false);
     }
