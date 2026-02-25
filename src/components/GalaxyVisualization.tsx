@@ -683,7 +683,7 @@ function ConceptDots({ concepts, onHover, onClick, overrideMode }: ConceptDotsPr
   );
 }
 
-function Tooltip({ concept, position, hasSession, onDelete }: { concept: Concept | null; position: THREE.Vector3 | null; session?: boolean; hasSession?: boolean; onDelete?: (id: string) => void }) {
+function Tooltip({ concept, position }: { concept: Concept | null; position: THREE.Vector3 | null }) {
   if (!concept || !position) return null;
 
   const displaySummary = typeof window !== "undefined"
@@ -703,28 +703,7 @@ function Tooltip({ concept, position, hasSession, onDelete }: { concept: Concept
         boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
         pointerEvents: "none",
       }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <p style={{ fontWeight: 600, color: "var(--accent-mid)", fontSize: "13px" }}>{concept.name}</p>
-          {hasSession && onDelete && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onDelete(concept.id); }}
-              style={{
-                pointerEvents: "auto",
-                background: "none",
-                border: "none",
-                color: "#ef4444",
-                cursor: "pointer",
-                fontSize: "14px",
-                padding: "0 2px",
-                lineHeight: 1,
-                opacity: 0.7,
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.7")}
-              title="Delete concept"
-            >✕</button>
-          )}
-        </div>
+        <p style={{ fontWeight: 600, color: "var(--accent-mid)", fontSize: "13px" }}>{concept.name}</p>
         <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }} dangerouslySetInnerHTML={{ __html: renderLatex(displaySummary) }} />
         {concept.date_learned && (
           <p style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "4px", opacity: 0.7 }}>
@@ -1057,7 +1036,7 @@ function TimelineOverlay({ concepts, mode, onLinesHidden }: { concepts: Concept[
   );
 }
 
-function Scene({ concepts, dispersionRef, onConceptClick, hasSession, onConceptDeleted }: { concepts: Concept[]; dispersionRef: React.MutableRefObject<{ target: number; current: number }>; onConceptClick: (concept: Concept) => void; hasSession: boolean; onConceptDeleted?: (id: string) => void }) {
+function Scene({ concepts, dispersionRef, onConceptClick, hasSession }: { concepts: Concept[]; dispersionRef: React.MutableRefObject<{ target: number; current: number }>; onConceptClick: (concept: Concept) => void; hasSession: boolean }) {
   const [hovered, setHovered] = useState<Concept | null>(null);
   const [hoveredPos, setHoveredPos] = useState<THREE.Vector3 | null>(null);
   const { mode } = useScroll();
@@ -1105,7 +1084,7 @@ function Scene({ concepts, dispersionRef, onConceptClick, hasSession, onConceptD
       </group>
       <ConceptDots concepts={concepts} onHover={handleHover} onClick={onConceptClick} overrideMode={deferredMode} />
       <TimelineOverlay concepts={concepts} mode={mode} onLinesHidden={handleLinesHidden} />
-      <Tooltip concept={hovered} position={hoveredPos} hasSession={hasSession} onDelete={onConceptDeleted} />
+      <Tooltip concept={hovered} position={hoveredPos} />
       <OrbitControls
         enableZoom={false}
         enablePan={false}
@@ -1124,10 +1103,9 @@ function Scene({ concepts, dispersionRef, onConceptClick, hasSession, onConceptD
 interface Props {
   concepts: Concept[];
   onReady?: () => void;
-  onConceptDeleted?: (id: string) => void;
 }
 
-export default function GalaxyVisualization({ concepts, onReady, onConceptDeleted }: Props) {
+export default function GalaxyVisualization({ concepts, onReady }: Props) {
   const { data: sessionData } = useSession();
   const { mode, nextMode, prevMode, setMode, pastVisualization, setPastVisualization } = useScroll();
   const [mounted, setMounted] = useState(false);
@@ -1339,7 +1317,7 @@ export default function GalaxyVisualization({ concepts, onReady, onConceptDelete
         gl={{ antialias: true, alpha: true }}
         onCreated={() => { if (onReady) onReady(); }}
       >
-        <Scene concepts={concepts} dispersionRef={dispersionRef} onConceptClick={handleConceptClick} hasSession={!!sessionData} onConceptDeleted={onConceptDeleted} />
+        <Scene concepts={concepts} dispersionRef={dispersionRef} onConceptClick={handleConceptClick} hasSession={!!sessionData} />
       </Canvas>
       {/* Mode buttons */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-10">
