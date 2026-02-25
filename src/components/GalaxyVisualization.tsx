@@ -998,7 +998,7 @@ function TimelineOverlay({ concepts, mode, onLinesHidden }: { concepts: Concept[
         <Html key={`label-${i}`} position={label.position} center style={{ pointerEvents: "none" }}>
           <div style={{ textAlign: "center", opacity: labelOpacityState }}>
             <div style={{
-              fontSize: "10px",
+              fontSize: "14px",
               fontFamily: "monospace",
               color: "var(--text-muted)",
               opacity: 0.5,
@@ -1007,7 +1007,7 @@ function TimelineOverlay({ concepts, mode, onLinesHidden }: { concepts: Concept[
               {label.date}
             </div>
             <div style={{
-              fontSize: "11px",
+              fontSize: "15px",
               color: "var(--text-muted)",
               opacity: 0.25,
               whiteSpace: "nowrap",
