@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Edit3, Save, X, Trash2, Sparkles, Loader2 } from "lucide-react";
-import { getAllConceptsAsync, saveConceptToDb, hideConceptInDb } from "@/lib/concepts";
+import { getAllConceptsAsync, saveConceptToDb, hideConceptInDb, invalidateConceptsCache } from "@/lib/concepts";
 import { Concept } from "@/types";
 import LatexText from "@/components/LatexText";
 import ImageGallery from "@/components/ImageGallery";
@@ -339,7 +339,13 @@ export default function ConceptDetail() {
                 <button
                   onClick={async () => {
                     if (!confirm(`Delete "${concept.name}"? This cannot be undone.`)) return;
-                    await hideConceptInDb(concept.id).catch(() => {});
+                    try {
+                      await hideConceptInDb(concept.id);
+                    } catch (e) {
+                      alert("Failed to delete concept. Are you logged in?");
+                      return;
+                    }
+                    invalidateConceptsCache();
                     router.push("/");
                   }}
                   className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg transition-colors cursor-pointer"
