@@ -340,7 +340,12 @@ export default function ConceptDetail() {
                   onClick={async () => {
                     if (!confirm(`Delete "${concept.name}"? This cannot be undone.`)) return;
                     try {
-                      await hideConceptInDb(concept.id);
+                      const res = await fetch("/api/db/concepts", {
+                        method: "DELETE",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id: concept.id }),
+                      });
+                      if (!res.ok) throw new Error("Failed");
                     } catch (e) {
                       alert("Failed to delete concept. Are you logged in?");
                       return;
