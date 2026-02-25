@@ -378,6 +378,7 @@ The approach outperformed more complex models (neural collaborative filtering, m
     title: "NeuralProphet Stock Forecasting",
     description: "Stock price forecasting using NeuralProphet time-series decomposition with AR-Net and additive events for IT sector stocks.",
     tech: ["Git", "Python", "NumPy", "Pandas", "SciPy", "NeuralProphet", "Time Series", "PyTorch"],
+    github: "https://www.github.com/sunnydigital/ptsa-f22",
     content: `## Overview
 
 Built a stock price forecasting system for IT sector stocks using NeuralProphet, which combines the decomposability of Prophet with the power of neural networks.

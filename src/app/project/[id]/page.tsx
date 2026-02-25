@@ -39,6 +39,8 @@ export default function ProjectDetail() {
   const [tech, setTech] = useState<string[]>([]);
   const [newTech, setNewTech] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [link, setLink] = useState("");
+  const [github, setGithub] = useState("");
 
   // Load any saved edits from Supabase
   useEffect(() => {
@@ -49,6 +51,8 @@ export default function ProjectDetail() {
     setContent(baseProject.content ?? "");
     setTech([...baseProject.tech]);
     setImages(baseProject.images ?? []);
+    setLink(baseProject.link ?? "");
+    setGithub(baseProject.github ?? "");
     // Fetch DB override
     supabase.from("projects").select("*").eq("id", baseProject.id).single().then(({ data }) => {
       if (data) {
@@ -57,6 +61,8 @@ export default function ProjectDetail() {
         if (data.content) setContent(data.content);
         if (data.tech) setTech(data.tech);
         if (data.images) setImages(data.images);
+        if (data.link !== undefined) setLink(data.link ?? "");
+        if (data.github !== undefined) setGithub(data.github ?? "");
       }
     });
   }, [baseProject]);
@@ -70,7 +76,7 @@ export default function ProjectDetail() {
   }
 
   const handleSave = () => {
-    saveToDb("projects", { id: baseProject.id, title, description, content, tech, images }).catch(() => {});
+    saveToDb("projects", { id: baseProject.id, title, description, content, tech, images, link: link || null, github: github || null }).catch(() => {});
     setEditing(false);
   };
 
@@ -80,6 +86,8 @@ export default function ProjectDetail() {
     setContent(baseProject.content ?? "");
     setTech([...baseProject.tech]);
     setImages(baseProject.images ?? []);
+    setLink(baseProject.link ?? "");
+    setGithub(baseProject.github ?? "");
     setEditing(false);
   };
 
@@ -173,30 +181,55 @@ export default function ProjectDetail() {
           </div>
         )}
 
-        <div className="flex gap-3 mb-4">
-          {baseProject.link && (
-            <a
-              href={baseProject.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg transition-colors"
-              style={{ color: "var(--accent-mid)", border: "1px solid rgba(2,132,199,0.3)" }}
-            >
-              <ExternalLink className="w-3.5 h-3.5" /> Live Site
-            </a>
-          )}
-          {baseProject.github && (
-            <a
-              href={baseProject.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg transition-colors"
-              style={{ color: "var(--accent-mid)", border: "1px solid rgba(2,132,199,0.3)" }}
-            >
-              <Github className="w-3.5 h-3.5" /> Source Code
-            </a>
-          )}
-        </div>
+        {editing ? (
+          <div className="flex flex-col gap-2 mb-4">
+            <div className="flex items-center gap-2">
+              <ExternalLink className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-muted)" }} />
+              <input
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
+                placeholder="Live site URL (optional)"
+                className="flex-1 text-sm bg-transparent px-2 py-1 rounded focus:outline-none"
+                style={{ color: "var(--text)", border: "1px solid var(--border)" }}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Github className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-muted)" }} />
+              <input
+                value={github}
+                onChange={(e) => setGithub(e.target.value)}
+                placeholder="GitHub URL (optional)"
+                className="flex-1 text-sm bg-transparent px-2 py-1 rounded focus:outline-none"
+                style={{ color: "var(--text)", border: "1px solid var(--border)" }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="flex gap-3 mb-4">
+            {link && (
+              <a
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg transition-colors"
+                style={{ color: "var(--accent-mid)", border: "1px solid rgba(2,132,199,0.3)" }}
+              >
+                <ExternalLink className="w-3.5 h-3.5" /> Live Site
+              </a>
+            )}
+            {github && (
+              <a
+                href={github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg transition-colors"
+                style={{ color: "var(--accent-mid)", border: "1px solid rgba(2,132,199,0.3)" }}
+              >
+                <Github className="w-3.5 h-3.5" /> Source Code
+              </a>
+            )}
+          </div>
+        )}
 
         {session && !editing && (
           <div className="flex gap-2 mb-8">
