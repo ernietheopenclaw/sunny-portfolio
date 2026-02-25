@@ -64,6 +64,13 @@ export default function Home() {
     getAllConceptsAsync().then(setConcepts);
   }, []);
 
+  const handleConceptDeleted = useCallback((id: string) => {
+    import("@/lib/concepts").then(({ hideConceptInDb }) => {
+      hideConceptInDb(id).catch(() => {});
+    });
+    setConcepts((prev) => prev.filter((c) => c.id !== id));
+  }, []);
+
   const handleDeletePost = useCallback((id: string) => {
     hideInDb("posts", id).catch(() => {});
     setPosts((prev) => prev.filter((p) => p.id !== id));
@@ -86,7 +93,7 @@ export default function Home() {
 
       {/* Galaxy visualization — single viewport, scroll wheel switches modes */}
       <div className="relative">
-        <GalaxyVisualization concepts={concepts} onReady={() => setGalaxyReady(true)} />
+        <GalaxyVisualization concepts={concepts} onReady={() => setGalaxyReady(true)} onConceptDeleted={handleConceptDeleted} />
         <ScrollIndicator />
       </div>
 
