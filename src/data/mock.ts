@@ -159,6 +159,7 @@ Measuring decision quality through:
     title: "Extending Non-Vacuous Generalization Bounds for LLMs",
     description: "Extended SubLoRA framework for PAC-Bayes generalization bounds on GPT-2 with adaptive per-layer subspace allocation. Resolved 857x performance bottleneck on A100 GPUs via tensor caching.",
     tech: ["Git", "Python", "PyTorch", "Deep Learning", "HPC", "Singularity", "Machine Learning"],
+    github: "https://github.com/jiaxuan030331/separated-projectors-sublora-bounds-for-llms",
     content: `## Overview
 
 Extended the SubLoRA framework to achieve non-vacuous PAC-Bayes generalization bounds on GPT-2, developing adaptive per-layer subspace allocation that better captures the varying complexity across transformer layers.
@@ -262,6 +263,7 @@ Slack API integration providing automated notifications on daily table schema mo
     title: "DDPM for Histopathologic Images",
     description: "Built denoising diffusion probabilistic models for histopathologic cancer detection on the Patch Camelyon dataset with comprehensive ablation studies.",
     tech: ["Git", "Python", "PyTorch", "Diffusion Models", "Computer Vision", "Deep Learning"],
+    github: "https://github.com/sunnydigital/ddpm-histo-gen",
     content: `## Overview
 
 Applied Denoising Diffusion Probabilistic Models (DDPMs) to histopathologic cancer detection using the Patch Camelyon (PCam) dataset containing 327,680 image patches.
